@@ -242,6 +242,8 @@ Otras reglas de diseño: sin chat, sin contenido generado por otros usuarios, si
 
 ## 8. Diseño (UX/UI) para 3–6 años
 
+> El diseño completo del mundo, los personajes, las sesiones y las reglas de interfaz está en [MUNDO_Y_EXPERIENCIA.md](MUNDO_Y_EXPERIENCIA.md).
+
 - **Navegación de un nivel**: inicio = 5 burbujas grandes (Pintar, Letras, Números, Animales, Juegos). Siempre un botón "casa" fijo.
 - **Sin texto obligatorio**: todo botón tiene ícono + locución al tocar.
 - **Tamaños**: objetivos táctiles ≥ 64 px (ideal 80–96 px), separación ≥ 16 px.
