@@ -1,7 +1,7 @@
 # La Escuelita de Emilia — Estudio de producto
 
 > Juego educativo multiplataforma (iOS, Android, Web/tablet) para niños de **3 a 6 años**:
-> pintar, letras, números, animales y sus sonidos, y minijuegos interactivos.
+> pintar, letras, números, animales y sus sonidos, minijuegos interactivos e **idiomas** (inglés, portugués, francés, chino y más).
 > Fecha del estudio: octubre 2026.
 
 ---
@@ -14,6 +14,7 @@
 | **Propuesta de valor** | "Aprender jugando en español, sin anuncios, sin internet obligatorio y con un panel para padres que muestra avances reales". |
 | **Diferenciador clave** | Contenido 100 % hispano (voz, acentos, animales y canciones de la región), **modo offline**, y un **panel docente/familia** que lo convierte en herramienta para jardines infantiles (B2B). |
 | **Modelo de negocio** | **90 % del contenido gratis y sin anuncios para todos.** Premium ultra accesible: **USD 1,99/mes o USD 19,99/año**, que desbloquea estadísticas para padres y un 10 % de contenido extra. Complemento: licencias para jardines/colegios. |
+| **Idiomas** | Los amigos de Emilia (Max, Bia, Léa, Xiao Lin) enseñan inglés, portugués, francés y chino con los mismos juegos. Suscripción: **USD 1,99 por idioma, USD 3,99 todos, USD 4,99 Familia Total** (Premium + idiomas). Ver [IDIOMAS.md](IDIOMAS.md). |
 | **Stack recomendado** | Monorepo TypeScript: **Expo (React Native + Web)** para una sola base de código en 3 plataformas, **Fastify** como API, **PostgreSQL (Supabase)** para datos, contenido versionado como datos. |
 | **MVP (≈10–12 semanas)** | 4 módulos: Pintar, Letras (A–Z + Ñ), Números (1–10), Animales y sonidos + perfil de niño + puerta parental + progreso local. |
 
@@ -112,6 +113,7 @@ Hay **dos usuarios** y hay que diseñar para ambos:
 | 🦁 **Animales** | Granja / selva / mar / regional: tocar y escuchar nombre + sonido, adivinar por sonido, ¿dónde vive?, mamá y cría. | Vocabulario, discriminación auditiva | 3–6 |
 | 🧩 **Juegos** | Memoria (parejas), rompecabezas 4–9 piezas, formas y colores, patrones, intruso, laberinto simple. | Memoria, lógica, atención | 3–6 |
 | 🛒 **Mundos de roles** (inspirado en Cocobi) | **La Tiendita** (poner N productos en la canasta y pagar con monedas), Cocina (receta por colores/formas), Veterinaria (cuidar animales), Huerto (plantar y contar). | Conteo aplicado, vocabulario, hábitos, juego simbólico | 3–6 |
+| 🌍 **Idiomas** (suscripción) | Amigos de otros países: tiendita, animales, memoria, canciones y "haz lo que dice" en inglés, portugués, francés, chino y más. Muestra gratis del primer nivel de cada idioma. | Segundo idioma por inmersión | 3–6 |
 | 🎵 **Música** (fase 2) | Instrumentos, xilófono, canciones con karaoke de letras. | Ritmo, memoria auditiva | 3–6 |
 
 **Bucle de recompensa (sin manipular):** cada actividad completada da una **estrella**; las estrellas desbloquean pegatinas y ropa para Emilia. **No** hay rachas que castiguen, temporizadores de presión ni moneda comprable.
@@ -138,6 +140,8 @@ Hay **dos usuarios** y hay que diseñar para ambos:
 | **Progreso del niño** | Estrellas y pegatinas dentro del juego | Igual | Igual |
 | **Estadísticas para padres** | Resumen básico: tiempo de juego del día y módulos jugados | **Panel completo**: avance por habilidad, letras y números dominados, dónde le cuesta, reporte semanal, recomendaciones de qué practicar | Panel docente por sala y por niño, reportes PDF |
 | **Sin internet** | Sí | Sí | Sí |
+
+> **Idiomas:** se suman como suscripción aparte — USD 1,99/mes por idioma, USD 3,99/mes todos los idiomas, o **Familia Total a USD 4,99/mes · USD 49,99/año** (Premium + todos los idiomas). La muestra del primer nivel de cada idioma es gratis. Detalle y números en [IDIOMAS.md](IDIOMAS.md).
 
 ### 6.3 Qué va en el 10 % premium
 
@@ -187,7 +191,7 @@ Mensaje de marketing: *"Todo lo importante es gratis y sin anuncios. Por menos d
 - Con 90 % gratis y sin anuncios, la conversión será **baja (1–3 %)**: el premium tiene que valer por las estadísticas.
 - Para cubrir un equipo pequeño (~USD 6.000/mes: 2 personas en LATAM, servidores, audio) se necesitan unas **4.300 familias pagando**, es decir, **~200.000 familias activas con 2 % de conversión**.
 - El costo de servidores es bajo (el juego funciona en el dispositivo), así que **cada familia gratis cuesta casi nada**. Esto permite crecer sin perder dinero.
-- **Conclusión:** el premium de USD 2 es la puerta de entrada y la marca, pero **no basta solo**. Hay que complementarlo con las fuentes de la sección 6.6.
+- **Conclusión:** el premium de USD 2 es la puerta de entrada y la marca, pero **no basta solo**. Hay que complementarlo con los **idiomas** (que duplican el ingreso por familia, ver [IDIOMAS.md](IDIOMAS.md) §5) y con las fuentes de la sección 6.6.
 
 ### 6.6 Ingresos complementarios (sin tocar al niño)
 
@@ -268,7 +272,8 @@ Otras reglas de diseño: sin chat, sin contenido generado por otros usuarios, si
 | **1. MVP** | 10–12 sem | Monorepo, app Expo (web + Android), Pintar, Letras A–Z+Ñ, Números 1–10, Animales (20), Memoria, perfiles, puerta parental, progreso offline. |
 | **2. Beta** | 6 sem | Cuentas de adulto, sincronización en nube, panel de padres web, iOS, premium USD 1,99/19,99 (RevenueCat), reporte semanal. |
 | **3. B2B** | 8 sem | Modo jardín, panel docente, reportes, licencias. |
-| **4. Expansión** | continuo | Música, sílabas y lectura inicial, acentos regionales, inglés como 2.ª lengua, contenido estacional. |
+| **4. Idiomas, ola 1** | 8 sem | Inglés y portugués (niveles 1–3), suscripciones por idioma y Familia Total. |
+| **5. Expansión** | continuo | Francés y chino (ola 2), música, sílabas y lectura inicial, acentos regionales, lenguas originarias, español como segundo idioma, contenido estacional. |
 
 ---
 

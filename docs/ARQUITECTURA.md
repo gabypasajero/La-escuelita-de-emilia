@@ -73,6 +73,16 @@
 - Las estadísticas detalladas (`/v1/perfiles/:id/resumen` y el reporte semanal) solo responden con datos completos para planes pagados. El resumen básico es gratis.
 - Pagos con RevenueCat (App Store + Google Play + web con Stripe) para tener una sola fuente de verdad de suscripciones.
 
+## Idiomas
+
+- Contenido con **id común por concepto** (por ejemplo, `manzana`) y una entrada por idioma: `es`, `en`, `pt`, `fr`, `zh`… con texto, audio y la misma imagen.
+- Los juegos de `packages/core` reciben `idioma` como parámetro; no hay un juego distinto por idioma.
+- El audio de cada idioma es un paquete descargable aparte (offline y app liviana).
+- Suscripciones por producto en RevenueCat: `premium`, `idioma:<código>`, `idiomas:todos`, `familia_total`.
+- Interfaz de adultos traducida por separado (es, pt, en) para vender también "español como segundo idioma".
+
+Detalle de producto en [IDIOMAS.md](IDIOMAS.md).
+
 ## Próximos pasos técnicos
 
 1. `pnpm install` y `pnpm --filter @escuelita/mobile web` para ver la app en el navegador.
