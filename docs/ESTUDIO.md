@@ -203,6 +203,8 @@ Mensaje: *"Por menos de lo que cuesta un helado al mes, sabes qué aprendió tu 
 
 ### 6.6 Ingresos complementarios (sin tocar al niño)
 
+> El plan completo para instituciones (jardines, escuelas de lenguaje, colegios, municipios y agrupaciones), con precios y etapas, está en [PLAN_DE_NEGOCIO.md](PLAN_DE_NEGOCIO.md). Ahí también queda el historial de versiones del modelo.
+
 | Fuente | Cómo funciona | Potencial |
 |---|---|---|
 | 🏫 **Jardines y colegios** | Licencia por sala con evaluación alineada a las Bases Curriculares e informes para apoderados. | **Alto** |
