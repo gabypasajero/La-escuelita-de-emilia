@@ -11,10 +11,10 @@
 | Punto | Conclusión |
 |---|---|
 | **Oportunidad** | Mercado preescolar digital en crecimiento (~USD 3.8 mil M en 2025, CAGR ~11 %) dominado por apps en inglés. El español latinoamericano está **sub-atendido** con contenido nativo (no traducido). |
-| **Propuesta de valor** | "Aprender jugando en español, sin anuncios, sin internet obligatorio y con un panel para padres que muestra avances reales". |
+| **Propuesta de valor** | "Aprender jugando en español, sin anuncios y sin internet obligatorio, con una **evaluación tipo educadora** que le dice a la familia qué aprendió su hijo y cómo seguir en casa". |
 | **Diferenciador clave** | Contenido 100 % hispano (voz, acentos, animales y canciones de la región), **modo offline**, y un **panel docente/familia** que lo convierte en herramienta para jardines infantiles (B2B). |
-| **Modelo de negocio** | **90 % del contenido gratis y sin anuncios para todos.** Premium ultra accesible: **USD 1,99/mes o USD 19,99/año**, que desbloquea estadísticas para padres y un 10 % de contenido extra. Complemento: licencias para jardines/colegios. |
-| **Idiomas** | Los amigos de Emilia (Max, Bia, Léa, Xiao Lin) enseñan inglés, portugués, francés y chino con los mismos juegos. Suscripción: **USD 1,99 por idioma, USD 3,99 todos, USD 4,99 Familia Total** (Premium + idiomas). Ver [IDIOMAS.md](IDIOMAS.md). |
+| **Modelo de negocio** | **90 % gratis y sin anuncios para todos.** Plan **Plus: $4.990 CLP al mes o $24.990 CLP al año**, con evaluación tipo educadora, informes, actividades para casa, 10 % de contenido extra y 1 idioma incluido. Ver [EVALUACION.md](EVALUACION.md). |
+| **Idiomas** | Los amigos de Emilia (Max, Bia, Léa, Xiao Lin) enseñan inglés, portugués, francés y chino con los mismos juegos. Plus incluye 1 idioma; todos los idiomas por + $1.990 CLP al mes. Ver [IDIOMAS.md](IDIOMAS.md). |
 | **Stack recomendado** | Monorepo TypeScript: **Expo (React Native + Web)** para una sola base de código en 3 plataformas, **Fastify** como API, **PostgreSQL (Supabase)** para datos, contenido versionado como datos. |
 | **MVP (≈10–12 semanas)** | 4 módulos: Pintar, Letras (A–Z + Ñ), Números (1–10), Animales y sonidos + perfil de niño + puerta parental + progreso local. |
 
@@ -93,7 +93,7 @@ Hay **dos usuarios** y hay que diseñar para ambos:
 | **Lo que tomamos** | Mundos de roles: **La Tiendita de Emilia** (contar), luego cocina (formas/colores), veterinaria (animales). | Formato de minijuego corto y sin texto dentro de cada módulo. | Ruta de aprendizaje visible, objetivos por actividad, reporte semanal a padres, multi-perfil. |
 | **Lo que evitamos** | Fragmentar en decenas de apps: **una sola app**. | Anuncios y falta de progresión. | Precio alto para LATAM y foco en inglés. |
 
-**Síntesis — nuestra fórmula:** *mundos de roles tipo Cocobi* + *minijuegos cortos* + *progreso y reportes tipo Lingokids*, todo **en español nativo**, en **una sola app**, con **90 % gratis sin anuncios** y un premium de **USD 2** (~85 % más barato que Lingokids o ABCmouse).
+**Síntesis — nuestra fórmula:** *mundos de roles tipo Cocobi* + *minijuegos cortos* + *progreso y reportes tipo Lingokids*, todo **en español nativo**, en **una sola app**, con **90 % gratis sin anuncios**, **evaluación tipo educadora** y un plan anual de **$24.990 CLP**, al alcance de toda familia.
 
 **Ventajas competitivas a construir (moat):**
 1. **Personaje guía "Emilia"** con voz humana real en español neutro (y paquetes de acento: rioplatense, chileno, mexicano, español).
@@ -122,105 +122,106 @@ Hay **dos usuarios** y hay que diseñar para ambos:
 
 ## 6. Modelo de negocio
 
+> **Misión antes que lucro:** más que ganar dinero, entregar una herramienta efectiva. Los niños pasan mucho tiempo en el celular; la idea es sacar lo mejor de ese tiempo para que crezcan con más capacidades. El precio está pensado para que **toda familia pueda pagar el plan anual**.
+
 ### 6.1 Principios (no negociables)
 
 1. **Cero anuncios para todos**, paguen o no. El niño nunca ve una interrupción.
-2. **El 90 % del contenido es gratis.** Aprender letras, números, animales, pintar y jugar no depende de pagar.
-3. **El premium es para el adulto**, no para el niño: lo que se paga son estadísticas y un 10 % de extras.
-4. **Precio ultra accesible:** USD 1,99/mes o USD 19,99/año (precios estándar de App Store y Google Play; equivalen a los USD 2 y 20 propuestos).
+2. **El 90 % del contenido es gratis.** Aprender no depende de pagar.
+3. **Lo que se paga es el acompañamiento al adulto:** evaluación tipo educadora, informes, recomendaciones y actividades para casa ([EVALUACION.md](EVALUACION.md)).
+4. **Sin candados visibles para el niño.** La venta ocurre solo en la zona de padres, detrás de la puerta parental.
+5. **El plan anual es la opción natural:** cuesta lo mismo que 5 meses.
 
-### 6.2 Planes
+### 6.2 Planes (Chile, mercado de lanzamiento)
 
-| | 🆓 Gratis | ⭐ Premium | 🏫 Jardín / Colegio |
-|---|---|---|---|
-| **Precio** | USD 0 | **USD 1,99/mes · USD 19,99/año** (el anual equivale a 10 meses) | USD 0,50–1 por niño/mes o licencia anual por sala |
-| **Contenido** | **90 %**: todos los módulos y mundos de roles base | **100 %**: +10 % de extras | 100 % |
-| **Anuncios** | Ninguno | Ninguno | Ninguno |
-| **Perfiles** | Hasta 4 | Hasta 4 | Ilimitados |
-| **Progreso del niño** | Estrellas y pegatinas dentro del juego | Igual | Igual |
-| **Estadísticas para padres** | Resumen básico: tiempo de juego del día y módulos jugados | **Panel completo**: avance por habilidad, letras y números dominados, dónde le cuesta, reporte semanal, recomendaciones de qué practicar | Panel docente por sala y por niño, reportes PDF |
-| **Sin internet** | Sí | Sí | Sí |
+| | 🆓 Gratis | ⭐ **Plus** | 🌍 Todos los idiomas (complemento) | 🏫 Jardín / Colegio |
+|---|---|---|---|---|
+| **Mensual** | $0 | **$4.990 CLP** | + $1.990 CLP | Por niño/mes |
+| **Anual** | $0 | **$24.990 CLP** (≈ $2.083 al mes, 58 % de ahorro) | + $9.990 CLP | Licencia anual por sala |
+| **Contenido** | 90 % | 100 % (+10 % extra) | Todos los idiomas | 100 % |
+| **Anuncios** | Ninguno | Ninguno | Ninguno | Ninguno |
+| **Evaluación tipo educadora** | Solo el primer informe, de muestra | ✅ Completa | — | ✅ Por sala y por niño |
+| **Informes y recomendaciones** | Título de cada logro | ✅ Semanal y trimestral | — | ✅ |
+| **Actividades para casa** (dibujo, lenguaje, matemática, idiomas) | — | ✅ | — | ✅ Actividades para la sala |
+| **Idiomas** | Muestra del primer nivel de cada idioma | ✅ **1 idioma incluido** a elección | ✅ Todos | Según licencia |
+| **Perfiles** | Hasta 4 | Hasta 4 | | Ilimitados |
 
-> **Idiomas:** se suman como suscripción aparte — USD 1,99/mes por idioma, USD 3,99/mes todos los idiomas, o **Familia Total a USD 4,99/mes · USD 49,99/año** (Premium + todos los idiomas). La muestra del primer nivel de cada idioma es gratis. Detalle y números en [IDIOMAS.md](IDIOMAS.md).
+- Los precios se fijan como $4.990 y $24.990 porque las tiendas usan precios terminados en 990; equivalen a los **$5.000 y $25.000** propuestos.
+- **Por qué Plus incluye 1 idioma:** *"inglés incluido"* hace que el plan anual sea muy difícil de rechazar. Quien quiera más idiomas suma el complemento.
+- **Otros países:** precio equivalente ajustado al poder adquisitivo de cada país (las tiendas permiten fijar precio por país).
 
 ### 6.3 Qué va en el 10 % premium
 
-El 10 % premium debe ser **"más de lo mismo, más entretenido"**, nunca contenido clave para aprender. Así nadie queda atrás por no pagar.
-
-- Mundos de temporada: Navidad, Halloween/Día de Muertos, Fiestas Patrias, verano.
-- Mundos de roles extra (por ejemplo, Veterinaria o Heladería) cuando el catálogo base ya esté completo.
-- Paquetes de voz con acento regional (rioplatense, chileno, mexicano, español).
+El 10 % extra debe ser **"más de lo mismo, más entretenido"**, nunca contenido clave para aprender:
+- Mundos de temporada: Navidad, Fiestas Patrias, Día de Muertos, verano.
+- Mundos de roles extra (por ejemplo, Veterinaria o Heladería).
+- Paquetes de voz con acento regional.
 - Ropa y accesorios extra para Emilia y un álbum de pegatinas ampliado.
-
-**Regla de diseño:** el niño **no ve candados** ni pantallas de "compra esto". El contenido premium aparece solo si está activo, y la invitación a mejorar el plan se muestra únicamente en la zona de padres, detrás de la puerta parental. Esto evita frustración y el "mamá, cómpramelo", y es lo que exigen Apple Kids y Google Families.
 
 ### 6.4 Comparación de precio
 
-| App | Precio mensual de referencia | Anuncios | Contenido gratis |
-|---|---|---|---|
-| Lingokids Plus | ~USD 13,49 | No | Parcial |
-| ABCmouse | ~USD 13,99 | No | No |
-| Cocobi | Apps gratis + compras | Varía | Parcial por app |
-| Khan Academy Kids | Gratis (ONG) | No | Total |
-| **La Escuelita de Emilia** | **USD 1,99** | **No** | **90 %** |
+Valores mensuales de referencia, convertidos a ~950 CLP por dólar (verificar el tipo de cambio).
 
-Mensaje de marketing: *"Todo lo importante es gratis y sin anuncios. Por menos de un helado al mes, ves cómo aprende tu hijo."*
+| App | Precio mensual aprox. | Qué incluye |
+|---|---|---|
+| Studycat | ~$14.200 CLP | **Un** idioma |
+| ABCmouse | ~$13.300 CLP | Currículo en inglés |
+| Lingokids Plus | ~$12.800 CLP | Inglés |
+| Khan Academy Kids | Gratis (ONG) | Contenido en inglés, español limitado |
+| **La Escuelita de Emilia Plus** | **$4.990 CLP, o $2.083 al mes en el plan anual** | Todo el contenido en español + evaluación tipo educadora + actividades para casa + 1 idioma |
+
+Mensaje: *"Por menos de lo que cuesta un helado al mes, sabes qué aprendió tu hijo y cómo seguir ayudándolo en casa."*
 
 ### 6.5 Números: ¿es viable?
 
-**Ingreso neto por familia que paga** (las tiendas cobran 15 % a desarrolladores pequeños, con ingresos bajo USD 1 M/año):
+**Ingreso neto por familia** (Chile: IVA 19 % incluido en el precio y 15 % de comisión de tienda para desarrolladores pequeños):
 
-| Plan | Precio | Neto tras tienda | Neto mensual |
+| Plan | Precio | Sin IVA | Neto tras tienda | Neto al mes |
+|---|---|---|---|---|
+| Mensual | $4.990 | $4.193 | $3.564 | **$3.564** |
+| Anual | $24.990 | $21.000 | $17.850 | **$1.488** |
+| Mezcla esperada (80 % anual, 20 % mensual) | | | | **≈ $1.900 (≈ USD 2)** |
+
+**Punto de equilibrio:** un equipo pequeño cuesta unos **$5,7 millones CLP al mes** (≈ USD 6.000: 2 personas, servidores, audio y asesora pedagógica). Se cubre con **unas 3.000 familias pagando**.
+
+**Tamaño del mercado chileno:** hay alrededor de **700 mil niños de 3 a 6 años**, estimado a partir de los nacimientos de los últimos años (validar con datos del INE). 3.000 familias son menos del **0,5 %** de ellos.
+
+**Escenarios en Chile** (ingreso neto al mes; familias activas × porcentaje que paga × $1.900):
+
+| Familias activas/mes | 3 % pagan | 6 % pagan | 10 % pagan |
 |---|---|---|---|
-| Mensual | USD 1,99 | USD 1,69 | **USD 1,69** |
-| Anual | USD 19,99 | USD 16,99 | **USD 1,42** |
-| Mezcla 50/50 | | | **≈ USD 1,55** |
+| 30.000 | $1,7 M | $3,4 M | **$5,7 M** ✅ |
+| 60.000 | $3,4 M | **$6,8 M** ✅ | $11,4 M |
+| 120.000 | **$6,8 M** ✅ | $13,7 M | $22,8 M |
 
-> Ojo: en varios países de LATAM el IVA va incluido en el precio de la tienda (por ejemplo, 19 % en Chile), lo que puede bajar el neto a ~USD 1,30. Para estimar, usamos USD 1,40.
-
-**Escenarios** (familias activas al mes × conversión a premium × USD 1,40):
-
-| Familias activas/mes | 1 % pagan | 2 % pagan | 4 % pagan |
-|---|---|---|---|
-| 10.000 | USD 140 | USD 280 | USD 560 |
-| 50.000 | USD 700 | USD 1.400 | USD 2.800 |
-| 200.000 | USD 2.800 | USD 5.600 | USD 11.200 |
-| 1.000.000 | USD 14.000 | USD 28.000 | USD 56.000 |
+✅ = cubre el punto de equilibrio. El complemento de idiomas y los jardines suman por encima de esto.
 
 **Lectura honesta:**
-- Con 90 % gratis y sin anuncios, la conversión será **baja (1–3 %)**: el premium tiene que valer por las estadísticas.
-- Para cubrir un equipo pequeño (~USD 6.000/mes: 2 personas en LATAM, servidores, audio) se necesitan unas **4.300 familias pagando**, es decir, **~200.000 familias activas con 2 % de conversión**.
-- El costo de servidores es bajo (el juego funciona en el dispositivo), así que **cada familia gratis cuesta casi nada**. Esto permite crecer sin perder dinero.
-- **Conclusión:** el premium de USD 2 es la puerta de entrada y la marca, pero **no basta solo**. Hay que complementarlo con los **idiomas** (que duplican el ingreso por familia, ver [IDIOMAS.md](IDIOMAS.md) §5) y con las fuentes de la sección 6.6.
+- Las apps gratuitas suelen convertir entre 2 % y 5 %. Apostamos a **5–10 %** porque el informe tipo educadora es un valor que la familia ve y entiende, y porque el precio anual es muy bajo. Hay que medirlo en la beta.
+- El costo por familia gratis es casi cero (el juego funciona en el teléfono), así que crecer no genera pérdidas.
+- Con el precio anual tan bajo, la **renovación** es la métrica clave: el informe trimestral debe recordarle a la familia todo lo que su hijo avanzó en el año.
 
 ### 6.6 Ingresos complementarios (sin tocar al niño)
 
 | Fuente | Cómo funciona | Potencial |
 |---|---|---|
-| 🏫 **Jardines y colegios (B2B)** | Licencia por sala con panel docente. Un jardín de 100 niños a USD 0,75 equivale a ~54 familias premium. | **Alto**: es la palanca principal |
-| 🏛️ **Municipios y gobiernos** | Licencias masivas para jardines públicos, programas de alfabetización temprana. | Alto, ciclo de venta lento |
-| 💛 **"Regala una Escuelita"** | Un padre o empresa paga premium para un jardín rural o una familia vulnerable. Responsabilidad social empresarial. | Medio, muy bueno para la marca |
-| 🎓 **Fondos y concursos** | Fondos de innovación y emprendimiento (por ejemplo, CORFO en Chile o BID Lab) y fundaciones de primera infancia. | Medio: financia el arranque |
-| 📚 **Productos físicos** (fase 4) | Cuadernos de trazado, láminas para colorear y peluche de Emilia que se conectan con la app. | Medio–alto si la marca crece |
+| 🏫 **Jardines y colegios** | Licencia por sala con evaluación alineada a las Bases Curriculares e informes para apoderados. | **Alto** |
+| 🏛️ **Municipios, JUNJI, Fundación Integra** | Licencias masivas para jardines públicos y programas de primera infancia. | Alto, ciclo de venta lento |
+| 💛 **"Regala una Escuelita"** | Una familia o empresa paga el plan anual de un niño o de un jardín rural. | Medio, muy bueno para la marca |
+| 🎓 **Fondos públicos y privados** | Por ejemplo, CORFO y fundaciones de primera infancia. | Medio: financia el arranque |
+| 📚 **Productos físicos** (fase 4) | Cuadernos de trazado, láminas e instructivos impresos, peluche de Emilia. | Medio–alto si la marca crece |
 
-### 6.7 Cómo hacer que el premium valga USD 2
-
-- **Reporte semanal** por correo o notificación: *"Esta semana Tomi reconoció 5 letras nuevas y contó hasta 8"*. Es lo que más convierte.
-- **Mapa de habilidades:** qué domina, qué está aprendiendo, qué le cuesta.
-- **Recomendaciones para casa:** *"Le cuesta la B y la D: jueguen a buscar cosas que empiecen con B"*.
-- **Prueba gratis de 14 días** del panel completo, activada desde la zona de padres.
-- **Plan anual destacado** (2 meses gratis): mejora la retención y el flujo de caja.
-
-Canales: tiendas (App Store / Google Play, sección Niños), web (PWA), venta directa a jardines (piloto gratuito de 1 mes), alianzas con municipios y ministerios.
+Canales: tiendas (App Store / Google Play, sección Niños), web (PWA), venta directa a jardines (piloto gratuito de 1 mes), alianzas con municipios.
 
 **Métricas clave (KPI):**
 - Familias activas al mes y retención D7/D30 del adulto.
 - Activación: el niño completa 3 actividades el día 1.
-- **Conversión a premium: meta 2–3 %**, con un 50 % o más eligiendo el plan anual.
-- *Churn* mensual del premium: meta bajo 6 %.
-- Jardines con licencia activa.
+- **Primer logro consolidado** (y su informe gratis) en los primeros 14 días.
+- **Conversión a Plus: meta 5–10 %**, con 80 % eligiendo el plan anual.
+- **Renovación anual: meta 60 % o más.**
+- Familias que hacen al menos una actividad en casa por semana (pregunta simple en la app).
 - Minutos por sesión: meta 10–15, no más.
-- NPS de padres.
+- Jardines con licencia activa y NPS de padres.
 
 ---
 
@@ -259,7 +260,8 @@ Otras reglas de diseño: sin chat, sin contenido generado por otros usuarios, si
 | Rechazo en tiendas por políticas infantiles | Medio | Checklist de Kids Category desde el día 1; sin SDKs de terceros. |
 | Rendimiento del lienzo de dibujo en equipos baratos | Medio | Skia (GPU), limitar puntos por trazo, probar en Android gama baja. |
 | Baja retención del adulto | Medio | Reportes semanales por correo, logros compartibles (dibujos). |
-| **Ingreso por usuario muy bajo** (USD 2 con 90 % gratis) | Alto | Costo por usuario casi cero (todo funciona en el dispositivo), B2B con jardines y municipios, "Regala una Escuelita", plan anual. Revisar el precio con datos reales a los 6 meses. |
+| **Ingreso por usuario muy bajo** (≈ $1.900 CLP neto al mes) | Alto | Costo por usuario casi cero, gancho del primer informe gratis, jardines y municipios, "Regala una Escuelita". Revisar el precio con datos reales a los 6 meses. |
+| Evaluación poco confiable o mal entendida | Alto | Criterios definidos con una educadora de párvulos, alineados a las Bases Curriculares; aviso de que no es un diagnóstico; lenguaje siempre positivo. |
 | Pagos dentro de la app cuestionados en apps infantiles | Medio | Compras solo en la zona de padres, tras la puerta parental; sin candados visibles para el niño. |
 
 ---
@@ -270,7 +272,7 @@ Otras reglas de diseño: sin chat, sin contenido generado por otros usuarios, si
 |---|---|---|
 | **0. Validación** | 2 sem | 15–20 entrevistas a padres y 3–5 educadoras; prototipo en Figma probado con niños. |
 | **1. MVP** | 10–12 sem | Monorepo, app Expo (web + Android), Pintar, Letras A–Z+Ñ, Números 1–10, Animales (20), Memoria, perfiles, puerta parental, progreso offline. |
-| **2. Beta** | 6 sem | Cuentas de adulto, sincronización en nube, panel de padres web, iOS, premium USD 1,99/19,99 (RevenueCat), reporte semanal. |
+| **2. Beta** | 6 sem | Cuentas de adulto, sincronización en nube, panel de padres web, iOS, motor de evaluación tipo educadora, plan Plus $4.990 / $24.990 CLP (RevenueCat), informe semanal y actividades para casa. |
 | **3. B2B** | 8 sem | Modo jardín, panel docente, reportes, licencias. |
 | **4. Idiomas, ola 1** | 8 sem | Inglés y portugués (niveles 1–3), suscripciones por idioma y Familia Total. |
 | **5. Expansión** | continuo | Francés y chino (ola 2), música, sílabas y lectura inicial, acentos regionales, lenguas originarias, español como segundo idioma, contenido estacional. |
@@ -284,6 +286,7 @@ Otras reglas de diseño: sin chat, sin contenido generado por otros usuarios, si
 - [IMARC — Global Education Apps Market](https://www.imarcgroup.com/global-education-apps-market)
 - [Technavio — Education Apps Market](https://technavio.com/report/education-apps-market-size-industry-analysis)
 - [Subger — Comparativa servicios infantiles (precios de referencia, julio 2026)](https://subger.com/en/au/compare/kids-family)
+- [MINEDUC — Bases Curriculares de la Educación Parvularia (2018)](https://parvularia.mineduc.cl/)
 - [Lingokids — Centro de ayuda (precios Plus)](https://help.lingokids.com/hc/en-us/articles/115005120505)
 - [Lingokids en App Store](https://apps.apple.com/us/app/lingokids-play-learn-english/id1002043426)
 - [Cocobi Supermarket (KIGLE) en App Store](https://apps.apple.com/us/app/%EC%BD%94%EC%BD%94%EB%B9%84-%EC%8A%88%ED%8D%BC%EB%A7%88%EC%BC%93-%EB%A7%88%ED%8A%B8-%EC%87%BC%ED%95%91-%EC%97%AD%ED%95%A0-%EB%86%80%EC%9D%B4/id1594483837?l=vi)

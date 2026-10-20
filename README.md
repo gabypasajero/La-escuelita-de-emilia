@@ -8,6 +8,7 @@ Juego educativo multiplataforma (iOS · Android · Web) para niños de **3 a 6 a
 
 ## Documentación
 - 📊 [Estudio de producto, mercado y competencia](docs/ESTUDIO.md)
+- 🧑‍🏫 [Evaluación tipo educadora e informes para la familia](docs/EVALUACION.md)
 - 🌍 [Idiomas por suscripción](docs/IDIOMAS.md)
 - 🏗️ [Arquitectura técnica](docs/ARQUITECTURA.md)
 

@@ -39,7 +39,7 @@
 | **Gus on the Go** | Más de 20 idiomas | Pago único ~USD 3,99 por idioma | Muchos idiomas, barato | Contenido limitado y antiguo, sin progreso |
 | **Little Pim** | Varios (videos) | ~USD 9,99/mes | Método de inmersión con video | Más ver que jugar |
 | **Duolingo ABC** | Inglés (lectura) | Gratis | Calidad, marca | Enseña a leer en inglés, no un idioma extranjero |
-| **La Escuelita de Emilia** | Español + inglés, portugués, francés, chino y más | **USD 1,99 por idioma o USD 3,99 todos** | Una sola app, todos los idiomas, precio bajo, sin anuncios | Hay que producir audio nativo por idioma |
+| **La Escuelita de Emilia** | Español + inglés, portugués, francés, chino y más | **1 idioma incluido en Plus ($4.990 CLP/mes); todos por + $1.990 CLP** | Una sola app, todos los idiomas, precio bajo, sin anuncios | Hay que producir audio nativo por idioma |
 
 > Precios de terceros o de tiendas en EE. UU.; cambian por país y por promoción.
 
@@ -77,36 +77,22 @@
 
 ## 5. Modelo de suscripción
 
-Se mantienen los principios del estudio: **sin anuncios**, sin candados visibles para el niño y venta solo en la zona de padres.
+Se mantienen los principios del estudio: **sin anuncios**, sin candados visibles para el niño y venta solo en la zona de padres. Precios para Chile, mercado de lanzamiento:
 
-| Plan | Mensual | Anual | Incluye |
+| Plan | Mensual | Anual | Idiomas |
 |---|---|---|---|
-| 🆓 **Gratis** | USD 0 | USD 0 | 90 % del contenido en español + **muestra gratis de cada idioma** (el nivel "Hola" con saludos y colores) |
-| ⭐ **Premium** | USD 1,99 | USD 19,99 | Estadísticas completas para padres + 10 % de contenido extra (sin cambios) |
-| 🌍 **1 idioma** | USD 1,99 | USD 19,99 | Todos los niveles de un idioma + su reporte de avance |
-| 🌎 **Todos los idiomas** | USD 3,99 | USD 39,99 | Todos los idiomas actuales y futuros |
-| 💎 **Familia Total** | **USD 4,99** | **USD 49,99** | Premium + todos los idiomas. Es el plan que se destaca. |
+| 🆓 **Gratis** | $0 | $0 | **Muestra gratis de cada idioma** (el nivel "Hola" con saludos y colores) |
+| ⭐ **Plus** | $4.990 CLP | $24.990 CLP | **1 idioma completo incluido**, a elección, con su avance dentro del informe tipo educadora |
+| 🌍 **Todos los idiomas** (complemento de Plus) | + $1.990 CLP | + $9.990 CLP | Todos los idiomas actuales y futuros |
 | 🏫 **Jardín bilingüe** | Por niño/mes | Licencia anual | Idiomas + panel docente para salas bilingües |
 
-**¿Por qué una muestra gratis por idioma?** El niño conoce a Max, Bia, Léa y Xiao Lin gratis. Cuando el padre ve que su hijo dice *"Hello!"*, la suscripción se vende sola.
+**¿Por qué una muestra gratis por idioma?** El niño conoce a Max, Bia, Léa y Xiao Lin gratis. Cuando la familia ve que su hijo dice *"Hello!"*, el plan se vende solo.
 
-**Comparación:** con Familia Total (USD 4,99) una familia tiene todos los idiomas y estadísticas por **un tercio del precio de Studycat o Lingokids**, que enseñan un solo idioma.
+**¿Por qué 1 idioma incluido en Plus?** *"Inglés incluido"* es el mejor argumento para el plan anual. Con los informes, la familia además recibe las **5 palabras de la semana con audio nativo** y la canción del tema para practicar en casa ([EVALUACION.md](EVALUACION.md) §4.3).
 
-### Efecto en los números
+**Comparación:** con Plus anual ($24.990 CLP, ≈ $2.083 al mes) una familia tiene un idioma, todo el contenido en español y la evaluación tipo educadora. Un solo idioma en Studycat cuesta ~$14.200 CLP **al mes**.
 
-Los idiomas suben el ingreso por familia sin tocar el 90 % gratis.
-
-Ejemplo con **200.000 familias activas al mes** (neto tras tienda e impuestos, ~70 % del precio):
-
-| Fuente | Conversión | Neto por familia/mes | Ingreso neto/mes |
-|---|---|---|---|
-| Premium (USD 1,99) | 2 % | ~USD 1,40 | USD 5.600 |
-| Idiomas y Familia Total (mezcla, ~USD 3,50) | 1,5 % | ~USD 2,45 | USD 7.350 |
-| **Total** | | | **~USD 12.950** |
-
-Con idiomas, el ingreso **se duplica** frente a solo Premium (USD 5.600). El equipo de ~USD 6.000/mes se cubre con menos familias activas, y queda margen para producir más idiomas.
-
-> Escenario ilustrativo, a validar con una encuesta de disposición a pagar y datos de la beta.
+**Efecto en los números:** el complemento de todos los idiomas ($9.990 CLP al año, ≈ $595 neto al mes) suma ingresos por encima del punto de equilibrio calculado en [ESTUDIO.md §6.5](ESTUDIO.md#65-números-es-viable). Se validará con la encuesta de disposición a pagar y los datos de la beta.
 
 ---
 
@@ -138,7 +124,7 @@ Con idiomas, el ingreso **se duplica** frente a solo Premium (USD 5.600). El equ
 
 - El contenido se organiza **por idioma**: cada palabra tiene un id común y una entrada por idioma (texto, audio, imagen compartida). Los juegos (Tiendita, Memoria, Animales, Pregunta) reciben el idioma como parámetro y no cambian.
 - La interfaz para adultos se traduce aparte (español, portugués, inglés) para el mercado inverso.
-- Suscripciones por producto: `premium`, `idioma:en`, `idioma:pt`, `idiomas:todos`, `familia_total`.
+- Suscripciones por producto: `plus` (incluye 1 idioma elegido) e `idiomas:todos`.
 - Audio descargable por idioma, para no hacer pesada la app y poder jugar sin internet.
 
 Detalle en [ARQUITECTURA.md](ARQUITECTURA.md).

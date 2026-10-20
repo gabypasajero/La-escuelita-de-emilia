@@ -67,18 +67,33 @@
 
 ## Planes y acceso premium
 
-- `adultos.plan` (`gratis` | `familia` | `institucional`) decide qué se desbloquea. "Familia" es el premium de USD 1,99/mes o USD 19,99/año.
+- `adultos.plan` (`gratis` | `familia` | `institucional`) decide qué se desbloquea. "Familia" es el plan **Plus** de $4.990 CLP al mes o $24.990 CLP al año (incluye 1 idioma elegido).
 - Cada actividad o mundo del contenido lleva `premium: true | false`. La meta es que solo el ~10 % sea premium; un test en `packages/core` puede verificarlo.
 - **El juego del niño no consulta el plan para mostrar candados.** Simplemente no lista lo premium si no está activo.
-- Las estadísticas detalladas (`/v1/perfiles/:id/resumen` y el reporte semanal) solo responden con datos completos para planes pagados. El resumen básico es gratis.
+- La evaluación tipo educadora, los informes y las actividades para casa solo se entregan completos a planes pagados. El primer informe es gratis como muestra.
 - Pagos con RevenueCat (App Store + Google Play + web con Stripe) para tener una sola fuente de verdad de suscripciones.
+
+## Motor de evaluación tipo educadora
+
+Detalle de producto en [EVALUACION.md](EVALUACION.md).
+
+| Pieza | Dónde | Qué hace |
+|---|---|---|
+| **Catálogo de habilidades** | `packages/core` (datos) | Cada habilidad tiene id, núcleo de las Bases Curriculares, nivel de referencia y su "próximo desafío". |
+| **Etiquetas en el contenido** | `packages/core` (datos) | Cada actividad e ítem apunta a una o más habilidades (por ejemplo, la letra M en Letras y en la Tiendita). |
+| **Intentos** | Tabla `intentos` (+ campos `uso_pista` y `habilidades`) | La evidencia: acierto, tiempo, pista, juego, fecha. |
+| **Motor de estados** | `packages/core` (función pura, con tests) | Calcula *explorando → en práctica → logrado → consolidado* con los criterios de EVALUACION.md §2. Corre en el teléfono, sin internet. |
+| **Repasos espaciados** | `packages/core` | Agenda volver a mostrar lo logrado 7 días después para confirmar que está consolidado. |
+| **Estado por habilidad** | Tabla nueva `habilidades_perfil` | Estado actual, fecha de logro y de consolidación. Reemplaza al resumen simple de `progreso`. |
+| **Catálogo de recomendaciones** | Contenido escrito por la asesora pedagógica | Une cada habilidad con actividades para casa: instructivos de dibujo, lenguaje, matemática, audios de idiomas. |
+| **Informes** | `apps/api` + tarea programada | Informe semanal (notificación o correo) y PDF trimestral, solo para planes pagados. |
 
 ## Idiomas
 
 - Contenido con **id común por concepto** (por ejemplo, `manzana`) y una entrada por idioma: `es`, `en`, `pt`, `fr`, `zh`… con texto, audio y la misma imagen.
 - Los juegos de `packages/core` reciben `idioma` como parámetro; no hay un juego distinto por idioma.
 - El audio de cada idioma es un paquete descargable aparte (offline y app liviana).
-- Suscripciones por producto en RevenueCat: `premium`, `idioma:<código>`, `idiomas:todos`, `familia_total`.
+- Suscripciones por producto en RevenueCat: `plus` (con el idioma elegido guardado en la cuenta) e `idiomas:todos`.
 - Interfaz de adultos traducida por separado (es, pt, en) para vender también "español como segundo idioma".
 
 Detalle de producto en [IDIOMAS.md](IDIOMAS.md).
