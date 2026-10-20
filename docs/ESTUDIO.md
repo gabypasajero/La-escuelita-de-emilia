@@ -274,7 +274,7 @@ Otras reglas de diseño: sin chat, sin contenido generado por otros usuarios, si
 | **1. MVP** | 10–12 sem | Monorepo, app Expo (web + Android), Pintar, Letras A–Z+Ñ, Números 1–10, Animales (20), Memoria, perfiles, puerta parental, progreso offline. |
 | **2. Beta** | 6 sem | Cuentas de adulto, sincronización en nube, panel de padres web, iOS, motor de evaluación tipo educadora, plan Plus $4.990 / $24.990 CLP (RevenueCat), informe semanal y actividades para casa. |
 | **3. B2B** | 8 sem | Modo jardín, panel docente, reportes, licencias. |
-| **4. Idiomas, ola 1** | 8 sem | Inglés y portugués (niveles 1–3), suscripciones por idioma y Familia Total. |
+| **4. Idiomas, ola 1** | 8 sem | Inglés y portugués (niveles 1–3), idioma incluido en Plus y complemento de todos los idiomas. |
 | **5. Expansión** | continuo | Francés y chino (ola 2), música, sílabas y lectura inicial, acentos regionales, lenguas originarias, español como segundo idioma, contenido estacional. |
 
 ---
