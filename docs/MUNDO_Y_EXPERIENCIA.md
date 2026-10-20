@@ -30,7 +30,8 @@ No es "una app con ejercicios": es **un lugar al que el niño vuelve**, con pers
 | 🧢 **Max** · 🎨 **Bia** · 🥐 **Léa** · 🐼 **Xiao Lin** | Amigos de otros países que visitan el barrio. Cada uno habla solo su idioma. | Enseñan idiomas ([IDIOMAS.md](IDIOMAS.md)). Aparecen como clientes en la tiendita, en la plaza o en su propia casa. |
 | 👵 **Doña Rosa** | La almacenera del barrio. | Cliente y dueña de la Tiendita. |
 | 🧑‍⚕️ **Dr. Lucas** | El veterinario. | Mundo de roles de la Veterinaria. |
-| 🧑‍🌾 **Don Pedro** | Cuida la granja y el huerto. | Animales, plantas y conteo. |
+| 🧑‍🌾 **Don Pedro** | Cuida la granja y el huerto. | Animales, jardinería y conteo. |
+| 👮 **La carabinera del barrio** | Cuida la calle y ayuda a los vecinos. | Seguridad en la Calle del barrio. |
 | 🧒 **El niño** | Su propio personaje, creado por él. | Protagonista: Emilia le habla a él. |
 
 **Reglas para los personajes:**
@@ -66,7 +67,9 @@ El inicio deja de ser una lista de botones y se convierte en un **mapa del barri
    │  🏠 Mi casita       🎠 Plaza de         🐾 Vete-   │
    │     (avatar,           juegos            rinaria   │
    │     pegatinas,         (Memoria,                   │
-   │     dibujos)           puzzles)        🍳 Cocina   │
+   │     dibujos)           puzzles)        🏡 Casa de  │
+   │                                           Emilia   │
+   │          🚦 Calle del barrio                       │
    │                                                    │
    │          🚌 Paradero de los amigos                 │
    │             (Idiomas: casas de Max, Bia,           │
@@ -80,7 +83,10 @@ El inicio deja de ser una lista de botones y se convierte en un **mapa del barri
 | 🎨 **Taller de arte** | Pintar | Lienzo libre, colorear por zonas, dibujo guiado paso a paso, galería. |
 | 🐄 **Granja** · 🌳 **Bosque y laguna** | Animales | Tocar animales para escuchar su nombre y sonido, adivinar por el sonido, ¿dónde vive?, mamá y cría. |
 | 🛒 **Tiendita de Doña Rosa** | Mundo de roles | Atender pedidos contando productos. Ya construida ([ver app](../apps/mobile/app/juegos/tiendita.tsx)). |
-| 🍳 **Cocina** · 🐾 **Veterinaria** · 🌻 **Huerto** | Mundos de roles | Recetas por colores y formas, cuidar animales, plantar y contar. |
+| 🐾 **Veterinaria** | Mundo de roles | Cuidar animales: alimentar, bañar, curar una patita. |
+| 🌻 **Huerto de Don Pedro** | Vida diaria | Sembrar, regar, cosechar y contar, compost, estaciones, y el poroto real en algodón ([VIDA_DIARIA.md](VIDA_DIARIA.md)). |
+| 🏡 **Casa de Emilia** | Vida diaria | Baño (manos, dientes), dormitorio (vestirse, ordenar), cocina y comedor (plato saludable, poner la mesa, recetas). |
+| 🚦 **Calle del barrio** | Vida diaria | Semáforo, cruzar la calle, pedir ayuda, números de emergencia (5+). |
 | 🎠 **Plaza de juegos** | Minijuegos | Memoria (ya construida), puzzles, patrones, laberintos, el intruso. |
 | 🚌 **Paradero de los amigos** | Idiomas | Llega el bus y baja un amigo; cada uno tiene su casa con juegos en su idioma. |
 | 🏠 **Mi casita** | Espacio personal | Cambiar ropa, álbum de pegatinas, galería de dibujos, el **árbol del saber**. |
@@ -269,7 +275,7 @@ La app que ya está en el repositorio es el punto de partida:
 
 ### Próximos pasos de diseño (por escrito)
 
-1. **Guion de voz de Emilia:** las frases de saludo, ánimo, pistas, celebraciones y despedida (unas 150 frases).
+1. ~~**Guion de voz de Emilia**~~ → listo en [GUION_EMILIA.md](GUION_EMILIA.md) (135 frases, sonidos de Tito y canciones).
 2. **Ficha de cada lugar del barrio:** personajes, actividades, sorpresas al tocar y habilidades que trabaja.
 3. **Bocetos de pantallas clave:** mapa, una actividad, Mi casita y el árbol del saber.
 4. **Prueba con niños:** mostrar los bocetos a 5–10 niños para ver qué entienden sin explicación.

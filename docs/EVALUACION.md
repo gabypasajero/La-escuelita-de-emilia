@@ -63,6 +63,9 @@ Para que la evaluación sea seria, las habilidades se organizan según las **Bas
 | **Lenguajes artísticos** | Usa colores, traza líneas y curvas, dibuja figuras humanas y animales, reconoce instrumentos y ritmos. |
 | **Exploración del entorno natural** | Reconoce animales, sus sonidos y dónde viven; cuidado de animales y plantas. |
 | **Comprensión del entorno sociocultural** | Juego de roles: comprar en la tiendita, oficios, hábitos (lavarse las manos, ordenar). |
+| **Identidad y autonomía** | Lavarse las manos y los dientes, vestirse en orden, ordenar, alimentación saludable ([VIDA_DIARIA.md](VIDA_DIARIA.md)). Se evalúa también con retos confirmados por la familia. |
+| **Corporalidad y movimiento** | Motricidad fina: abrochar, cortar con tijeras, trazar; cuidado del cuerpo. |
+| **Convivencia y ciudadanía** | Seguridad en la calle, pedir ayuda, ayudar en la casa, cuidar el entorno y reciclar. |
 | **Idiomas** (complemento propio) | Palabras y frases reconocidas y repetidas por idioma, orientado a un nivel pre-A1. |
 
 Niveles de referencia: **Nivel Medio** (aprox. 3–4 años) y **Nivel Transición 1 y 2** (aprox. 4–6 años).

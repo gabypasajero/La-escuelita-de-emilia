@@ -8,6 +8,8 @@ Juego educativo multiplataforma (iOS · Android · Web) para niños de **3 a 6 a
 
 ## Documentación
 - 🌎 [El mundo de Emilia: concepto, sesiones y experiencia del niño](docs/MUNDO_Y_EXPERIENCIA.md)
+- 🌻 [Vida diaria: huerto, cuidado personal y habilidades para la vida](docs/VIDA_DIARIA.md)
+- 🎙️ [Guion de voz de Emilia](docs/GUION_EMILIA.md)
 - 📊 [Estudio de producto, mercado y competencia](docs/ESTUDIO.md)
 - 💼 [Plan de negocio y escalamiento a instituciones](docs/PLAN_DE_NEGOCIO.md)
 - 🧑‍🏫 [Evaluación tipo educadora e informes para la familia](docs/EVALUACION.md)
