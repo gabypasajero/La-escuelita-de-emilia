@@ -1,9 +1,9 @@
 import { ESTADO_INICIAL, registrarRespuesta, tableroMemoria, type CartaMemoria } from "@escuelita/core";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Pantalla } from "../components/Pantalla";
-import { COLORES } from "../lib/tema";
-import { hablar } from "../lib/voz";
+import { Pantalla } from "../../components/Pantalla";
+import { COLORES } from "../../lib/tema";
+import { hablar } from "../../lib/voz";
 
 /** Memoria (parejas). Al completar un tablero, el siguiente se adapta al nivel. */
 export default function Juegos() {

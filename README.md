@@ -2,9 +2,9 @@
 
 Juego educativo multiplataforma (iOS · Android · Web) para niños de **3 a 6 años**: pintar, letras, números, animales y sus sonidos, y juegos interactivos. 100 % en español, sin anuncios y con zona protegida para padres.
 
-| Inicio | Letras | Pintar | Memoria |
-|---|---|---|---|
-| ![](docs/capturas/inicio.png) | ![](docs/capturas/letras.png) | ![](docs/capturas/pintar.png) | ![](docs/capturas/juegos.png) |
+| Inicio | Letras | Pintar | La Tiendita | Memoria |
+|---|---|---|---|---|
+| ![](docs/capturas/inicio.png) | ![](docs/capturas/letras.png) | ![](docs/capturas/pintar.png) | ![](docs/capturas/tiendita.png) | ![](docs/capturas/juegos.png) |
 
 ## Documentación
 - 📊 [Estudio de producto, mercado y competencia](docs/ESTUDIO.md)

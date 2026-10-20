@@ -64,6 +64,8 @@ Hay **dos usuarios** y hay que diseñar para ambos:
 | **Lingokids** | Freemium (2–8 años) | Empresa española, fuerte en LATAM, enfoque en inglés como 2.ª lengua. | Su foco es **aprender inglés**, no lectoescritura en español. |
 | **Sago Mini / Toca Boca** | Pago / suscripción | Juego libre de excelente calidad visual. | Poco contenido académico explícito (letras/números). |
 | **Smile and Learn** | Suscripción + colegios | Español, catálogo grande, venta a colegios. | Interfaz fragmentada en cientos de juegos; menos identidad de personaje. |
+| **Cocobi (KIGLE, Corea)** | Decenas de apps gratis separadas + compras dentro de la app | Personajes muy queribles (dinosaurios), juegos de roles de la vida diaria (supermercado, hospital, cocina, limpieza), arte y animación excelentes. | Contenido académico débil; catálogo fragmentado en muchas apps; textos traducidos. |
+| **"Juegos educativos infantiles" (genéricas)** | Gratis + compras / anuncios | Muchas actividades cortas (puzzles, colores, formas), se descargan mucho por búsqueda en la tienda. | Sin personaje ni historia, calidad irregular, poca progresión. |
 | **Apps de dibujo genéricas** | Gratis con anuncios | Fáciles. | Anuncios, sin progreso ni aprendizaje. |
 
 **Posicionamiento propuesto:**
@@ -79,6 +81,18 @@ Hay **dos usuarios** y hay que diseñar para ambos:
                             │
                  Juego libre / exploración
 ```
+
+### 4.1 Referentes: qué tomar de cada uno
+
+| | 🦖 Cocobi | 🧩 "Juegos educativos infantiles" | 🦊 Lingokids |
+|---|---|---|---|
+| **Qué es** | Juegos de roles con personajes: supermercado, hospital, panadería, camión de helados, cuidar mascotas, hábitos. | Colecciones de minijuegos cortos: puzzles, formas, colores, emparejar, contar. | Plataforma de suscripción: juegos, canciones, videos y reportes; enfocada en inglés, 2–8 años. |
+| **Lo que hace muy bien** | **Juego de roles** con objetos tocables, causa-efecto y "mundo vivo". Cada acción da una reacción divertida. | **Sesiones de 1–2 min**, cero instrucciones, mucha variedad. | **Mapa de progreso**, objetivos de aprendizaje medibles, **reportes a padres**, hasta 4 perfiles, sin anuncios. |
+| **Monetización** | Apps gratis + compras dentro de la app (sin evidencia de suscripción). | Gratis + compras o anuncios. | Lingokids Plus: USD 13,49/mes según su centro de ayuda (varía por país y promoción). |
+| **Lo que tomamos** | Mundos de roles: **La Tiendita de Emilia** (contar), luego cocina (formas/colores), veterinaria (animales). | Formato de minijuego corto y sin texto dentro de cada módulo. | Ruta de aprendizaje visible, objetivos por actividad, reporte semanal a padres, multi-perfil. |
+| **Lo que evitamos** | Fragmentar en decenas de apps: **una sola app**. | Anuncios y falta de progresión. | Precio alto para LATAM y foco en inglés. |
+
+**Síntesis — nuestra fórmula:** *mundos de roles tipo Cocobi* + *minijuegos cortos* + *progreso y reportes tipo Lingokids*, todo **en español nativo**, en **una sola app** y con **precio regional**.
 
 **Ventajas competitivas a construir (moat):**
 1. **Personaje guía "Emilia"** con voz humana real en español neutro (y paquetes de acento: rioplatense, chileno, mexicano, español).
@@ -97,6 +111,7 @@ Hay **dos usuarios** y hay que diseñar para ambos:
 | 🔢 **Números** | Contar objetos, trazar números, ¿cuál tiene más?, ordenar 1–10, sumas con frutas (5–6). | Sentido numérico | 3–6 |
 | 🦁 **Animales** | Granja / selva / mar / regional: tocar y escuchar nombre + sonido, adivinar por sonido, ¿dónde vive?, mamá y cría. | Vocabulario, discriminación auditiva | 3–6 |
 | 🧩 **Juegos** | Memoria (parejas), rompecabezas 4–9 piezas, formas y colores, patrones, intruso, laberinto simple. | Memoria, lógica, atención | 3–6 |
+| 🛒 **Mundos de roles** (inspirado en Cocobi) | **La Tiendita** (poner N productos en la canasta y pagar con monedas), Cocina (receta por colores/formas), Veterinaria (cuidar animales), Huerto (plantar y contar). | Conteo aplicado, vocabulario, hábitos, juego simbólico | 3–6 |
 | 🎵 **Música** (fase 2) | Instrumentos, xilófono, canciones con karaoke de letras. | Ritmo, memoria auditiva | 3–6 |
 
 **Bucle de recompensa (sin manipular):** cada actividad completada da una **estrella**; las estrellas desbloquean pegatinas y ropa para Emilia. **No** hay rachas que castiguen, temporizadores de presión ni moneda comprable.
@@ -174,5 +189,10 @@ Otras reglas de diseño: sin chat, sin contenido generado por otros usuarios, si
 - [IMARC — Global Education Apps Market](https://www.imarcgroup.com/global-education-apps-market)
 - [Technavio — Education Apps Market](https://technavio.com/report/education-apps-market-size-industry-analysis)
 - [Subger — Comparativa servicios infantiles (precios de referencia, julio 2026)](https://subger.com/en/au/compare/kids-family)
+- [Lingokids — Centro de ayuda (precios Plus)](https://help.lingokids.com/hc/en-us/articles/115005120505)
+- [Lingokids en App Store](https://apps.apple.com/us/app/lingokids-play-learn-english/id1002043426)
+- [Cocobi Supermarket (KIGLE) en App Store](https://apps.apple.com/us/app/%EC%BD%94%EC%BD%94%EB%B9%84-%EC%8A%88%ED%8D%BC%EB%A7%88%EC%BC%93-%EB%A7%88%ED%8A%B8-%EC%87%BC%ED%95%91-%EC%97%AD%ED%95%A0-%EB%86%80%EC%9D%B4/id1594483837?l=vi)
+- [AppGoblin — Cocobi Baby Pet Care (estimación de ingresos)](https://appgoblin.info/apps/6744205564)
+- [Ejemplo de "juegos para niños 3–4 años" en App Store](https://apps.apple.com/es/app/juegos-para-ni%C3%B1os-de-3-4-a%C3%B1os/id1195601592)
 
 > Las cifras de mercado provienen de informes comerciales con metodologías distintas; tomarlas como orden de magnitud. Los precios de competidores son de terceros y deben verificarse en cada tienda.
