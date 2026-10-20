@@ -2,6 +2,7 @@
 
 > Las frases que dicen Emilia, Tito y los vecinos del barrio. Define la **personalidad del juego** y sirve de base para la grabación con actores de voz.
 > Complementa [MUNDO_Y_EXPERIENCIA.md](MUNDO_Y_EXPERIENCIA.md). Octubre 2026. Versión 1.
+> Los guiones completos por personaje, con memoria y conversaciones, están en [GUIONES_PERSONAJES.md](GUIONES_PERSONAJES.md).
 
 ---
 
