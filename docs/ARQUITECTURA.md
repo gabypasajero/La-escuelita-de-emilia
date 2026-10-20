@@ -65,6 +65,14 @@
 - Toda la zona de adultos (`/padres`) detrás de una **puerta parental** (`crearPuertaParental` en `core`).
 - Row Level Security: un adulto solo ve sus perfiles.
 
+## Planes y acceso premium
+
+- `adultos.plan` (`gratis` | `familia` | `institucional`) decide qué se desbloquea. "Familia" es el premium de USD 1,99/mes o USD 19,99/año.
+- Cada actividad o mundo del contenido lleva `premium: true | false`. La meta es que solo el ~10 % sea premium; un test en `packages/core` puede verificarlo.
+- **El juego del niño no consulta el plan para mostrar candados.** Simplemente no lista lo premium si no está activo.
+- Las estadísticas detalladas (`/v1/perfiles/:id/resumen` y el reporte semanal) solo responden con datos completos para planes pagados. El resumen básico es gratis.
+- Pagos con RevenueCat (App Store + Google Play + web con Stripe) para tener una sola fuente de verdad de suscripciones.
+
 ## Próximos pasos técnicos
 
 1. `pnpm install` y `pnpm --filter @escuelita/mobile web` para ver la app en el navegador.
