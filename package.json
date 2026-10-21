@@ -3,6 +3,7 @@
   "private": true,
   "packageManager": "pnpm@10.28.0",
   "scripts": {
+    "build:web": "pnpm --filter @escuelita/mobile build:web",
     "dev:web": "pnpm --filter @escuelita/mobile web",
     "dev:api": "pnpm --filter @escuelita/api dev",
     "test": "pnpm -r test",

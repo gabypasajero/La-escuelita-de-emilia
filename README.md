@@ -41,3 +41,9 @@ pnpm typecheck
 ```
 
 Para Android/iOS: `pnpm --filter @escuelita/mobile android` (o `ios`) con Expo Go.
+
+## Publicar la web en Vercel
+
+Importa este repositorio en Vercel y deja **Root Directory** en la raíz del repositorio. La configuración de [vercel.json](./vercel.json) instala las dependencias del workspace con pnpm, exporta la versión web de Expo y publica `apps/mobile/dist`. No cambies el directorio raíz a `apps/mobile`, porque la aplicación depende del paquete compartido `packages/core`.
+
+La compilación también se puede verificar localmente con `pnpm build:web`.
