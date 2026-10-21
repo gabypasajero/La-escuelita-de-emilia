@@ -16,7 +16,6 @@
       overflow-x: hidden;
       transition: background 0.8s ease;
     }
-    /* Modos de accesibilidad */
     body.high-contrast {
       filter: contrast(1.35) saturate(1.2);
     }
@@ -24,7 +23,6 @@
       animation: none !important;
       transition: none !important;
     }
-    /* Animaciones suaves y redondeadas */
     @keyframes floatSlow {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-8px); }
@@ -45,8 +43,6 @@
     .glow-help { animation: pulseGlow 1.5s infinite; border-color: #facc15 !important; }
     .breathe-anim { animation: breatheCircle 6s ease-in-out infinite; }
     .hand-pointer { animation: handPoint 1s ease-in-out infinite; }
-
-    /* Botones gigantes para niños */
     .kid-btn {
       transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
       box-shadow: 0 8px 0 rgba(0,0,0,0.18);
@@ -55,7 +51,6 @@
       transform: translateY(6px);
       box-shadow: 0 2px 0 rgba(0,0,0,0.18);
     }
-    /* Paisaje Cordillera y Valparaíso */
     .andes-bg {
       background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 65%, #bbf7d0 100%);
     }
@@ -69,12 +64,10 @@
 
   <!-- FONDO ILUSTRADO: Cordillera de los Andes, Araucarias y Nubes Interactivas -->
   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    <!-- Sol / Luna interactivo -->
     <button onclick="toggleDayNight()" class="pointer-events-auto absolute top-5 right-64 text-6xl transform hover:scale-110 transition cursor-pointer z-20" title="Cambiar Día / Noche">
       <span id="sky-celestial">☀️</span>
     </button>
 
-    <!-- Nubes y Sorpresas al tocar -->
     <div onclick="touchSurprise(this, '🌧️ ¡Gotitas frescas!')" class="pointer-events-auto cursor-pointer absolute top-10 left-1/4 text-5xl opacity-85 float-anim">☁️</div>
     <div onclick="touchSurprise(this, '🦅 ¡Un cóndor saludando!')" class="pointer-events-auto cursor-pointer absolute top-16 left-2/3 text-4xl opacity-90 float-anim" style="animation-delay: 1.2s;">🦅</div>
     <div id="september-kites" class="hidden">
@@ -82,41 +75,33 @@
       <div onclick="touchSurprise(this, '🪁 ¡Volantín chupete!')" class="pointer-events-auto cursor-pointer absolute top-12 right-1/3 text-5xl float-anim" style="animation-delay: 0.7s;">🪁</div>
     </div>
 
-    <!-- Cordillera de los Andes SVG -->
     <svg class="absolute bottom-24 w-full h-56 opacity-90" viewBox="0 0 1440 320" preserveAspectRatio="none">
       <polygon fill="#64748b" points="0,320 220,90 450,260 720,40 1020,240 1260,70 1440,220 1440,320"/>
-      <!-- Nieve en las cumbres -->
       <polygon fill="#f8fafc" points="220,90 175,148 220,135 265,148"/>
       <polygon fill="#f8fafc" points="720,40 660,120 705,105 720,125 745,100 780,120"/>
       <polygon fill="#f8fafc" points="1260,70 1210,135 1260,120 1310,135"/>
-      <!-- Cerros coloridos tipo Valparaíso -->
       <path fill="#4ade80" d="M0,260 Q360,180 720,250 T1440,230 L1440,320 L0,320 Z"/>
       <path fill="#22c55e" d="M0,285 Q400,230 850,280 T1440,265 L1440,320 L0,320 Z"/>
     </svg>
-    <!--Pradera inferior-->
     <div class="absolute bottom-0 w-full h-28 bg-emerald-500"></div>
   </div>
 
-  <!-- BARRA SUPERIOR SIEMPRE VISIBLE (Sin texto obligatorio, íconos gigantes + voz) -->
+  <!-- BARRA SUPERIOR SIEMPRE VISIBLE -->
   <header class="relative z-30 flex items-center justify-between px-4 py-3 bg-white/85 backdrop-blur-md shadow-md border-b-4 border-amber-300">
-    <!-- Botón Casa SIEMPRE VISIBLE -->
     <div class="flex items-center gap-3">
       <button onclick="goHomeMap()" class="kid-btn bg-amber-400 hover:bg-amber-300 text-amber-950 px-5 py-3 rounded-3xl flex items-center gap-2 text-2xl font-bold border-4 border-white" aria-label="Ir al Mapa del Barrio">
         🏠 <span class="hidden sm:inline text-lg">El Barrio</span>
       </button>
 
-      <!-- Botón Rincón de la Calma con Tito el Pudú -->
       <button onclick="openTitoCalm()" class="kid-btn bg-teal-400 hover:bg-teal-300 text-teal-950 px-4 py-3 rounded-3xl flex items-center gap-2 text-2xl font-bold border-4 border-white" aria-label="Rincón de la Calma con Tito">
         🦌 <span class="hidden md:inline text-base">Calma con Tito</span>
       </button>
 
-      <!-- Árbol del Saber rápido -->
       <button onclick="openKnowledgeTree()" class="kid-btn bg-pink-400 hover:bg-pink-300 text-pink-950 px-4 py-3 rounded-3xl flex items-center gap-2 text-2xl font-bold border-4 border-white">
         🌳 <span id="flower-counter" class="text-lg bg-white/90 px-2.5 py-0.5 rounded-full">🌸 3</span>
       </button>
     </div>
 
-    <!-- Indicador de la Sesión de 5 pasos (Como un día de jardín) -->
     <div class="hidden lg:flex items-center gap-2 bg-amber-100/90 px-4 py-2 rounded-full border-2 border-amber-300">
       <button onclick="setSessionStep(1)" id="step-dot-1" class="px-3 py-1 rounded-full text-sm font-bold bg-amber-400 text-amber-950">1. 👋 Saludo</button>
       <span>➔</span>
@@ -129,7 +114,6 @@
       <button onclick="setSessionStep(5)" id="step-dot-5" class="px-3 py-1 rounded-full text-sm font-bold bg-white text-slate-700">5. 🌙 Despedida</button>
     </div>
 
-    <!-- Controles de Modo, Inclusión y Aviso Suave -->
     <div class="flex items-center gap-2">
       <button onclick="triggerGentleEnd()" class="kid-btn bg-indigo-500 hover:bg-indigo-400 text-white px-3 py-2.5 rounded-2xl text-sm font-bold border-2 border-white" title="Simular aviso suave de término de sesión">
         ⏳ Aviso Suave
@@ -144,7 +128,6 @@
   <div class="relative z-20 max-w-5xl mx-auto w-full px-4 mt-3">
     <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-xl border-4 border-amber-400 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <!-- Avatar Emilia + Tito -->
         <div onclick="speakCurrentDialogue()" class="cursor-pointer relative flex -space-x-3 items-end group">
           <div class="w-20 h-20 rounded-full bg-amber-200 border-4 border-amber-500 flex items-center justify-center text-5xl shadow-md group-hover:scale-105 transition">
             👧🏽
@@ -155,7 +138,6 @@
           <span class="absolute -top-2 -left-2 bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">🔊 Tócame</span>
         </div>
 
-        <!-- Burbuja de voz y subtítulo siempre claro -->
         <div>
           <div class="flex items-center gap-2">
             <span class="font-bold text-amber-900 text-lg">Emilia y Tito</span>
@@ -168,7 +150,6 @@
         </div>
       </div>
 
-      <!-- Personaje del Niño + Selector de Paseo / Explorar -->
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="openView('view-casita')" class="kid-btn bg-amber-100 hover:bg-amber-200 px-3 py-2 rounded-2xl border-2 border-amber-400 flex items-center gap-2">
           <span id="kid-avatar-top" class="text-3xl">🧒🏻👓</span>
@@ -181,12 +162,10 @@
     </div>
   </div>
 
-  <!-- CONTENEDOR PRINCIPAL DE VISTAS (MÁXIMO 2 NIVELES DE PROFUNDIDAD) -->
+  <!-- CONTENEDOR PRINCIPAL DE VISTAS -->
   <main class="relative z-20 flex-1 max-w-6xl w-full mx-auto px-4 py-4 flex items-center justify-center">
 
-    <!-- ==========================================
-         VISTA 1: SALUDO EMOCIONAL (Paso 1 de Sesión)
-         ========================================== -->
+    <!-- VISTA 1: SALUDO EMOCIONAL -->
     <section id="view-checkin" class="w-full bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-sky-300 text-center">
       <h1 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-2">👋 ¡Bienvenido a la Escuelita Mágica!</h1>
       <p class="text-lg text-slate-600 mb-6">Toca la carita que muestra cómo te sientes hoy:</p>
@@ -214,11 +193,8 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         VISTA 2: EL MAPA DEL BARRIO (Nivel 1 Principal)
-         ========================================== -->
+    <!-- VISTA 2: EL MAPA DEL BARRIO -->
     <section id="view-map" class="hidden w-full">
-      <!-- Cinta de Fiesta / Estación -->
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3 bg-white/80 px-4 py-2 rounded-2xl border-2 border-emerald-300">
         <div class="flex items-center gap-2 text-sm font-bold text-emerald-950">
           <span>🌲 Barrio estilo Valparaíso y Sur de Chile</span>
@@ -234,9 +210,7 @@
         </div>
       </div>
 
-      <!-- Grilla de Lugares del Barrio -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- 1. La Escuelita -->
         <button onclick="openEscuelita()" id="map-card-escuelita" class="kid-btn bg-rose-400 hover:bg-rose-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center relative">
           <span id="recommend-badge-escuelita" class="absolute -top-3 bg-yellow-300 text-amber-950 text-xs font-bold px-3 py-1 rounded-full border-2 border-white shadow">🌟 Paso del Paseo</span>
           <span class="text-6xl mb-2">🏫</span>
@@ -244,49 +218,42 @@
           <p class="text-sm text-rose-100 font-semibold">Letras, números y ayudar a Emilia</p>
         </button>
 
-        <!-- 2. Almacén de Doña Rosa y Oficios -->
         <button onclick="openView('view-almacen')" class="kid-btn bg-amber-400 hover:bg-amber-300 text-amber-950 p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
           <span class="text-6xl mb-2">🛒</span>
           <h2 class="text-2xl font-bold">Almacén Doña Rosa</h2>
           <p class="text-sm text-amber-900 font-semibold">Cocina, Veterinaria Dr. Lucas y Huerto</p>
         </button>
 
-        <!-- 3. Taller de Arte -->
         <button onclick="openView('view-arte')" class="kid-btn bg-purple-400 hover:bg-purple-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
           <span class="text-6xl mb-2">🎨</span>
           <h2 class="text-2xl font-bold">Taller de Arte</h2>
           <p class="text-sm text-purple-100 font-semibold">Pintar libre (Diestro / Zurdo)</p>
         </button>
 
-        <!-- 4. Granja de Don Pedro y Bosque Nativo -->
         <button onclick="openView('view-granja')" class="kid-btn bg-emerald-500 hover:bg-emerald-400 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
           <span class="text-6xl mb-2">🐄</span>
           <h2 class="text-2xl font-bold">Granja y Bosque</h2>
           <p class="text-sm text-emerald-100 font-semibold">Don Pedro y Fauna Nativa Chilena</p>
         </button>
 
-        <!-- 5. Plaza de Juegos (Memoria) -->
         <button onclick="openPlaza()" class="kid-btn bg-sky-400 hover:bg-sky-300 text-sky-950 p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
           <span class="text-6xl mb-2">🎠</span>
           <h2 class="text-2xl font-bold">Plaza de Juegos</h2>
           <p class="text-sm text-sky-900 font-semibold">Memoria y puzzles sin reloj</p>
         </button>
 
-        <!-- 6. Paradero de los Amigos (Idiomas) -->
         <button onclick="openView('view-paradero')" class="kid-btn bg-indigo-400 hover:bg-indigo-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
           <span class="text-6xl mb-2">🚌</span>
           <h2 class="text-2xl font-bold">Paradero Amigos</h2>
           <p class="text-sm text-indigo-100 font-semibold">Max, Bia, Léa y Xiao Lin</p>
         </button>
 
-        <!-- 7. Mi Casita (Personaje Inclusivo y Pegatinas) -->
         <button onclick="openView('view-casita')" class="kid-btn bg-orange-400 hover:bg-orange-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
           <span class="text-6xl mb-2">🏠</span>
           <h2 class="text-2xl font-bold">Mi Casita</h2>
           <p class="text-sm text-orange-100 font-semibold">Tu personaje inclusivo y pegatinas</p>
         </button>
 
-        <!-- 8. Árbol del Saber y Juguemos Juntos -->
         <button onclick="openKnowledgeTree()" class="kid-btn bg-pink-400 hover:bg-pink-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
           <span class="text-6xl mb-2">🌳</span>
           <h2 class="text-2xl font-bold">Árbol del Saber</h2>
@@ -295,9 +262,7 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         MODULO 1: LA ESCUELITA (Ayuda en Escalera + Emilia se equivoca a propósito)
-         ========================================== -->
+    <!-- MODULO 1: LA ESCUELITA -->
     <section id="view-escuelita" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-rose-400">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div class="flex items-center gap-3">
@@ -317,7 +282,6 @@
         </div>
       </div>
 
-      <!-- Indicador visual de la Escalera de Ayuda -->
       <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 mb-5 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-bold text-amber-900">
         <span>🪜 Escalera de Ayuda activa:</span>
         <span id="ladder-step-1" class="px-2.5 py-1 rounded-full bg-white border">1. 5s sin tocar: Mano señala</span>
@@ -326,7 +290,6 @@
         <span id="ladder-step-4" class="px-2.5 py-1 rounded-full bg-white border">4. 3er error: Emilia muestra y tú repites</span>
       </div>
 
-      <!-- Pregunta Activa -->
       <div class="text-center my-6">
         <div class="inline-block bg-rose-100 border-4 border-rose-300 px-8 py-4 rounded-3xl mb-6">
           <p id="escuelita-question" class="text-2xl sm:text-3xl font-bold text-rose-950">
@@ -334,25 +297,20 @@
           </p>
         </div>
 
-        <!-- Opciones Gigantes con Mano de Emilia para inactividad -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto relative">
-          <!-- Opción Correcta -->
           <button id="btn-correct-option" onclick="answerEscuelita(true, this)" class="kid-btn bg-emerald-100 hover:bg-emerald-200 border-4 border-emerald-400 p-6 rounded-3xl flex flex-col items-center gap-2 relative">
             <span class="text-7xl">🐒</span>
             <span class="text-2xl font-bold text-emerald-950">Mono</span>
-            <!-- Mano de ayuda tras 5 segundos -->
             <div id="emilia-helping-hand" class="hidden absolute -bottom-6 -right-4 text-6xl hand-pointer pointer-events-none">
               👆🏽
             </div>
           </button>
 
-          <!-- Opción Distractor 1 -->
           <button onclick="answerEscuelita(false, this)" class="kid-btn bg-sky-100 hover:bg-sky-200 border-4 border-sky-300 p-6 rounded-3xl flex flex-col items-center gap-2">
             <span class="text-7xl">🌞</span>
             <span class="text-2xl font-bold text-sky-950">Sol</span>
           </button>
 
-          <!-- Opción Distractor 2 -->
           <button onclick="answerEscuelita(false, this)" class="kid-btn bg-purple-100 hover:bg-purple-200 border-4 border-purple-300 p-6 rounded-3xl flex flex-col items-center gap-2">
             <span class="text-7xl">🐻</span>
             <span class="text-2xl font-bold text-purple-950">Oso</span>
@@ -361,9 +319,7 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         MODULO 2: ALMACÉN DE DOÑA ROSA Y JUEGOS DE ROL (Imán generoso)
-         ========================================== -->
+    <!-- MODULO 2: ALMACÉN DE DOÑA ROSA -->
     <section id="view-almacen" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-amber-400">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div class="flex items-center gap-3">
@@ -381,18 +337,16 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center my-4">
-        <!-- Estante de objetos -->
         <div class="bg-amber-50 p-5 rounded-3xl border-4 border-amber-200">
           <h3 id="roleplay-prompt" class="text-xl font-bold text-amber-950 mb-4">👵🏽 Doña Rosa: "¿Me ayudas a poner 3 frutas ricas en la canasta?"</h3>
           <div id="roleplay-items" class="grid grid-cols-2 gap-4">
-            <button onclick="magnetDropItem(this, '🍎 Manzana roja')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-4xl flex items-center justify-center gap-2 font-bold text-lg">🍎 Manzana</button>
-            <button onclick="magnetDropItem(this, '🍌 Plátano dulce')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-4xl flex items-center justify-center gap-2 font-bold text-lg">🍌 Plátano</button>
-            <button onclick="magnetDropItem(this, '🍐 Pera jugosa')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-4xl flex items-center justify-center gap-2 font-bold text-lg">🍐 Pera</button>
-            <button onclick="magnetDropItem(this, '🍊 Naranja')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-4xl flex items-center justify-center gap-2 font-bold text-lg">🍊 Naranja</button>
+            <button onclick="magnetDropItem(this, '🍎')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl flex items-center justify-center gap-2 font-bold">🍎 Manzana</button>
+            <button onclick="magnetDropItem(this, '🍌')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl flex items-center justify-center gap-2 font-bold">🍌 Plátano</button>
+            <button onclick="magnetDropItem(this, '🍐')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl flex items-center justify-center gap-2 font-bold">🍐 Pera</button>
+            <button onclick="magnetDropItem(this, '🍊')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl flex items-center justify-center gap-2 font-bold">🍊 Naranja</button>
           </div>
         </div>
 
-        <!-- Canasta / Destino con imán generoso -->
         <div class="bg-emerald-50 p-6 rounded-3xl border-4 border-dashed border-emerald-400 text-center flex flex-col items-center justify-center min-h-[220px]">
           <div id="roleplay-target-icon" class="text-7xl mb-2">🧺</div>
           <p class="font-bold text-emerald-950 text-lg">Zona con Imán Automático</p>
@@ -401,9 +355,7 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         MODULO 3: TALLER DE ARTE (Con Modo Zurdo / Diestro)
-         ========================================== -->
+    <!-- MODULO 3: TALLER DE ARTE -->
     <section id="view-arte" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-purple-400">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div class="flex items-center gap-3">
@@ -426,14 +378,11 @@
         </div>
       </div>
 
-      <!-- Contenedor flexible que invierte orden en Modo Zurdo -->
       <div id="art-workspace" class="flex flex-col md:flex-row gap-4 items-center">
-        <!-- Lienzo -->
         <div class="flex-1 w-full bg-amber-50 rounded-3xl border-4 border-purple-300 overflow-hidden shadow-inner flex justify-center">
           <canvas id="art-canvas" width="600" height="320" class="bg-white cursor-crosshair touch-none w-full max-w-[600px]"></canvas>
         </div>
 
-        <!-- Paleta de Colores y Estampas (Se mueve a la izquierda para zurdos) -->
         <div class="w-full md:w-48 bg-purple-50 p-4 rounded-3xl border-2 border-purple-200 flex flex-row md:flex-col flex-wrap gap-3 justify-center">
           <button onclick="setBrushColor('#ef4444')" class="w-12 h-12 rounded-full bg-red-500 border-4 border-white shadow-md"></button>
           <button onclick="setBrushColor('#f59e0b')" class="w-12 h-12 rounded-full bg-amber-500 border-4 border-white shadow-md"></button>
@@ -446,9 +395,7 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         MODULO 4: GRANJA DE DON PEDRO Y BOSQUE NATIVO
-         ========================================== -->
+    <!-- MODULO 4: GRANJA DE DON PEDRO -->
     <section id="view-granja" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-emerald-500">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
@@ -481,9 +428,7 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         MODULO 5: PLAZA DE JUEGOS (Memoria sin temporizador)
-         ========================================== -->
+    <!-- MODULO 5: PLAZA DE JUEGOS -->
     <section id="view-plaza" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-sky-400 text-center">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
@@ -499,9 +444,7 @@
       <div id="memory-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-4 max-w-3xl mx-auto my-6"></div>
     </section>
 
-    <!-- ==========================================
-         MODULO 6: PARADERO DE LOS AMIGOS (Idiomas + "Repite Conmigo" sin guardar voz)
-         ========================================== -->
+    <!-- MODULO 6: PARADERO DE LOS AMIGOS -->
     <section id="view-paradero" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-indigo-400">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
@@ -539,7 +482,6 @@
         </button>
       </div>
 
-      <!-- Actividad "Repite Conmigo" (Privacidad total: sin guardar audio) -->
       <div class="bg-indigo-50 p-4 rounded-2xl border-2 border-indigo-200 flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
         <div>
           <h4 class="font-bold text-indigo-950 text-lg">🎙️ "Repite Conmigo" (Privacidad Infantil)</h4>
@@ -551,12 +493,9 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         MODULO 7: MI CASITA (Creador de Personaje Inclusivo + Pegatinas)
-         ========================================== -->
+    <!-- MODULO 7: MI CASITA -->
     <section id="view-casita" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-orange-400">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Creador Inclusivo -->
         <div class="bg-orange-50 p-5 rounded-3xl border-2 border-orange-200 text-center">
           <h2 class="text-2xl font-bold text-orange-950 mb-2">🏠 Así soy yo</h2>
           <p class="text-sm text-orange-800 mb-4">Personaliza tu personaje con lentes, audífonos o silla de ruedas:</p>
@@ -581,7 +520,6 @@
           </div>
         </div>
 
-        <!-- Álbum de Pegatinas Ganadas Jugando -->
         <div class="bg-amber-50 p-5 rounded-3xl border-2 border-amber-200">
           <h3 class="text-2xl font-bold text-amber-950 mb-2">🌟 Mis Pegatinas del Barrio</h3>
           <p class="text-sm text-amber-800 mb-4">Cada esfuerzo hace crecer tu colección:</p>
@@ -594,12 +532,9 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         MODULO 8: ÁRBOL DEL SABER + MODO "JUGUEMOS JUNTOS" + TABLA DE EVOLUCIÓN
-         ========================================== -->
+    <!-- MODULO 8: ÁRBOL DEL SABER -->
     <section id="view-arbol" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-pink-400">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-        <!-- El Árbol Visual para el Niño -->
         <div class="bg-gradient-to-b from-sky-100 to-emerald-100 p-6 rounded-3xl border-4 border-pink-300 text-center relative">
           <h2 class="text-2xl font-bold text-pink-950">🌳 El Árbol del Saber</h2>
           <p class="text-sm font-semibold text-pink-800 mb-4">Cada habilidad que aprendes hace brotar una flor nueva</p>
@@ -618,7 +553,6 @@
           </div>
         </div>
 
-        <!-- Panel "Juguemos Juntos" (Niño + Adulto) y Tabla de Transformación -->
         <div class="space-y-4">
           <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-300">
             <h3 class="text-lg font-bold text-amber-950">👨‍👩‍👧 Modo "Juguemos Juntos" (Para la Familia)</h3>
@@ -642,9 +576,7 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         VISTA 5: DESPEDIDA CON RETO FUERA DE LA PANTALLA (Paso 5 de Sesión)
-         ========================================== -->
+    <!-- VISTA 5: DESPEDIDA -->
     <section id="view-farewell" class="hidden w-full bg-indigo-950 text-white rounded-3xl p-8 shadow-2xl border-4 border-indigo-400 text-center">
       <div class="text-7xl mb-3">🌙👧🏽🦌</div>
       <h2 class="text-3xl font-bold text-amber-300 mb-2">¡Hoy aprendiste la M de Mono!</h2>
@@ -652,7 +584,6 @@
         Emilia y Tito ya tienen sueño y se van a descansar. Te ganaste la pegatina del día: <span class="text-4xl">🏅🐒</span>
       </p>
 
-      <!-- Reto Fuera de la Pantalla -->
       <div class="bg-indigo-900/90 border-4 border-amber-400 rounded-3xl p-6 max-w-xl mx-auto mb-6">
         <span class="bg-amber-400 text-amber-950 text-xs font-bold px-3 py-1 rounded-full uppercase">🏡 Reto fuera de la pantalla</span>
         <p class="text-2xl font-bold text-white mt-3">
@@ -668,9 +599,7 @@
 
   </main>
 
-  <!-- ==========================================
-       MODAL: RINCÓN DE LA CALMA CON TITO EL PUDÚ
-       ========================================== -->
+  <!-- MODAL: RINCÓN DE LA CALMA CON TITO -->
   <div id="modal-tito-calm" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-teal-50 border-4 border-teal-400 rounded-3xl max-w-lg w-full p-6 text-center shadow-2xl">
       <h3 class="text-2xl font-bold text-teal-950 mb-1">🌿 Rincón de la Calma con Tito</h3>
@@ -690,9 +619,7 @@
     </div>
   </div>
 
-  <!-- ==========================================
-       MODAL: CONFIGURACIÓN DE INCLUSIÓN, VOZ Y MODO SALA (JARDÍN)
-       ========================================== -->
+  <!-- MODAL: CONFIGURACIÓN DE INCLUSIÓN -->
   <div id="modal-accessibility" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white border-4 border-purple-400 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
@@ -736,12 +663,10 @@
     </div>
   </div>
 
-  <!-- PIE DE PÁGINA DE ÉTICA INFANTIL -->
   <footer class="relative z-20 text-center py-2 px-4 text-xs font-bold text-emerald-950 bg-emerald-300/70 backdrop-blur-sm">
     🛡️ Diseño Ético Infantil: Sin vidas ni castigos · Sin relojes que presionen · Sin rachas de culpa · Sin candados de pago · Funciona Offline
   </footer>
 
-  <!-- LÓGICA INTERACTIVA COMPLETA -->
   <script>
     let voiceRate = 0.95;
     let playStyle = 'guided';
@@ -1056,7 +981,12 @@
         };
       };
 
-      const start = (e) => { isDrawing = true; const p = getPos(e); artCtx.beginPath(); artCtx.moveTo(p.x, p.y); };
+      const start = (e) => {
+        isDrawing = true;
+        const p = getPos(e);
+        artCtx.beginPath();
+        artCtx.moveTo(p.x, p.y);
+      };
       const move = (e) => {
         if (!isDrawing) return;
         e.preventDefault();
