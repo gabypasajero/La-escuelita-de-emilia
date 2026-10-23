@@ -1,5 +1,5 @@
 export * from "./tipos";
-export { LETRAS } from "./contenido/letras";
+export { LETRAS, presentarLetra } from "./contenido/letras";
 export { NUMEROS, OBJETOS_PARA_CONTAR } from "./contenido/numeros";
 export { ANIMALES } from "./contenido/animales";
 export { PRODUCTOS, type Producto } from "./contenido/tienda";

@@ -34,6 +34,25 @@ export function rondaContar(
   };
 }
 
+/**
+ * Conciencia fonológica sin leer: "¿Cuál empieza con mmm?" y el niño elige
+ * entre dibujos. La H no participa porque no suena.
+ */
+export function rondaSonidoInicial(nivel: Nivel, azar: Aleatorio = Math.random): Ronda<Letra> {
+  const conSonido = LETRAS.filter((l) => l.sonido);
+  const correcta = elegir(conSonido, azar);
+  // Distractores con un sonido inicial distinto: C, K y Q suenan /k/; B y V, /b/; S, X y Z, /s/.
+  const distintos = conSonido.filter((l) => l === correcta || fonema(l) !== fonema(correcta));
+  return {
+    enunciado: `¿Cuál empieza con ${correcta.sonido}?`,
+    opciones: opcionesCon(correcta, distintos, OPCIONES_POR_NIVEL[nivel], azar),
+    correcta,
+  };
+}
+
+const MISMO_SONIDO: Record<string, string> = { C: "k", K: "k", Q: "k", B: "b", V: "b", S: "s", X: "s", Z: "s" };
+export const fonema = (l: Letra) => MISMO_SONIDO[l.letra] ?? l.letra;
+
 /** "¿Quién hace ¡Muuu!?" */
 export function rondaSonidoAnimal(nivel: Nivel, azar: Aleatorio = Math.random): Ronda<Animal> {
   const correcta = elegir(ANIMALES, azar);

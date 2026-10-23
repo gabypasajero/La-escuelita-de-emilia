@@ -3,6 +3,9 @@ import {
   ANIMALES,
   ESTADO_INICIAL,
   LETRAS,
+  presentarLetra,
+  rondaSonidoInicial,
+  fonema,
   type Ronda,
   calcularEstrellas,
   crearPuertaParental,
@@ -113,5 +116,29 @@ describe("puerta parental", () => {
     expect(puerta.pregunta).toBe("¿Cuánto es 3 × 3?");
     expect(puerta.verificar(" 9 ")).toBe(true);
     expect(puerta.verificar("6")).toBe(false);
+  });
+});
+
+describe("letras por sonido", () => {
+  it("cada letra tiene nombre, y sonido salvo la H", () => {
+    for (const l of LETRAS) {
+      expect(l.nombre).not.toBe("");
+      expect(l.sonido === "").toBe(l.letra === "H");
+    }
+  });
+
+  it("presenta la letra con nombre, sonido y palabra", () => {
+    expect(presentarLetra(LETRAS.find((l) => l.letra === "M")!)).toBe("Eme. Suena mmm. Mmm… mono.");
+    expect(presentarLetra(LETRAS.find((l) => l.letra === "H")!)).toContain("no suena");
+  });
+
+  it("en el juego de sonidos ninguna opción incorrecta suena igual que la correcta", () => {
+    const azar = semilla(11);
+    for (let i = 0; i < 300; i++) {
+      const r = rondaSonidoInicial(3, azar);
+      expect(r.opciones).toContain(r.correcta);
+      for (const o of r.opciones) if (o !== r.correcta) expect(fonema(o)).not.toBe(fonema(r.correcta));
+      expect(r.correcta.sonido).not.toBe("");
+    }
   });
 });

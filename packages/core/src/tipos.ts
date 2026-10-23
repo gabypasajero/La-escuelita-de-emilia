@@ -11,6 +11,14 @@ export interface Letra {
   palabra: string;
   emoji: string;
   esVocal: boolean;
+  /** Nombre de la letra ("eme"). */
+  nombre: string;
+  /**
+   * Cómo suena al inicio de la palabra, escrito para la voz: las letras que se
+   * pueden alargar se alargan ("mmm"); las demás, con su sílaba ("pa").
+   * Vacío para la H, que no suena.
+   */
+  sonido: string;
 }
 
 export interface Numero {
