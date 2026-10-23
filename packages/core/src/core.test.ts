@@ -11,6 +11,8 @@ import {
   rondaLetraInicial,
   rondaSonidoAnimal,
   tableroMemoria,
+  NIVELES_MEMORIA,
+  PAREJAS_POR_NIVEL,
 } from "./index";
 
 /** Generador determinista para tests reproducibles. */
@@ -57,12 +59,23 @@ describe("rondas", () => {
     for (let i = 0; i < 100; i++) expect(rondaContar(1, azar).cantidad).toBeLessThanOrEqual(3);
   });
 
-  it("el tablero de memoria tiene cada carta exactamente dos veces", () => {
-    const tablero = tableroMemoria(2, semilla(3));
-    expect(tablero).toHaveLength(8);
-    const conteo = new Map<string, number>();
-    for (const c of tablero) conteo.set(c.valor, (conteo.get(c.valor) ?? 0) + 1);
-    for (const n of conteo.values()) expect(n).toBe(2);
+  it("cada tablero de memoria tiene parejas completas en todos los temas y niveles", () => {
+    for (const tema of ["frutas", "animales", "letras", "numeros", "mezcla"] as const) {
+      for (let nivel = 1; nivel <= NIVELES_MEMORIA; nivel++) {
+        const tablero = tableroMemoria(nivel, tema, semilla(nivel * 7));
+        expect(tablero).toHaveLength(PAREJAS_POR_NIVEL[nivel - 1]! * 2);
+        const conteo = new Map<string, number>();
+        for (const c of tablero) conteo.set(c.par, (conteo.get(c.par) ?? 0) + 1);
+        for (const n of conteo.values()) expect(n).toBe(2);
+      }
+    }
+  });
+
+  it("en letras la pareja es la letra con su dibujo", () => {
+    const tablero = tableroMemoria(1, "letras", semilla(5));
+    const par = tablero.filter((c) => c.par === tablero[0]!.par);
+    const letra = LETRAS.find((l) => l.letra === par[0]!.par)!;
+    expect(par.map((c) => c.cara).sort()).toEqual([letra.letra, letra.emoji].sort());
   });
 });
 
