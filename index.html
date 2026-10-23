@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>El Barrio Mágico de Emilia 🌟</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Fredoka', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      overflow-x: hidden;
+      transition: background 0.8s ease;
+    }
+    body.high-contrast {
+      filter: contrast(1.35) saturate(1.2);
+    }
+    body.reduced-motion * {
+      animation: none !important;
+      transition: none !important;
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.8), 0 0 25px 8px rgba(250, 204, 21, 0.6); transform: scale(1.06); }
+      50% { box-shadow: 0 0 0 12px rgba(250, 204, 21, 0), 0 0 35px 14px rgba(250, 204, 21, 0.9); transform: scale(1.12); }
+    }
+    @keyframes breatheCircle {
+      0%, 100% { transform: scale(1); background-color: #93c5fd; }
+      50% { transform: scale(1.65); background-color: #6ee7b7; }
+    }
+    @keyframes handPoint {
+      0%, 100% { transform: translate(0, 0) rotate(-15deg); }
+      50% { transform: translate(-8px, -12px) rotate(-5deg); }
+    }
+    .float-anim { animation: floatSlow 3.5s ease-in-out infinite; }
+    .glow-help { animation: pulseGlow 1.5s infinite; border-color: #facc15 !important; }
+    .breathe-anim { animation: breatheCircle 6s ease-in-out infinite; }
+    .hand-pointer { animation: handPoint 1s ease-in-out infinite; }
+    .kid-btn {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+      box-shadow: 0 8px 0 rgba(0,0,0,0.18);
+    }
+    .kid-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.18);
+    }
+    .andes-bg {
+      background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 65%, #bbf7d0 100%);
+    }
+    .andes-night {
+      background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 65%, #064e3b 100%);
+      color: #f8fafc;
+    }
+  </style>
+</head>
+<body id="app-body" class="andes-bg min-h-screen flex flex-col justify-between relative">
+
+  <!-- FONDO ILUSTRADO: Cordillera de los Andes, Araucarias y Nubes Interactivas -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <button onclick="toggleDayNight()" class="pointer-events-auto absolute top-5 right-64 text-6xl transform hover:scale-110 transition cursor-pointer z-20" title="Cambiar Día / Noche">
+      <span id="sky-celestial">☀️</span>
+    </button>
+
+    <div onclick="touchSurprise(this, '🌧️ ¡Gotitas frescas!')" class="pointer-events-auto cursor-pointer absolute top-10 left-1/4 text-5xl opacity-85 float-anim">☁️</div>
+    <div onclick="touchSurprise(this, '🦅 ¡Un cóndor saludando!')" class="pointer-events-auto cursor-pointer absolute top-16 left-2/3 text-4xl opacity-90 float-anim" style="animation-delay: 1.2s;">🦅</div>
+    <div id="september-kites" class="hidden">
+      <div onclick="touchSurprise(this, '🪁 ¡A la chilena! ¡Tikitikiti!')" class="pointer-events-auto cursor-pointer absolute top-24 left-1/3 text-5xl float-anim">🪁</div>
+      <div onclick="touchSurprise(this, '🪁 ¡Volantín chupete!')" class="pointer-events-auto cursor-pointer absolute top-12 right-1/3 text-5xl float-anim" style="animation-delay: 0.7s;">🪁</div>
+    </div>
+
+    <svg class="absolute bottom-24 w-full h-56 opacity-90" viewBox="0 0 1440 320" preserveAspectRatio="none">
+      <polygon fill="#64748b" points="0,320 220,90 450,260 720,40 1020,240 1260,70 1440,220 1440,320"/>
+      <polygon fill="#f8fafc" points="220,90 175,148 220,135 265,148"/>
+      <polygon fill="#f8fafc" points="720,40 660,120 705,105 720,125 745,100 780,120"/>
+      <polygon fill="#f8fafc" points="1260,70 1210,135 1260,120 1310,135"/>
+      <path fill="#4ade80" d="M0,260 Q360,180 720,250 T1440,230 L1440,320 L0,320 Z"/>
+      <path fill="#22c55e" d="M0,285 Q400,230 850,280 T1440,265 L1440,320 L0,320 Z"/>
+    </svg>
+    <div class="absolute bottom-0 w-full h-28 bg-emerald-500"></div>
+  </div>
+
+  <!-- BARRA SUPERIOR SIEMPRE VISIBLE -->
+  <header class="relative z-30 flex items-center justify-between px-4 py-3 bg-white/85 backdrop-blur-md shadow-md border-b-4 border-amber-300">
+    <div class="flex items-center gap-3">
+      <button onclick="goHomeMap()" class="kid-btn bg-amber-400 hover:bg-amber-300 text-amber-950 px-5 py-3 rounded-3xl flex items-center gap-2 text-2xl font-bold border-4 border-white" aria-label="Ir al Mapa del Barrio">
+        🏠 <span class="hidden sm:inline text-lg">El Barrio</span>
+      </button>
+
+      <button onclick="openTitoCalm()" class="kid-btn bg-teal-400 hover:bg-teal-300 text-teal-950 px-4 py-3 rounded-3xl flex items-center gap-2 text-2xl font-bold border-4 border-white" aria-label="Rincón de la Calma con Tito">
+        🦌 <span class="hidden md:inline text-base">Calma con Tito</span>
+      </button>
+
+      <button onclick="openKnowledgeTree()" class="kid-btn bg-pink-400 hover:bg-pink-300 text-pink-950 px-4 py-3 rounded-3xl flex items-center gap-2 text-2xl font-bold border-4 border-white">
+        🌳 <span id="flower-counter" class="text-lg bg-white/90 px-2.5 py-0.5 rounded-full">🌸 3</span>
+      </button>
+    </div>
+
+    <div class="hidden lg:flex items-center gap-2 bg-amber-100/90 px-4 py-2 rounded-full border-2 border-amber-300">
+      <button onclick="setSessionStep(1)" id="step-dot-1" class="px-3 py-1 rounded-full text-sm font-bold bg-amber-400 text-amber-950">1. 👋 Saludo</button>
+      <span>➔</span>
+      <button onclick="setSessionStep(2)" id="step-dot-2" class="px-3 py-1 rounded-full text-sm font-bold bg-white text-slate-700">2. 🔁 Repaso</button>
+      <span>➔</span>
+      <button onclick="setSessionStep(3)" id="step-dot-3" class="px-3 py-1 rounded-full text-sm font-bold bg-white text-slate-700">3. 🌟 Lo Nuevo</button>
+      <span>➔</span>
+      <button onclick="setSessionStep(4)" id="step-dot-4" class="px-3 py-1 rounded-full text-sm font-bold bg-white text-slate-700">4. 🎨 Tú Eliges</button>
+      <span>➔</span>
+      <button onclick="setSessionStep(5)" id="step-dot-5" class="px-3 py-1 rounded-full text-sm font-bold bg-white text-slate-700">5. 🌙 Despedida</button>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="triggerGentleEnd()" class="kid-btn bg-indigo-500 hover:bg-indigo-400 text-white px-3 py-2.5 rounded-2xl text-sm font-bold border-2 border-white" title="Simular aviso suave de término de sesión">
+        ⏳ Aviso Suave
+      </button>
+      <button onclick="toggleAccessibilityModal()" class="kid-btn bg-purple-500 hover:bg-purple-400 text-white px-4 py-2.5 rounded-2xl text-xl font-bold border-2 border-white" title="Inclusión, Sonido y Modo Sala">
+        ⚙️♿
+      </button>
+    </div>
+  </header>
+
+  <!-- GUÍA FLOTANTE: EMILIA (6 años) Y TITO EL PUDÚ -->
+  <div class="relative z-20 max-w-5xl mx-auto w-full px-4 mt-3">
+    <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-xl border-4 border-amber-400 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div onclick="speakCurrentDialogue()" class="cursor-pointer relative flex -space-x-3 items-end group">
+          <div class="w-20 h-20 rounded-full bg-amber-200 border-4 border-amber-500 flex items-center justify-center text-5xl shadow-md group-hover:scale-105 transition">
+            👧🏽
+          </div>
+          <div onclick="event.stopPropagation(); openTitoCalm();" class="w-14 h-14 rounded-full bg-emerald-200 border-4 border-emerald-500 flex items-center justify-center text-3xl shadow-md hover:scale-110 transition" title="Tito el Pudú">
+            🦌
+          </div>
+          <span class="absolute -top-2 -left-2 bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">🔊 Tócame</span>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-amber-900 text-lg">Emilia y Tito</span>
+            <span id="play-mode-badge" class="bg-sky-100 text-sky-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-sky-300">🚶🏽‍♀️ Paseo con Emilia (3-4 años)</span>
+            <span id="classroom-turn-badge" class="hidden bg-purple-100 text-purple-900 text-xs font-bold px-2.5 py-0.5 rounded-full border border-purple-400">🏫 Modo Sala: Turno Niño 1</span>
+          </div>
+          <p id="emilia-subtitle" class="text-slate-800 text-xl sm:text-2xl font-bold mt-1 leading-snug">
+            ¡Hola! Qué lindo verte en el barrio. ¿Cómo se siente tu corazón hoy?
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="openView('view-casita')" class="kid-btn bg-amber-100 hover:bg-amber-200 px-3 py-2 rounded-2xl border-2 border-amber-400 flex items-center gap-2">
+          <span id="kid-avatar-top" class="text-3xl">🧒🏻👓</span>
+          <span id="kid-name-top" class="font-bold text-amber-950 text-sm">Mi Personaje</span>
+        </button>
+        <button onclick="togglePlayStyle()" class="kid-btn bg-sky-500 hover:bg-sky-400 text-white px-3 py-2 rounded-2xl text-xs font-bold border-2 border-white">
+          🔄 Cambiar Modo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL DE VISTAS -->
+  <main class="relative z-20 flex-1 max-w-6xl w-full mx-auto px-4 py-4 flex items-center justify-center">
+
+    <!-- VISTA 1: SALUDO EMOCIONAL -->
+    <section id="view-checkin" class="w-full bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-sky-300 text-center">
+      <h1 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-2">👋 ¡Bienvenido a la Escuelita Mágica!</h1>
+      <p class="text-lg text-slate-600 mb-6">Toca la carita que muestra cómo te sientes hoy:</p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-5 max-w-4xl mx-auto">
+        <button onclick="selectEmotion('happy')" class="kid-btn bg-yellow-300 hover:bg-yellow-200 p-6 rounded-3xl border-4 border-white flex flex-col items-center gap-3">
+          <span class="text-7xl">😊</span>
+          <span class="text-2xl font-bold text-amber-950">Feliz</span>
+        </button>
+
+        <button onclick="selectEmotion('calm')" class="kid-btn bg-emerald-300 hover:bg-emerald-200 p-6 rounded-3xl border-4 border-white flex flex-col items-center gap-3">
+          <span class="text-7xl">😌</span>
+          <span class="text-2xl font-bold text-emerald-950">Tranquilo</span>
+        </button>
+
+        <button onclick="selectEmotion('sad')" class="kid-btn bg-sky-300 hover:bg-sky-200 p-6 rounded-3xl border-4 border-white flex flex-col items-center gap-3">
+          <span class="text-7xl">😢</span>
+          <span class="text-2xl font-bold text-sky-950">Triste</span>
+        </button>
+
+        <button onclick="selectEmotion('angry')" class="kid-btn bg-rose-300 hover:bg-rose-200 p-6 rounded-3xl border-4 border-white flex flex-col items-center gap-3">
+          <span class="text-7xl">😠</span>
+          <span class="text-2xl font-bold text-rose-950">Enojado</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- VISTA 2: EL MAPA DEL BARRIO -->
+    <section id="view-map" class="hidden w-full">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3 bg-white/80 px-4 py-2 rounded-2xl border-2 border-emerald-300">
+        <div class="flex items-center gap-2 text-sm font-bold text-emerald-950">
+          <span>🌲 Barrio estilo Valparaíso y Sur de Chile</span>
+          <span class="text-xs bg-amber-200 px-2 py-0.5 rounded-full">🔓 Todo se abre jugando, nunca pagando</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleSeptemberParty()" class="bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">
+            🪁 Fiesta Septiembre (Volantines)
+          </button>
+          <button onclick="playFolkChord()" class="bg-amber-500 hover:bg-amber-400 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">
+            🪕 Acorde Ukelele / Charango
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button onclick="openEscuelita()" id="map-card-escuelita" class="kid-btn bg-rose-400 hover:bg-rose-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center relative">
+          <span id="recommend-badge-escuelita" class="absolute -top-3 bg-yellow-300 text-amber-950 text-xs font-bold px-3 py-1 rounded-full border-2 border-white shadow">🌟 Paso del Paseo</span>
+          <span class="text-6xl mb-2">🏫</span>
+          <h2 class="text-2xl font-bold">La Escuelita</h2>
+          <p class="text-sm text-rose-100 font-semibold">Letras, números y ayudar a Emilia</p>
+        </button>
+
+        <button onclick="openView('view-almacen')" class="kid-btn bg-amber-400 hover:bg-amber-300 text-amber-950 p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
+          <span class="text-6xl mb-2">🛒</span>
+          <h2 class="text-2xl font-bold">Almacén Doña Rosa</h2>
+          <p class="text-sm text-amber-900 font-semibold">Cocina, Veterinaria Dr. Lucas y Huerto</p>
+        </button>
+
+        <button onclick="openView('view-arte')" class="kid-btn bg-purple-400 hover:bg-purple-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
+          <span class="text-6xl mb-2">🎨</span>
+          <h2 class="text-2xl font-bold">Taller de Arte</h2>
+          <p class="text-sm text-purple-100 font-semibold">Pintar libre (Diestro / Zurdo)</p>
+        </button>
+
+        <button onclick="openView('view-granja')" class="kid-btn bg-emerald-500 hover:bg-emerald-400 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
+          <span class="text-6xl mb-2">🐄</span>
+          <h2 class="text-2xl font-bold">Granja y Bosque</h2>
+          <p class="text-sm text-emerald-100 font-semibold">Don Pedro y Fauna Nativa Chilena</p>
+        </button>
+
+        <button onclick="openPlaza()" class="kid-btn bg-sky-400 hover:bg-sky-300 text-sky-950 p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
+          <span class="text-6xl mb-2">🎠</span>
+          <h2 class="text-2xl font-bold">Plaza de Juegos</h2>
+          <p class="text-sm text-sky-900 font-semibold">Memoria y puzzles sin reloj</p>
+        </button>
+
+        <button onclick="openView('view-paradero')" class="kid-btn bg-indigo-400 hover:bg-indigo-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
+          <span class="text-6xl mb-2">🚌</span>
+          <h2 class="text-2xl font-bold">Paradero Amigos</h2>
+          <p class="text-sm text-indigo-100 font-semibold">Max, Bia, Léa y Xiao Lin</p>
+        </button>
+
+        <button onclick="openView('view-casita')" class="kid-btn bg-orange-400 hover:bg-orange-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
+          <span class="text-6xl mb-2">🏠</span>
+          <h2 class="text-2xl font-bold">Mi Casita</h2>
+          <p class="text-sm text-orange-100 font-semibold">Tu personaje inclusivo y pegatinas</p>
+        </button>
+
+        <button onclick="openKnowledgeTree()" class="kid-btn bg-pink-400 hover:bg-pink-300 text-white p-5 rounded-3xl border-4 border-white flex flex-col items-center text-center">
+          <span class="text-6xl mb-2">🌳</span>
+          <h2 class="text-2xl font-bold">Árbol del Saber</h2>
+          <p class="text-sm text-pink-100 font-semibold">Tus flores y modo Juguemos Juntos</p>
+        </button>
+      </div>
+    </section>
+
+    <!-- MODULO 1: LA ESCUELITA -->
+    <section id="view-escuelita" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-rose-400">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-3">
+          <span class="text-4xl">🏫</span>
+          <div>
+            <h2 class="text-2xl font-bold text-rose-900">La Escuelita de Emilia</h2>
+            <p id="escuelita-mode-label" class="text-sm font-bold text-rose-600">Nivel con Ayuda en Escalera (4 niveles sin frustración)</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="triggerEmiliaMistakeMode()" class="kid-btn bg-amber-300 hover:bg-amber-200 text-amber-950 px-4 py-2 rounded-2xl text-sm font-bold border-2 border-amber-500">
+            🤭 Modo: "¡Emilia se equivocó, corrígela!"
+          </button>
+          <button onclick="goHomeMap()" class="kid-btn bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-2xl text-sm font-bold">
+            ⬅️ Volver al Barrio
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 mb-5 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-bold text-amber-900">
+        <span>🪜 Escalera de Ayuda activa:</span>
+        <span id="ladder-step-1" class="px-2.5 py-1 rounded-full bg-white border">1. 5s sin tocar: Mano señala</span>
+        <span id="ladder-step-2" class="px-2.5 py-1 rounded-full bg-white border">2. 1er error: "¡Casi!" sin buzzer</span>
+        <span id="ladder-step-3" class="px-2.5 py-1 rounded-full bg-white border">3. 2do error: Respuesta brilla</span>
+        <span id="ladder-step-4" class="px-2.5 py-1 rounded-full bg-white border">4. 3er error: Emilia muestra y tú repites</span>
+      </div>
+
+      <div class="text-center my-6">
+        <div class="inline-block bg-rose-100 border-4 border-rose-300 px-8 py-4 rounded-3xl mb-6">
+          <p id="escuelita-question" class="text-2xl sm:text-3xl font-bold text-rose-950">
+            ¿Cuál de estos amigos empieza con la letra <span class="text-4xl text-rose-600 underline">M</span>?
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto relative">
+          <button id="btn-correct-option" onclick="answerEscuelita(true, this)" class="kid-btn bg-emerald-100 hover:bg-emerald-200 border-4 border-emerald-400 p-6 rounded-3xl flex flex-col items-center gap-2 relative">
+            <span class="text-7xl">🐒</span>
+            <span class="text-2xl font-bold text-emerald-950">Mono</span>
+            <div id="emilia-helping-hand" class="hidden absolute -bottom-6 -right-4 text-6xl hand-pointer pointer-events-none">
+              👆🏽
+            </div>
+          </button>
+
+          <button onclick="answerEscuelita(false, this)" class="kid-btn bg-sky-100 hover:bg-sky-200 border-4 border-sky-300 p-6 rounded-3xl flex flex-col items-center gap-2">
+            <span class="text-7xl">🌞</span>
+            <span class="text-2xl font-bold text-sky-950">Sol</span>
+          </button>
+
+          <button onclick="answerEscuelita(false, this)" class="kid-btn bg-purple-100 hover:bg-purple-200 border-4 border-purple-300 p-6 rounded-3xl flex flex-col items-center gap-2">
+            <span class="text-7xl">🐻</span>
+            <span class="text-2xl font-bold text-purple-950">Oso</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULO 2: ALMACÉN DE DOÑA ROSA -->
+    <section id="view-almacen" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-amber-400">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-3">
+          <span class="text-5xl">👵🏽🛒</span>
+          <div>
+            <h2 class="text-2xl font-bold text-amber-950">Almacén de Doña Rosa y Vecinos</h2>
+            <p class="text-sm font-semibold text-amber-800">Toca o acerca cada elemento: ¡se acomoda solito con imán amigable!</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="switchRoleplay('rosa')" class="kid-btn bg-amber-300 px-3 py-2 rounded-2xl text-sm font-bold">🛒 Doña Rosa</button>
+          <button onclick="switchRoleplay('lucas')" class="kid-btn bg-teal-300 px-3 py-2 rounded-2xl text-sm font-bold">🐾 Dr. Lucas (Vet)</button>
+          <button onclick="switchRoleplay('huerto')" class="kid-btn bg-lime-300 px-3 py-2 rounded-2xl text-sm font-bold">🌻 Huerto y Cocina</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center my-4">
+        <div class="bg-amber-50 p-5 rounded-3xl border-4 border-amber-200">
+          <h3 id="roleplay-prompt" class="text-xl font-bold text-amber-950 mb-4">👵🏽 Doña Rosa: "¿Me ayudas a poner 3 frutas ricas en la canasta?"</h3>
+          <div id="roleplay-items" class="grid grid-cols-2 gap-4">
+            <button onclick="magnetDropItem(this, '🍎')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl flex items-center justify-center gap-2 font-bold">🍎 Manzana</button>
+            <button onclick="magnetDropItem(this, '🍌')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl flex items-center justify-center gap-2 font-bold">🍌 Plátano</button>
+            <button onclick="magnetDropItem(this, '🍐')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl flex items-center justify-center gap-2 font-bold">🍐 Pera</button>
+            <button onclick="magnetDropItem(this, '🍊')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl flex items-center justify-center gap-2 font-bold">🍊 Naranja</button>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50 p-6 rounded-3xl border-4 border-dashed border-emerald-400 text-center flex flex-col items-center justify-center min-h-[220px]">
+          <div id="roleplay-target-icon" class="text-7xl mb-2">🧺</div>
+          <p class="font-bold text-emerald-950 text-lg">Zona con Imán Automático</p>
+          <div id="roleplay-basket" class="flex flex-wrap gap-3 mt-3 justify-center text-5xl"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULO 3: TALLER DE ARTE -->
+    <section id="view-arte" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-purple-400">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-3">
+          <span class="text-4xl">🎨</span>
+          <div>
+            <h2 class="text-2xl font-bold text-purple-950">Taller de Arte del Barrio</h2>
+            <p class="text-sm font-semibold text-purple-700">Dibuja para tu Casita. ¡Puedes poner tus herramientas a la izquierda o derecha!</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="toggleLeftHandedArt()" id="left-hand-btn" class="kid-btn bg-purple-200 hover:bg-purple-300 text-purple-950 px-4 py-2 rounded-2xl text-sm font-bold border-2 border-purple-400">
+            ✋ Modo Zurdo: Desactivado
+          </button>
+          <button onclick="clearArtCanvas()" class="kid-btn bg-rose-200 text-rose-900 px-4 py-2 rounded-2xl text-sm font-bold">
+            🧽 Limpiar
+          </button>
+          <button onclick="saveArtSticker()" class="kid-btn bg-emerald-400 text-emerald-950 px-4 py-2 rounded-2xl text-sm font-bold">
+            🌟 Guardar en Mi Casita
+          </button>
+        </div>
+      </div>
+
+      <div id="art-workspace" class="flex flex-col md:flex-row gap-4 items-center">
+        <div class="flex-1 w-full bg-amber-50 rounded-3xl border-4 border-purple-300 overflow-hidden shadow-inner flex justify-center">
+          <canvas id="art-canvas" width="600" height="320" class="bg-white cursor-crosshair touch-none w-full max-w-[600px]"></canvas>
+        </div>
+
+        <div class="w-full md:w-48 bg-purple-50 p-4 rounded-3xl border-2 border-purple-200 flex flex-row md:flex-col flex-wrap gap-3 justify-center">
+          <button onclick="setBrushColor('#ef4444')" class="w-12 h-12 rounded-full bg-red-500 border-4 border-white shadow-md"></button>
+          <button onclick="setBrushColor('#f59e0b')" class="w-12 h-12 rounded-full bg-amber-500 border-4 border-white shadow-md"></button>
+          <button onclick="setBrushColor('#10b981')" class="w-12 h-12 rounded-full bg-emerald-500 border-4 border-white shadow-md"></button>
+          <button onclick="setBrushColor('#3b82f6')" class="w-12 h-12 rounded-full bg-blue-500 border-4 border-white shadow-md"></button>
+          <button onclick="setBrushColor('#8b5cf6')" class="w-12 h-12 rounded-full bg-purple-500 border-4 border-white shadow-md"></button>
+          <button onclick="stampOnCanvas('🦌')" class="kid-btn bg-white px-3 py-2 rounded-2xl text-2xl border">🦌</button>
+          <button onclick="stampOnCanvas('🌸')" class="kid-btn bg-white px-3 py-2 rounded-2xl text-2xl border">🌸</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULO 4: GRANJA DE DON PEDRO -->
+    <section id="view-granja" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-emerald-500">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="text-5xl">👨🏽‍🌾🌲</span>
+          <div>
+            <h2 class="text-2xl font-bold text-emerald-950">Granja de Don Pedro y Bosque Chileno</h2>
+            <p class="text-sm font-semibold text-emerald-700">Toca cada animalito nativo para conocerlo y cuidarlo</p>
+          </div>
+        </div>
+        <button onclick="goHomeMap()" class="kid-btn bg-slate-200 px-4 py-2 rounded-2xl font-bold">⬅️ Barrio</button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-4">
+        <button onclick="animalSound('Tito el Pudú', '🦌 ¡Piu, piu! El ciervo más pequeñito de los bosques del sur.')" class="kid-btn bg-emerald-100 p-5 rounded-3xl border-4 border-emerald-300 flex flex-col items-center gap-2">
+          <span class="text-6xl">🦌</span>
+          <span class="font-bold text-lg text-emerald-950">Pudú</span>
+        </button>
+        <button onclick="animalSound('El Cóndor', '🦅 ¡Vuela muy alto sobre la Cordillera de los Andes!')" class="kid-btn bg-sky-100 p-5 rounded-3xl border-4 border-sky-300 flex flex-col items-center gap-2">
+          <span class="text-6xl">🦅</span>
+          <span class="font-bold text-lg text-sky-950">Cóndor</span>
+        </button>
+        <button onclick="animalSound('La Chinchilla', '🐹 ¡Tiene el pelaje más suavecito de las montañas!')" class="kid-btn bg-amber-100 p-5 rounded-3xl border-4 border-amber-300 flex flex-col items-center gap-2">
+          <span class="text-6xl">🐹</span>
+          <span class="font-bold text-lg text-amber-950">Chinchilla</span>
+        </button>
+        <button onclick="animalSound('El Flamenco', '🦩 ¡Vive en las lagunas del norte y come de cabeza!')" class="kid-btn bg-pink-100 p-5 rounded-3xl border-4 border-pink-300 flex flex-col items-center gap-2">
+          <span class="text-6xl">🦩</span>
+          <span class="font-bold text-lg text-pink-950">Flamenco</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- MODULO 5: PLAZA DE JUEGOS -->
+    <section id="view-plaza" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-sky-400 text-center">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="text-4xl">🎠</span>
+          <div class="text-left">
+            <h2 class="text-2xl font-bold text-sky-950">Plaza de Juegos: Memoria Calma</h2>
+            <p class="text-sm font-semibold text-sky-700">Sin relojes que apuren ni pantallas de perder. ¡A tu propio ritmo!</p>
+          </div>
+        </div>
+        <button onclick="initMemoryGame()" class="kid-btn bg-sky-200 text-sky-900 px-4 py-2 rounded-2xl font-bold">🔄 Jugar otra vez</button>
+      </div>
+
+      <div id="memory-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-4 max-w-3xl mx-auto my-6"></div>
+    </section>
+
+    <!-- MODULO 6: PARADERO DE LOS AMIGOS -->
+    <section id="view-paradero" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-indigo-400">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="text-4xl">🚌🌍</span>
+          <div>
+            <h2 class="text-2xl font-bold text-indigo-950">Paradero de los Amigos del Mundo</h2>
+            <p class="text-sm font-semibold text-indigo-700">Saluda a los amigos de Emilia y juega a "Repite Conmigo"</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 my-4">
+        <button onclick="friendSpeak('Max', 'Hello friend! Let\'s play together!', 'en-US')" class="kid-btn bg-blue-100 p-5 rounded-3xl border-4 border-blue-300 flex flex-col items-center">
+          <span class="text-6xl mb-2">👦🏼🇬🇧</span>
+          <h3 class="text-xl font-bold text-blue-950">Max (Inglés)</h3>
+          <p class="text-sm font-bold text-blue-700 mt-1">"Hello friend!"</p>
+        </button>
+
+        <button onclick="friendSpeak('Bia', 'Olá amigo! Vamos brincar!', 'pt-BR')" class="kid-btn bg-emerald-100 p-5 rounded-3xl border-4 border-emerald-300 flex flex-col items-center">
+          <span class="text-6xl mb-2">👧🏾🇧🇷</span>
+          <h3 class="text-xl font-bold text-emerald-950">Bia (Portugués)</h3>
+          <p class="text-sm font-bold text-emerald-700 mt-1">"Olá amigo!"</p>
+        </button>
+
+        <button onclick="friendSpeak('Léa', 'Bonjour! Tu es super!', 'fr-FR')" class="kid-btn bg-rose-100 p-5 rounded-3xl border-4 border-rose-300 flex flex-col items-center">
+          <span class="text-6xl mb-2">👧🏻🇫🇷</span>
+          <h3 class="text-xl font-bold text-rose-950">Léa (Francés)</h3>
+          <p class="text-sm font-bold text-rose-700 mt-1">"Bonjour!"</p>
+        </button>
+
+        <button onclick="friendSpeak('Xiao Lin', 'Nǐ hǎo! Vamos a aprender juntos!', 'zh-CN')" class="kid-btn bg-amber-100 p-5 rounded-3xl border-4 border-amber-300 flex flex-col items-center">
+          <span class="text-6xl mb-2">🧒🏻🇨🇳</span>
+          <h3 class="text-xl font-bold text-amber-950">Xiao Lin (Mandarín)</h3>
+          <p class="text-sm font-bold text-amber-700 mt-1">"Nǐ hǎo! (你好)"</p>
+        </button>
+      </div>
+
+      <div class="bg-indigo-50 p-4 rounded-2xl border-2 border-indigo-200 flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+        <div>
+          <h4 class="font-bold text-indigo-950 text-lg">🎙️ "Repite Conmigo" (Privacidad Infantil)</h4>
+          <p class="text-xs text-indigo-700 font-semibold">Dile "¡Hola!" en voz alta a nuestros amigos. Emilia celebra tu esfuerzo sin grabar ni guardar tu voz.</p>
+        </div>
+        <button onclick="simulateRepeatWithMe()" class="kid-btn bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold text-lg shrink-0">
+          🗣️ ¡Hablar ahora!
+        </button>
+      </div>
+    </section>
+
+    <!-- MODULO 7: MI CASITA -->
+    <section id="view-casita" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-orange-400">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-orange-50 p-5 rounded-3xl border-2 border-orange-200 text-center">
+          <h2 class="text-2xl font-bold text-orange-950 mb-2">🏠 Así soy yo</h2>
+          <p class="text-sm text-orange-800 mb-4">Personaliza tu personaje con lentes, audífonos o silla de ruedas:</p>
+
+          <div class="w-32 h-32 mx-auto rounded-full bg-white border-4 border-orange-400 flex items-center justify-center text-6xl shadow-md mb-4" id="casita-avatar-preview">
+            🧒🏻👓
+          </div>
+
+          <div class="flex flex-wrap justify-center gap-2 mb-4">
+            <button onclick="setBaseAvatar('🧒🏻')" class="kid-btn bg-white px-3 py-2 rounded-xl text-3xl border">🧒🏻</button>
+            <button onclick="setBaseAvatar('👧🏽')" class="kid-btn bg-white px-3 py-2 rounded-xl text-3xl border">👧🏽</button>
+            <button onclick="setBaseAvatar('👦🏾')" class="kid-btn bg-white px-3 py-2 rounded-xl text-3xl border">👦🏾</button>
+            <button onclick="setBaseAvatar('👧🏻')" class="kid-btn bg-white px-3 py-2 rounded-xl text-3xl border">👧🏻</button>
+          </div>
+
+          <p class="text-xs font-bold uppercase text-orange-900 mb-2">Opciones Inclusivas:</p>
+          <div class="flex flex-wrap justify-center gap-2">
+            <button onclick="setAccessory('👓')" class="kid-btn bg-amber-200 px-3 py-2 rounded-xl font-bold text-sm">👓 Lentes</button>
+            <button onclick="setAccessory('🎧')" class="kid-btn bg-teal-200 px-3 py-2 rounded-xl font-bold text-sm">🎧 Audífonos / Implante</button>
+            <button onclick="setAccessory('🦽')" class="kid-btn bg-sky-200 px-3 py-2 rounded-xl font-bold text-sm">🦽 Silla de Ruedas</button>
+            <button onclick="setAccessory('✨')" class="kid-btn bg-purple-200 px-3 py-2 rounded-xl font-bold text-sm">✨ Ninguno</button>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 p-5 rounded-3xl border-2 border-amber-200">
+          <h3 class="text-2xl font-bold text-amber-950 mb-2">🌟 Mis Pegatinas del Barrio</h3>
+          <p class="text-sm text-amber-800 mb-4">Cada esfuerzo hace crecer tu colección:</p>
+          <div id="sticker-album" class="grid grid-cols-4 gap-3 text-4xl bg-white p-4 rounded-2xl border-2 border-amber-300 min-h-[160px] items-center justify-items-center">
+            <span title="Saludo del día">👋</span>
+            <span title="Amigo de Tito">🦌</span>
+            <span title="Letra M">🐒</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULO 8: ÁRBOL DEL SABER -->
+    <section id="view-arbol" class="hidden w-full bg-white/95 rounded-3xl p-6 shadow-2xl border-4 border-pink-400">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <div class="bg-gradient-to-b from-sky-100 to-emerald-100 p-6 rounded-3xl border-4 border-pink-300 text-center relative">
+          <h2 class="text-2xl font-bold text-pink-950">🌳 El Árbol del Saber</h2>
+          <p class="text-sm font-semibold text-pink-800 mb-4">Cada habilidad que aprendes hace brotar una flor nueva</p>
+
+          <div class="text-8xl my-4 relative inline-block">
+            🌳
+            <div id="tree-flowers-container" class="absolute inset-0 flex flex-wrap items-center justify-center gap-2 pointer-events-none text-3xl">
+              <span>🌸</span><span>🌺</span><span>🌻</span>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <button onclick="bloomNewFlower('🌟 ¡Creciste aprendiendo en el barrio!')" class="kid-btn bg-pink-500 text-white px-5 py-2.5 rounded-2xl font-bold">
+              🌸 Hacer brotar flor de prueba
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-300">
+            <h3 class="text-lg font-bold text-amber-950">👨‍👩‍👧 Modo "Juguemos Juntos" (Para la Familia)</h3>
+            <p class="text-sm text-amber-900 mt-1">
+              Este árbol es la traducción visual para el niño del informe familiar:
+              <strong>3 flores brotaron hoy</strong> (Reconocimiento emocional, Letra M con ayuda escalonada y Juego de rol con Doña Rosa).
+            </p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 text-xs sm:text-sm">
+            <h4 class="font-bold text-slate-800 mb-2">🗺️ Qué ya existía en la app ➔ En qué se convierte:</h4>
+            <ul class="space-y-1 text-slate-700 font-medium">
+              <li>• 5 burbujas sueltas ➔ <strong>Mapa vivo del Barrio de Emilia</strong></li>
+              <li>• Ejercicios de letras/números ➔ <strong>La Escuelita con Emilia (que a veces se equivoca)</strong></li>
+              <li>• Módulo Tiendita ➔ <strong>Almacén de Doña Rosa, Dr. Lucas y Huerto</strong></li>
+              <li>• Juego de Memoria ➔ <strong>Plaza de Juegos sin reloj ni presión</strong></li>
+              <li>• Idiomas ➔ <strong>Paradero con Max, Bia, Léa y Xiao Lin</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 5: DESPEDIDA -->
+    <section id="view-farewell" class="hidden w-full bg-indigo-950 text-white rounded-3xl p-8 shadow-2xl border-4 border-indigo-400 text-center">
+      <div class="text-7xl mb-3">🌙👧🏽🦌</div>
+      <h2 class="text-3xl font-bold text-amber-300 mb-2">¡Hoy aprendiste la M de Mono!</h2>
+      <p class="text-lg text-indigo-100 max-w-xl mx-auto mb-6">
+        Emilia y Tito ya tienen sueño y se van a descansar. Te ganaste la pegatina del día: <span class="text-4xl">🏅🐒</span>
+      </p>
+
+      <div class="bg-indigo-900/90 border-4 border-amber-400 rounded-3xl p-6 max-w-xl mx-auto mb-6">
+        <span class="bg-amber-400 text-amber-950 text-xs font-bold px-3 py-1 rounded-full uppercase">🏡 Reto fuera de la pantalla</span>
+        <p class="text-2xl font-bold text-white mt-3">
+          "¿Encuentras algo en tu casa que empiece con la letra M?"
+        </p>
+        <p class="text-sm text-indigo-200 mt-1">(Una mesa, una manzana, tus manos o mamá... ¡ve a buscarlo!)</p>
+      </div>
+
+      <button onclick="goHomeMap()" class="kid-btn bg-emerald-400 text-emerald-950 px-8 py-4 rounded-3xl text-xl font-bold">
+        ☀️ Empezar un nuevo día en el Barrio
+      </button>
+    </section>
+
+  </main>
+
+  <!-- MODAL: RINCÓN DE LA CALMA CON TITO -->
+  <div id="modal-tito-calm" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-teal-50 border-4 border-teal-400 rounded-3xl max-w-lg w-full p-6 text-center shadow-2xl">
+      <h3 class="text-2xl font-bold text-teal-950 mb-1">🌿 Rincón de la Calma con Tito</h3>
+      <p class="text-sm text-teal-800 mb-6">Tito no habla con palabras, pero te acompaña a respirar despacito. Sigue el círculo:</p>
+
+      <div class="my-10 flex items-center justify-center">
+        <div class="w-32 h-32 rounded-full breathe-anim flex items-center justify-center text-6xl shadow-inner border-4 border-white">
+          🦌
+        </div>
+      </div>
+
+      <p class="text-lg font-bold text-teal-900 mb-6">Inhala profundo... huele una flor 🌸... sopla una vela 🕯️</p>
+
+      <button onclick="closeTitoCalm()" class="kid-btn bg-teal-500 text-white px-8 py-3 rounded-2xl text-lg font-bold">
+        💚 ¡Ya me siento mejor!
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURACIÓN DE INCLUSIÓN -->
+  <div id="modal-accessibility" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white border-4 border-purple-400 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-2xl font-bold text-purple-950">♿ Inclusión y Modo Sala</h3>
+        <button onclick="toggleAccessibilityModal()" class="text-2xl font-bold text-slate-500">✖️</button>
+      </div>
+
+      <div class="space-y-3 text-sm font-bold text-slate-800">
+        <label class="flex items-center justify-between bg-slate-100 p-3 rounded-2xl cursor-pointer">
+          <span>👁️ Modo Alto Contraste</span>
+          <input type="checkbox" onchange="document.body.classList.toggle('high-contrast', this.checked)" class="w-6 h-6">
+        </label>
+
+        <label class="flex items-center justify-between bg-slate-100 p-3 rounded-2xl cursor-pointer">
+          <span>🐢 Modo con Menos Movimiento</span>
+          <input type="checkbox" onchange="document.body.classList.toggle('reduced-motion', this.checked)" class="w-6 h-6">
+        </label>
+
+        <div class="bg-slate-100 p-3 rounded-2xl flex items-center justify-between">
+          <span>🗣️ Velocidad de la voz de Emilia</span>
+          <select id="voice-speed-select" onchange="voiceRate = parseFloat(this.value)" class="bg-white border-2 border-purple-300 rounded-xl px-3 py-1 font-bold">
+            <option value="0.8">Despacito (0.8x)</option>
+            <option value="0.95" selected>Normal (1.0x)</option>
+            <option value="1.1">Alegre (1.1x)</option>
+          </select>
+        </div>
+
+        <label class="flex items-center justify-between bg-purple-100 p-3 rounded-2xl cursor-pointer border-2 border-purple-300">
+          <span>🏫 Modo Sala de Jardín (Turnos compartidos)</span>
+          <input type="checkbox" id="classroom-mode-toggle" onchange="toggleClassroomMode(this.checked)" class="w-6 h-6">
+        </label>
+
+        <div class="bg-amber-50 p-3 rounded-2xl border border-amber-300 text-xs text-amber-900">
+          🤟 <strong>Próximamente:</strong> Recuadro de Emilia en Lengua de Señas Chilena (LSCh).
+        </div>
+      </div>
+
+      <button onclick="toggleAccessibilityModal()" class="kid-btn w-full bg-purple-500 text-white py-3 rounded-2xl text-lg font-bold">
+        ✅ Listo
+      </button>
+    </div>
+  </div>
+
+  <footer class="relative z-20 text-center py-2 px-4 text-xs font-bold text-emerald-950 bg-emerald-300/70 backdrop-blur-sm">
+    🛡️ Diseño Ético Infantil: Sin vidas ni castigos · Sin relojes que presionen · Sin rachas de culpa · Sin candados de pago · Funciona Offline
+  </footer>
+
+  <script>
+    let voiceRate = 0.95;
+    let playStyle = 'guided';
+    let isNightMode = false;
+    let escuelitaErrorCount = 0;
+    let inactivityTimer = null;
+    let emiliaMistakeActive = false;
+    let flowerCount = 3;
+    let baseAvatar = '🧒🏻';
+    let avatarAccessory = '👓';
+    let classroomMode = false;
+    let currentClassroomTurn = 1;
+
+    function emiliaSay(text, lang = 'es-CL') {
+      const sub = document.getElementById('emilia-subtitle');
+      if (sub) sub.textContent = text;
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = lang;
+        utter.rate = voiceRate;
+        utter.pitch = 1.15;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    function speakCurrentDialogue() {
+      const text = document.getElementById('emilia-subtitle').textContent;
+      emiliaSay(text);
+    }
+
+    function playGentleNote(freq = 523.25, duration = 0.25) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playFolkChord() {
+      const notes = [392.00, 493.88, 587.33, 783.99];
+      notes.forEach((n, i) => setTimeout(() => playGentleNote(n, 0.35), i * 90));
+      emiliaSay('¡Escucha la música de nuestro barrio con ukelele, marimba y charango!');
+    }
+
+    function openView(viewId) {
+      clearTimeout(inactivityTimer);
+      const views = ['view-checkin', 'view-map', 'view-escuelita', 'view-almacen', 'view-arte', 'view-granja', 'view-plaza', 'view-paradero', 'view-casita', 'view-arbol', 'view-farewell'];
+      views.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById(viewId);
+      if (target) target.classList.remove('hidden');
+      playGentleNote(587.33, 0.2);
+    }
+
+    function goHomeMap() {
+      openView('view-map');
+      emiliaSay('Estamos en la plaza del barrio. ¿A dónde quieres ir a jugar ahora?');
+    }
+
+    function selectEmotion(emotion) {
+      if (emotion === 'sad' || emotion === 'angry') {
+        emiliaSay('Entiendo cómo te sientes. Tito el pudú quiere respirar contigo para sentirnos mejor.');
+        openTitoCalm();
+      } else {
+        emiliaSay('¡Qué alegría! Empecemos nuestro paseo por el barrio.');
+        setSessionStep(2);
+      }
+    }
+
+    function setSessionStep(step) {
+      for (let i = 1; i <= 5; i++) {
+        const dot = document.getElementById('step-dot-' + i);
+        if (dot) {
+          dot.className = (i === step)
+            ? 'px-3 py-1 rounded-full text-sm font-bold bg-amber-400 text-amber-950 shadow'
+            : 'px-3 py-1 rounded-full text-sm font-bold bg-white text-slate-700';
+        }
+      }
+      if (step === 1) {
+        openView('view-checkin');
+        emiliaSay('¡Hola! ¿Cómo te sientes hoy?');
+      } else if (step === 2) {
+        openEscuelita(true);
+      } else if (step === 3) {
+        openEscuelita(false);
+      } else if (step === 4) {
+        openView('view-map');
+        emiliaSay('¡Turno de juego libre! Tú eliges qué lugar del barrio visitar.');
+      } else if (step === 5) {
+        openView('view-farewell');
+        emiliaSay('¡Lo hiciste increíble hoy! Mira tu pegatina y el reto para buscar en tu casa.');
+      }
+    }
+
+    function openTitoCalm() {
+      document.getElementById('modal-tito-calm').classList.remove('hidden');
+      playGentleNote(440, 0.5);
+    }
+    function closeTitoCalm() {
+      document.getElementById('modal-tito-calm').classList.add('hidden');
+      openView('view-map');
+      emiliaSay('¡Gracias Tito! Ahora estamos tranquilos para recorrer el barrio.');
+    }
+
+    function toggleDayNight() {
+      isNightMode = !isNightMode;
+      const body = document.getElementById('app-body');
+      const sky = document.getElementById('sky-celestial');
+      if (isNightMode) {
+        body.classList.remove('andes-bg');
+        body.classList.add('andes-night');
+        sky.textContent = '🌙';
+        emiliaSay('Uaaah... ya salió la luna en la cordillera. ¿Leemos un cuento tranquilo antes de dormir?');
+      } else {
+        body.classList.remove('andes-night');
+        body.classList.add('andes-bg');
+        sky.textContent = '☀️';
+        emiliaSay('¡Salió el sol sobre los cerros del barrio!');
+      }
+    }
+
+    function toggleSeptemberParty() {
+      const kites = document.getElementById('september-kites');
+      kites.classList.toggle('hidden');
+      emiliaSay('¡Llegó septiembre al barrio! Mira cómo vuelan los volantines en el cielo.');
+    }
+
+    function touchSurprise(el, msg) {
+      playGentleNote(659.25, 0.2);
+      emiliaSay(msg);
+    }
+
+    function togglePlayStyle() {
+      const badge = document.getElementById('play-mode-badge');
+      const recBadge = document.getElementById('recommend-badge-escuelita');
+      if (playStyle === 'guided') {
+        playStyle = 'free';
+        badge.textContent = '🧭 Explorar el Barrio (5-6 años)';
+        if (recBadge) recBadge.classList.add('hidden');
+        emiliaSay('Modo Explorar el Barrio activado. ¡Puedes entrar libremente a cualquier lugar!');
+      } else {
+        playStyle = 'guided';
+        badge.textContent = '🚶🏽‍♀️ Paseo con Emilia (3-4 años)';
+        if (recBadge) recBadge.classList.remove('hidden');
+        emiliaSay('Modo Paseo con Emilia: yo te voy invitando paso a paso.');
+      }
+    }
+
+    function openEscuelita(isReview = false) {
+      openView('view-escuelita');
+      resetHelpLadder();
+      emiliaMistakeActive = false;
+      const q = document.getElementById('escuelita-question');
+      if (isReview) {
+        q.innerHTML = '🔁 Repaso fácil: ¿Cuál de estos amigos empieza con <span class="text-4xl text-rose-600 underline">M</span>?';
+        emiliaSay('Empecemos con algo que ya conoces muy bien. ¿Cuál empieza con M de Mono?');
+      } else {
+        q.innerHTML = '🌟 Lo nuevo: ¿Encuentras el animal que empieza con <span class="text-4xl text-rose-600 underline">M</span>?';
+        emiliaSay('¿Cuál de estos dibujos empieza con el sonido Mmmm?');
+      }
+      startInactivityTimer();
+    }
+
+    function resetHelpLadder() {
+      escuelitaErrorCount = 0;
+      document.getElementById('emilia-helping-hand').classList.add('hidden');
+      document.getElementById('btn-correct-option').classList.remove('glow-help');
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById('ladder-step-' + i).className = 'px-2.5 py-1 rounded-full bg-white border';
+      }
+    }
+
+    function highlightLadderBadge(step) {
+      const el = document.getElementById('ladder-step-' + step);
+      if (el) el.className = 'px-2.5 py-1 rounded-full bg-amber-400 text-amber-950 font-extrabold border-2 border-amber-700 shadow';
+    }
+
+    function startInactivityTimer() {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        document.getElementById('emilia-helping-hand').classList.remove('hidden');
+        highlightLadderBadge(1);
+        emiliaSay('Mira donde apunta mi mano... ¡por ahí está la respuesta!');
+      }, 5000);
+    }
+
+    function answerEscuelita(isCorrect, btnEl) {
+      clearTimeout(inactivityTimer);
+      if (isCorrect) {
+        playFolkChord();
+        resetHelpLadder();
+        if (emiliaMistakeActive) {
+          emiliaSay('¡Jajaja, tienes toda la razón! Mono empieza con M, no Sol. ¡Eres un experto enseñándome!');
+          emiliaMistakeActive = false;
+        } else {
+          emiliaSay('¡Lo intentaste hasta lograrlo! ¡Mono empieza con M! Brotó una flor en tu Árbol del Saber.');
+        }
+        bloomNewFlower();
+        advanceClassroomTurn();
+      } else {
+        escuelitaErrorCount++;
+        playGentleNote(349.23, 0.2);
+
+        if (escuelitaErrorCount === 1) {
+          highlightLadderBadge(2);
+          emiliaSay('¡Casi, casi! Escuchemos juntos: Mmmm... ¿cuál suena como Mmmm-Mono?');
+        } else if (escuelitaErrorCount === 2) {
+          highlightLadderBadge(3);
+          document.getElementById('btn-correct-option').classList.add('glow-help');
+          emiliaSay('¡Mira cuál está brillando como una estrellita! Tócalo.');
+        } else {
+          highlightLadderBadge(4);
+          document.getElementById('btn-correct-option').classList.add('glow-help');
+          document.getElementById('emilia-helping-hand').classList.remove('hidden');
+          emiliaSay('Yo lo hago primero: M de Mono 🐒. ¡Ahora tócalo tú conmigo!');
+        }
+      }
+    }
+
+    function triggerEmiliaMistakeMode() {
+      resetHelpLadder();
+      emiliaMistakeActive = true;
+      const q = document.getElementById('escuelita-question');
+      q.innerHTML = '🤭 Emilia dice: "¡Yo creo que 🌞 <u>SOL</u> empieza con M! ¿Estoy bien o me ayudas a corregir?"';
+      emiliaSay('¡Ya sé! ¡Yo creo que Sol empieza con la letra M! ¿O me equivoqué? ¡Toca el que de verdad empieza con M para enseñarme!');
+      document.getElementById('btn-correct-option').classList.add('glow-help');
+    }
+
+    function switchRoleplay(role) {
+      const prompt = document.getElementById('roleplay-prompt');
+      const items = document.getElementById('roleplay-items');
+      const targetIcon = document.getElementById('roleplay-target-icon');
+      document.getElementById('roleplay-basket').innerHTML = '';
+
+      if (role === 'rosa') {
+        targetIcon.textContent = '🧺';
+        prompt.textContent = '👵🏽 Doña Rosa: "¿Me ayudas a poner frutas ricas en la canasta?"';
+        items.innerHTML = `
+          <button onclick="magnetDropItem(this, '🍎')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl font-bold">🍎 Manzana</button>
+          <button onclick="magnetDropItem(this, '🍌')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl font-bold">🍌 Plátano</button>
+          <button onclick="magnetDropItem(this, '🍐')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl font-bold">🍐 Pera</button>
+          <button onclick="magnetDropItem(this, '🍊')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-amber-300 text-3xl font-bold">🍊 Naranja</button>
+        `;
+        emiliaSay('Estamos en el almacén de Doña Rosa. Toca las frutas y se acomodan solitas en la canasta.');
+      } else if (role === 'lucas') {
+        targetIcon.textContent = '🐕‍🦺';
+        prompt.textContent = '👨🏽‍⚕️ Dr. Lucas (Veterinario): "¡Cuidemos al perrito con cariño!"';
+        items.innerHTML = `
+          <button onclick="magnetDropItem(this, '🩹')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-teal-300 text-3xl font-bold">🩹 Curita</button>
+          <button onclick="magnetDropItem(this, '🥣')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-teal-300 text-3xl font-bold">🥣 Comida</button>
+          <button onclick="magnetDropItem(this, '🫧')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-teal-300 text-3xl font-bold">🫧 Baño</button>
+          <button onclick="magnetDropItem(this, '❤️')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-teal-300 text-3xl font-bold">❤️ Cariño</button>
+        `;
+        emiliaSay('El Doctor Lucas nos enseña a cuidar a los animales del barrio.');
+      } else {
+        targetIcon.textContent = '🍲';
+        prompt.textContent = '🌻 Del Huerto a la Cocina: "¡Preparemos una sopita rica!"';
+        items.innerHTML = `
+          <button onclick="magnetDropItem(this, '🥕')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-lime-300 text-3xl font-bold">🥕 Zanahoria</button>
+          <button onclick="magnetDropItem(this, '🌽')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-lime-300 text-3xl font-bold">🌽 Choclo</button>
+          <button onclick="magnetDropItem(this, '🍅')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-lime-300 text-3xl font-bold">🍅 Tomate</button>
+          <button onclick="magnetDropItem(this, '🥔')" class="kid-btn bg-white p-4 rounded-2xl border-2 border-lime-300 text-3xl font-bold">🥔 Papa</button>
+        `;
+        emiliaSay('Cosechemos verduras del huerto para cocinar juntos.');
+      }
+    }
+
+    function magnetDropItem(btn, emoji) {
+      playGentleNote(659.25, 0.2);
+      const basket = document.getElementById('roleplay-basket');
+      const span = document.createElement('span');
+      span.textContent = emoji;
+      basket.appendChild(span);
+      btn.classList.add('opacity-40', 'pointer-events-none');
+      emiliaSay('¡Súper! Se acomodó directo en su lugar. ¡Qué buen equipo hacemos!');
+      if (basket.children.length >= 3) {
+        bloomNewFlower();
+        emiliaSay('¡Lo lograste! Ayudaste a los vecinos del barrio y ganaste una flor nueva.');
+      }
+    }
+
+    let artCtx = null;
+    let isDrawing = false;
+    let brushColor = '#ef4444';
+    let leftHandedArt = false;
+
+    function initCanvas() {
+      const canvas = document.getElementById('art-canvas');
+      if (!canvas) return;
+      artCtx = canvas.getContext('2d');
+      artCtx.lineCap = 'round';
+      artCtx.lineWidth = 10;
+
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * (canvas.width / rect.width),
+          y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+      };
+
+      const start = (e) => {
+        isDrawing = true;
+        const p = getPos(e);
+        artCtx.beginPath();
+        artCtx.moveTo(p.x, p.y);
+      };
+      const move = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const p = getPos(e);
+        artCtx.strokeStyle = brushColor;
+        artCtx.lineTo(p.x, p.y);
+        artCtx.stroke();
+      };
+      const end = () => { isDrawing = false; };
+
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', end);
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove', move, { passive: false });
+      window.addEventListener('touchend', end);
+    }
+
+    function setBrushColor(c) {
+      brushColor = c;
+      playGentleNote(523.25, 0.15);
+    }
+
+    function stampOnCanvas(emoji) {
+      if (!artCtx) return;
+      artCtx.font = '48px serif';
+      artCtx.fillText(emoji, Math.random() * 480 + 40, Math.random() * 220 + 60);
+      playGentleNote(698.46, 0.2);
+    }
+
+    function clearArtCanvas() {
+      const canvas = document.getElementById('art-canvas');
+      if (artCtx && canvas) artCtx.clearRect(0, 0, canvas.width, canvas.height);
+      emiliaSay('Lienzo limpiecito para una nueva obra de arte.');
+    }
+
+    function toggleLeftHandedArt() {
+      leftHandedArt = !leftHandedArt;
+      const ws = document.getElementById('art-workspace');
+      const btn = document.getElementById('left-hand-btn');
+      if (leftHandedArt) {
+        ws.classList.remove('md:flex-row');
+        ws.classList.add('md:flex-row-reverse');
+        btn.textContent = '🤚 Modo Zurdo: Activado';
+        emiliaSay('Pusimos los colores al lado izquierdo para que pintes súper cómodo sin tapar la pantalla.');
+      } else {
+        ws.classList.remove('md:flex-row-reverse');
+        ws.classList.add('md:flex-row');
+        btn.textContent = '✋ Modo Zurdo: Desactivado';
+        emiliaSay('Colores a la derecha.');
+      }
+    }
+
+    function saveArtSticker() {
+      addStickerToAlbum('🎨');
+      emiliaSay('¡Guardamos tu dibujo en tu Casita! Qué lindo te quedó.');
+    }
+
+    function animalSound(name, desc) {
+      playGentleNote(587.33, 0.25);
+      emiliaSay(name + ': ' + desc);
+    }
+
+    let memoryFirstCard = null;
+    let memoryLock = false;
+
+    function openPlaza() {
+      openView('view-plaza');
+      initMemoryGame();
+      emiliaSay('Bienvenido a la Plaza de Juegos. Encuentra las parejas con calma, sin ningún reloj que te apure.');
+    }
+
+    function initMemoryGame() {
+      const grid = document.getElementById('memory-grid');
+      grid.innerHTML = '';
+      memoryFirstCard = null;
+      memoryLock = false;
+      const emojis = ['🦌', '🦅', '🪁', '🌻', '🍎', '🚌'];
+      const deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+
+      deck.forEach((emo) => {
+        const card = document.createElement('button');
+        card.className = 'kid-btn bg-sky-200 hover:bg-sky-300 h-28 rounded-3xl border-4 border-white text-5xl flex items-center justify-center font-bold';
+        card.dataset.emoji = emo;
+        card.textContent = '❓';
+        card.onclick = () => flipMemoryCard(card);
+        grid.appendChild(card);
+      });
+    }
+
+    function flipMemoryCard(card) {
+      if (memoryLock || card.dataset.matched === 'true' || card === memoryFirstCard) return;
+      card.textContent = card.dataset.emoji;
+      card.classList.replace('bg-sky-200', 'bg-amber-200');
+      playGentleNote(523.25, 0.15);
+
+      if (!memoryFirstCard) {
+        memoryFirstCard = card;
+      } else {
+        memoryLock = true;
+        if (memoryFirstCard.dataset.emoji === card.dataset.emoji) {
+          memoryFirstCard.dataset.matched = 'true';
+          card.dataset.matched = 'true';
+          memoryFirstCard = null;
+          memoryLock = false;
+          playFolkChord();
+          emiliaSay('¡Encontraste una pareja! ¡Qué buena memoria tienes!');
+        } else {
+          setTimeout(() => {
+            memoryFirstCard.textContent = '❓';
+            card.textContent = '❓';
+            memoryFirstCard.classList.replace('bg-amber-200', 'bg-sky-200');
+            card.classList.replace('bg-amber-200', 'bg-sky-200');
+            memoryFirstCard = null;
+            memoryLock = false;
+            emiliaSay('¡Casi! Ya sabemos dónde están para el próximo intento.');
+          }, 900);
+        }
+      }
+    }
+
+    function friendSpeak(name, phrase, lang) {
+      emiliaSay(name + ' nos dice: ' + phrase, lang);
+    }
+
+    function simulateRepeatWithMe() {
+      playFolkChord();
+      emiliaSay('¡Te escuché decirlo súper fuerte y claro! (Tu voz no se graba ni se guarda nunca).');
+      addStickerToAlbum('🌍');
+    }
+
+    function setBaseAvatar(av) {
+      baseAvatar = av;
+      updateAvatarDisplay();
+    }
+    function setAccessory(acc) {
+      avatarAccessory = (acc === '✨') ? '' : acc;
+      updateAvatarDisplay();
+      emiliaSay('¡Me encanta cómo se ve tu personaje!');
+    }
+    function updateAvatarDisplay() {
+      const combined = baseAvatar + avatarAccessory;
+      document.getElementById('casita-avatar-preview').textContent = combined;
+      document.getElementById('kid-avatar-top').textContent = combined;
+    }
+    function addStickerToAlbum(sticker) {
+      const album = document.getElementById('sticker-album');
+      const sp = document.createElement('span');
+      sp.textContent = sticker;
+      album.appendChild(sp);
+    }
+
+    function openKnowledgeTree() {
+      openView('view-arbol');
+      emiliaSay('Mira tu Árbol del Saber. Cada flor es algo nuevo que aprendiste jugando.');
+    }
+
+    function bloomNewFlower(customMsg) {
+      flowerCount++;
+      document.getElementById('flower-counter').textContent = '🌸 ' + flowerCount;
+      const container = document.getElementById('tree-flowers-container');
+      if (container) {
+        const fl = document.createElement('span');
+        const flowers = ['🌸', '🌺', '🌻', '🌷', '🌼'];
+        fl.textContent = flowers[flowerCount % flowers.length];
+        container.appendChild(fl);
+      }
+      addStickerToAlbum('🌸');
+      if (customMsg) emiliaSay(customMsg);
+    }
+
+    function triggerGentleEnd() {
+      emiliaSay('Uaaah... Tito y yo ya tenemos un poquito de sueño. Terminemos esta actividad con calma y vamos a despedirnos.');
+      setTimeout(() => {
+        setSessionStep(5);
+      }, 4200);
+    }
+
+    function toggleAccessibilityModal() {
+      document.getElementById('modal-accessibility').classList.toggle('hidden');
+    }
+
+    function toggleClassroomMode(enabled) {
+      classroomMode = enabled;
+      const badge = document.getElementById('classroom-turn-badge');
+      if (enabled) {
+        badge.classList.remove('hidden');
+        emiliaSay('Modo Sala de Jardín activado. Jugaremos por turnos en la misma tablet.');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function advanceClassroomTurn() {
+      if (!classroomMode) return;
+      currentClassroomTurn = (currentClassroomTurn % 4) + 1;
+      const badge = document.getElementById('classroom-turn-badge');
+      badge.textContent = '🏫 Modo Sala: Turno Niño ' + currentClassroomTurn;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvas();
+    });
+  </script>
+</body>
+</html>
