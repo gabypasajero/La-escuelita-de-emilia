@@ -2,9 +2,11 @@
 
 Juego educativo multiplataforma (iOS · Android · Web) para niños de **3 a 6 años**: pintar, letras, números, animales y sus sonidos, y juegos interactivos. 100 % en español, sin anuncios y con zona protegida para padres.
 
-| Inicio | Letras | Pintar | La Tiendita | Memoria |
+![El barrio de Emilia](docs/capturas/barrio.png)
+
+| Huerto | Patio de Tito | Pintar | La Tiendita | Memoria |
 |---|---|---|---|---|
-| ![](docs/capturas/inicio.png) | ![](docs/capturas/letras.png) | ![](docs/capturas/pintar.png) | ![](docs/capturas/tiendita.png) | ![](docs/capturas/juegos.png) |
+| ![](docs/capturas/huerto.png) | ![](docs/capturas/patio.png) | ![](docs/capturas/pintar.png) | ![](docs/capturas/tiendita.png) | ![](docs/capturas/juegos.png) |
 
 ## Documentación
 - 🌎 [El mundo de Emilia: concepto, sesiones y experiencia del niño](docs/MUNDO_Y_EXPERIENCIA.md)
