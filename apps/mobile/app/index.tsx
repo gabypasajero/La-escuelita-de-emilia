@@ -62,10 +62,13 @@ export default function Barrio() {
   }
 
   function entrar(lugar: Lugar) {
-    decir(lugar.frase);
+    setDialogo(lugar.frase);
+    if (!lugar.ruta) return void hablar(lugar.frase);
     if (lugar.ruta) {
       const ruta = lugar.ruta;
-      setTimeout(() => router.push(ruta), 900);
+      // Entra al lugar cuando Emilia termina la frase (máximo 2,5 s para no hacer esperar).
+      Promise.race([hablar(lugar.frase), new Promise((r) => setTimeout(r, 2500))]).then(() => router.push(ruta));
+      return;
     }
   }
 

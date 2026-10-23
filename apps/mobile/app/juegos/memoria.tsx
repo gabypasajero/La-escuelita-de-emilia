@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../../components/Pantalla";
 import { COLORES } from "../../lib/tema";
-import { hablar } from "../../lib/voz";
+import { hablar, hablarYEsperar } from "../../lib/voz";
 
 /** Memoria (parejas). Al completar un tablero, el siguiente se adapta al nivel. */
 export default function Juegos() {
@@ -29,11 +29,10 @@ export default function Juegos() {
       const total = new Set(encontradas).add(a!.valor);
       setEncontradas(total);
       if (total.size * 2 === cartas.length) {
-        hablar("¡Ganaste! ¡Encontraste todas las parejas!");
-        setTimeout(() => {
+        hablarYEsperar("¡Ganaste! ¡Encontraste todas las parejas!", 600).then(() => {
           setCartas(tableroMemoria(siguiente.nivel));
           setEncontradas(new Set());
-        }, 2000);
+        });
       } else {
         hablar("¡Pareja!");
       }

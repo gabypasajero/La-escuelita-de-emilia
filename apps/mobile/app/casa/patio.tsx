@@ -13,7 +13,7 @@ export default function Patio() {
   const globo = useRef(new Animated.Value(0.6)).current;
   const contador = useRef(0);
 
-  useEffect(() => hablar("¡Bienvenidos al patio! Tito quiere jugar."), []);
+  useEffect(() => void hablar("¡Bienvenidos al patio! Tito quiere jugar."), []);
 
   function decir(t: string) {
     setTexto(t);

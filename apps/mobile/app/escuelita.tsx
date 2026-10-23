@@ -12,7 +12,7 @@ const SALAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; f
 ];
 
 export default function Escuelita() {
-  useEffect(() => hablar("¡Llegamos a la escuelita! ¿Letras o números?"), []);
+  useEffect(() => void hablar("¡Llegamos a la escuelita! ¿Letras o números?"), []);
   return (
     <Pantalla color={COLORES.letras}>
       <View style={estilos.fila}>

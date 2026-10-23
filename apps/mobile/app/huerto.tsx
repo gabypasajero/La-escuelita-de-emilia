@@ -19,7 +19,7 @@ export default function Huerto() {
   const [etapa, setEtapa] = useState<EtapaPlanta>("tierra");
   const [texto, setTexto] = useState("Hoy sembramos. Primero, un hoyito.");
 
-  useEffect(() => hablar("¡Llegó mi ayudante! Hoy sembramos. Primero, un hoyito."), []);
+  useEffect(() => void hablar("¡Llegó mi ayudante! Hoy sembramos. Primero, un hoyito."), []);
 
   function usar(h: Herramienta) {
     if (etapa === "flor") {

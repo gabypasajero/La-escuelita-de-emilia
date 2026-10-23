@@ -13,7 +13,7 @@ const PIEZAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; 
 
 /** La casa amarilla de Emilia: el baño (rutinas reales) y el patio con Tito. */
 export default function Casa() {
-  useEffect(() => hablar("¡Bienvenidos a mi casa! ¿Qué hacemos?"), []);
+  useEffect(() => void hablar("¡Bienvenidos a mi casa! ¿Qué hacemos?"), []);
   return (
     <Pantalla color="#FFF59D">
       <View style={estilos.fila}>
