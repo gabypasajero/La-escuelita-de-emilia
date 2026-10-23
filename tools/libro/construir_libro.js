@@ -41,6 +41,7 @@ function limpiar(texto) {
     .replace(/<br\s*\/?>/gi, " ")
     .replace(/\\\|/g, "|")
     .replace(/[ \t]{2,}/g, " ");
+  // (los saltos de línea se manejan en parrafo())
   return t.trim();
 }
 
@@ -103,10 +104,14 @@ function parsear(md) {
       continue;
     }
     if (/^\s*(---+|\*\*\*+)\s*$/.test(l) || !l.trim()) { i++; continue; }
-    const cuerpo = [l];
+    // Un salto de línea forzado de Markdown (dos espacios o "\\" al final) se conserva: lo usan las canciones.
+    let texto = l;
     i++;
-    while (i < lineas.length && lineas[i].trim() && !/^(#|\||>|```|\s*([-*]|\d+\.)\s)/.test(lineas[i])) cuerpo.push(lineas[i++]);
-    bloques.push({ tipo: "parrafo", texto: cuerpo.join(" ") });
+    while (i < lineas.length && lineas[i].trim() && !/^(#|\||>|```|\s*([-*]|\d+\.)\s)/.test(lineas[i])) {
+      const forzado = / {2,}$|\\$/.test(texto);
+      texto = texto.replace(/\s+$|\\$/, "") + (forzado ? "\n" : " ") + lineas[i++];
+    }
+    bloques.push({ tipo: "parrafo", texto: texto.trim() });
   }
   return bloques;
 }
@@ -153,11 +158,12 @@ function titulo(nivel, texto) {
 }
 
 function parrafo(texto, opciones = {}) {
+  const lineas = texto.split("\n");
   return new Paragraph({
     indent: { right: opciones.sinMargen ? 0 : MARGEN_NOTAS },
     spacing: { after: 100 },
     ...opciones.extra,
-    children: runs(texto, opciones.base),
+    children: lineas.flatMap((l, k) => (k ? [new TextRun({ break: 1 }), ...runs(l, opciones.base)] : runs(l, opciones.base))),
   });
 }
 
@@ -198,7 +204,10 @@ function celda(texto, ancho, { encabezado = false, correccion = false } = {}) {
     shading: encabezado
       ? { type: ShadingType.CLEAR, color: "auto", fill: COLOR.celda }
       : correccion ? { type: ShadingType.CLEAR, color: "auto", fill: "FBFAFD" } : undefined,
-    children: [new Paragraph({ spacing: { after: 0 }, children: runs(texto, { size: 18, bold: encabezado || undefined }) })],
+    // Respuestas largas separadas por " · " (una por opción): una línea cada una para corregirlas por separado.
+    children: (texto.length > 60 && texto.includes(" · ") ? texto.split(" · ") : [texto]).map(
+      (parte) => new Paragraph({ spacing: { after: 40 }, children: runs(parte, { size: 18, bold: encabezado || undefined }) }),
+    ),
   });
 }
 

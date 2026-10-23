@@ -170,7 +170,7 @@ Después de cada saludo viene **el saludo secreto**: Emilia lo hace y espera que
 | ¿Los peces duermen? | ¡Sí! Pero con los ojos abiertos, porque no tienen párpados. ¡Qué raro, cierto? |
 | ¿Por qué hay que lavarse las manos? | Porque en las manos viven bichitos chiquititos que no vemos. ¡El jabón los hace desaparecer! |
 | ¿Por qué el pudú es tan chiquito? | Porque vive en el bosque, entre plantas muy tupidas. ¡Siendo chiquito se mueve fácil! |
-| ¿Cuántos años tienes? | ¡Tengo seis! ¿Y tú cuántos tienes? *(Elige con los dedos de una mano.)* |
+| ¿Cuántos años tienes? | ¡Tengo seis! ¿Y tú cuántos tienes? *(El niño elige su edad tocando números del 3 al 6.)* |
 | ¿Te da miedo algo? | Un poquito la oscuridad. Por eso duermo con una lucecita y con Tito. |
 | ¿Dónde duerme Tito? | En una camita de hojas al lado de mi cama. ¡Ronca bajito! |
 

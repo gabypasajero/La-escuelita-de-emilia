@@ -14,6 +14,7 @@ Juego educativo multiplataforma (iOS · Android · Web) para niños de **3 a 6 a
 - 💛 [Emilia, compañera de cada niño (lazo y conversación sin internet)](docs/EMILIA_COMPANERA.md)
 - 🎭 [Guiones de los personajes](docs/GUIONES_PERSONAJES.md)
 - 🎙️ [Guion de voz de Emilia](docs/GUION_EMILIA.md)
+- 📚 [Guiones complementarios](docs/GUIONES_COMPLEMENTARIOS.md) · 🖨️ **Libro de guiones para imprimir y corregir:** [Word](docs/imprimible/Libro_de_guiones_La_Escuelita_de_Emilia.docx) · [PDF](docs/imprimible/Libro_de_guiones_La_Escuelita_de_Emilia.pdf) (se regenera con `tools/libro/construir.sh`)
 - 🧪 [Piloto familiar](docs/PILOTO_FAMILIAR.md)
 - 📊 [Estudio de producto, mercado y competencia](docs/ESTUDIO.md)
 - 💼 [Plan de negocio y escalamiento a instituciones](docs/PLAN_DE_NEGOCIO.md)
