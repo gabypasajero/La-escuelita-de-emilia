@@ -5,7 +5,7 @@ import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
 import { Avatar, TitoVestido } from "../components/Avatar";
 import { LugarDibujo, type LugarId } from "../components/Lugares";
 import { EmiliaDibujo, Globo } from "../components/Personajes";
-import { Monedas, useJuego } from "../lib/juego";
+import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 
 /**
@@ -27,6 +27,8 @@ interface Lugar {
   x: number;
   /** Línea del suelo donde se apoya el edificio (define qué se dibuja delante). */
   y: number;
+  /** Estrellas necesarias para entrar (lugar desbloqueable). */
+  estrellas?: number;
 }
 
 const LUGARES: Lugar[] = [
@@ -38,12 +40,13 @@ const LUGARES: Lugar[] = [
   { id: "plaza", nombre: "Parque", frase: "¡Al parque de juegos! Columpio, resbalín y balancín.", ruta: "/plaza", x: 700, y: 770 },
   { id: "huerto", nombre: "Huerto", frase: "Don Pedro nos espera en el huerto.", ruta: "/huerto", x: 1100, y: 770 },
   { id: "granja", nombre: "Granja", frase: "¡Vamos a ver a los animales!", ruta: "/animales", x: 1480, y: 770 },
+  { id: "veterinaria", nombre: "Veterinaria", frase: "¡La veterinaria del Dr. Lucas! Vamos a cuidar animales.", ruta: "/veterinaria", x: 560, y: 1150, estrellas: DESBLOQUEOS.veterinaria },
   { id: "paradero", nombre: "Paradero", frase: "Pronto llegan en bus mis amigos de otros países.", x: 1300, y: 1150 },
 ];
 
 const ARBOLES: Array<[number, number]> = [
-  [90, 230], [220, 190], [1680, 210], [1760, 560], [80, 1080], [430, 1170], [1720, 1120],
-  [610, 560], [1290, 560], [990, 1010], [180, 640], [1600, 960], [560, 1060],
+  [90, 230], [220, 190], [1680, 210], [1760, 560], [80, 1080], [330, 1170], [1720, 1120],
+  [610, 560], [1290, 560], [990, 1010], [180, 640], [1600, 960], [760, 1060],
 ];
 
 const VECINOS: Array<{ emoji: string; x: number; y: number; frase: string }> = [
@@ -74,7 +77,9 @@ export default function Barrio() {
 }
 
 function Mundo() {
-  const { perfil, accesorioPuesto, aviso, limpiarAviso, elegirJugador } = useJuego();
+  const { perfil, accesorioPuesto, aviso, limpiarAviso, elegirJugador, estrellas } = useJuego();
+  const estrellasRef = useRef(estrellas);
+  estrellasRef.current = estrellas;
   const { width: vw, height: vh } = useWindowDimensions();
   const escala = Math.max(vh / 820, vw / 1500);
   const [dialogo, setDialogo] = useState(() => saludo(perfil!.nombre));
@@ -122,6 +127,10 @@ function Mundo() {
   );
 
   const entrar = useCallback(async (l: Lugar) => {
+    if (l.estrellas && estrellasRef.current < l.estrellas) {
+      const faltan = l.estrellas - estrellasRef.current;
+      return decir(`La ${l.nombre.toLowerCase()} está en construcción. Se abre con ${l.estrellas} estrellas: ¡te faltan ${faltan}! Juega en la escuelita para ganar estrellas.`);
+    }
     setDialogo(l.frase);
     if (!l.ruta) return void hablar(l.frase);
     const ruta = l.ruta;
@@ -233,7 +242,7 @@ function Mundo() {
           >
             <LugarDibujo id={l.id} tamano={alto(l.id === "paradero" ? TAMANO_LUGAR * 0.7 : TAMANO_LUGAR)} />
             <View style={[estilos.letrero, !l.ruta && estilos.letreroPronto]}>
-              <Text style={[estilos.letreroTexto, { fontSize: Math.max(13, alto(20)) }]}>{l.ruta ? l.nombre : "Pronto"}</Text>
+              <Text style={[estilos.letreroTexto, { fontSize: Math.max(13, alto(20)) }]}>{!l.ruta ? "Pronto" : l.estrellas && estrellas < l.estrellas ? `🚧 ⭐${estrellas}/${l.estrellas}` : l.nombre}</Text>
             </View>
           </Pressable>
         ))}

@@ -7,6 +7,7 @@ export * from "./juegos/azar";
 export * from "./juegos/dificultad";
 export * from "./juegos/rondas";
 export * from "./juegos/memoria";
+export * from "./juegos/descubrir";
 export * from "./juegos/tiendita";
 export * from "./juegos/huerto";
 export * from "./juegos/rutinas";

@@ -1,7 +1,7 @@
 import Svg, { Circle, Ellipse, G, Line, Path, Polygon, Rect, Text as SvgText } from "react-native-svg";
 
 /** Dibujos de los lugares del barrio. Todos usan un lienzo de 200×200 con el suelo abajo. */
-export type LugarId = "casa" | "escuelita" | "taller" | "tiendita" | "plaza" | "granja" | "huerto" | "paradero" | "disfraces";
+export type LugarId = "casa" | "escuelita" | "taller" | "tiendita" | "plaza" | "granja" | "huerto" | "paradero" | "disfraces" | "veterinaria";
 
 export function LugarDibujo({ id, tamano }: { id: LugarId; tamano: number }) {
   return (
@@ -144,6 +144,20 @@ const DIBUJOS: Record<LugarId, React.ReactElement> = {
       <Circle cx="96" cy="140" r="8" fill="#7E57C2" />
       <Rect x="124" y="118" width="34" height="72" rx="14" fill="#880E4F" />
       <Circle cx="150" cy="156" r="3" fill="#FDD835" />
+    </G>
+  ),
+  // Veterinaria del Dr. Lucas: blanca y verde agua, con una cruz y una huella.
+  veterinaria: (
+    <G>
+      <Polygon points="20,86 100,40 180,86" fill="#00897B" />
+      <Rect x="32" y="84" width="136" height="106" rx="6" fill="#E0F2F1" />
+      <Rect x="86" y="50" width="28" height="28" rx="4" fill="#fff" />
+      <Rect x="96" y="54" width="8" height="20" fill="#E53935" />
+      <Rect x="90" y="60" width="20" height="8" fill="#E53935" />
+      <Circle cx="64" cy="118" r="10" fill="#4DB6AC" />
+      {[[50, 102], [60, 96], [72, 96], [80, 104]].map(([x, y], i) => <Circle key={i} cx={x} cy={y} r="4.5" fill="#4DB6AC" />)}
+      <Rect x="112" y="104" width="40" height="34" rx="4" fill="#B2DFDB" stroke="#fff" strokeWidth="4" />
+      <Rect x="84" y="134" width="32" height="56" rx="6" fill="#00695C" />
     </G>
   ),
   // Paradero de los amigos: donde llega el bus con amigos de otros países.

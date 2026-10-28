@@ -1,6 +1,6 @@
 import { router, type Href } from "expo-router";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../components/Pantalla";
 import { EmiliaDibujo, Globo } from "../components/Personajes";
 import { COLORES } from "../lib/tema";
@@ -14,6 +14,11 @@ const SALAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; f
   { ruta: "/letra-animal", nombre: "Letra y animal", emoji: "🐒", color: "#FFCA28", frase: "¿Qué animal empieza con esta letra?" },
   { ruta: "/animales", nombre: "Sonidos", emoji: "🐄", color: "#8D6E63", frase: "¿Quién hace este sonido?" },
   { ruta: "/juegos/memoria", nombre: "Memoria", emoji: "🃏", color: "#AB47BC", frase: "¡A buscar parejas!" },
+  { ruta: "/descubrir/colores", nombre: "Colores", emoji: "🎨", color: "#EC407A", frase: "¡A jugar con los colores!" },
+  { ruta: "/descubrir/formas", nombre: "Formas", emoji: "🔺", color: "#7E57C2", frase: "¡Círculos, cuadrados y triángulos!" },
+  { ruta: "/descubrir/mas-menos", nombre: "Más y menos", emoji: "⚖️", color: "#26A69A", frase: "¿Dónde hay más?" },
+  { ruta: "/descubrir/patrones", nombre: "¿Qué sigue?", emoji: "🔴", color: "#FFB300", frase: "¡A descubrir patrones!" },
+  { ruta: "/descubrir/verduras", nombre: "Verduras", emoji: "🥕", color: "#7CB342", frase: "¡Busquemos verduras del huerto!" },
   { ruta: "/juegos/tiendita", nombre: "Tiendita", emoji: "🛒", color: "#EF5350", frase: "Doña Rosa necesita ayuda en la tiendita." },
 ];
 
@@ -25,7 +30,7 @@ export default function Escuelita() {
         <EmiliaDibujo alto={150} />
         <Globo texto="¿A qué jugamos hoy?" alLado="izquierda" />
       </View>
-      <View style={estilos.salas}>
+      <ScrollView contentContainerStyle={estilos.salas}>
         {SALAS.map((s) => (
           <Pressable
             key={s.nombre}
@@ -40,15 +45,15 @@ export default function Escuelita() {
             <Text style={estilos.nombre}>{s.nombre}</Text>
           </Pressable>
         ))}
-      </View>
+      </ScrollView>
     </Pantalla>
   );
 }
 
 const estilos = StyleSheet.create({
   fila: { flexDirection: "row", alignItems: "center", gap: 8 },
-  salas: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 18, marginTop: 12, maxWidth: 900 },
-  puerta: { width: 150, height: 170, borderTopLeftRadius: 75, borderTopRightRadius: 75, borderRadius: 20, alignItems: "center", justifyContent: "center", borderWidth: 6, borderColor: "#fff" },
+  salas: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, paddingTop: 12, paddingBottom: 24, maxWidth: 980 },
+  puerta: { width: 140, height: 150, borderTopLeftRadius: 70, borderTopRightRadius: 70, borderRadius: 20, alignItems: "center", justifyContent: "center", borderWidth: 6, borderColor: "#fff" },
   emoji: { fontSize: 60 },
   nombre: { fontSize: 19, textAlign: "center", fontWeight: "800", color: "#fff" },
 });

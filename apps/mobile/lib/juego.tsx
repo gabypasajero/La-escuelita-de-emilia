@@ -84,7 +84,7 @@ const CLAVE_ANTIGUA = "escuelita:juego:v1";
 const VACIO: Estado = { perfil: null, monedas: 0, estrellas: 0, comprados: [], puestos: {} };
 
 /** Lugares que se abren al juntar estrellas. */
-export const DESBLOQUEOS = { arenero: 10 } as const;
+export const DESBLOQUEOS = { arenero: 10, veterinaria: 20 } as const;
 const Contexto = createContext<Juego | null>(null);
 
 /** Qué accesorio nuevo alcanza a comprar ahora y antes no (el más caro de esos). */
