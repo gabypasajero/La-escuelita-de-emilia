@@ -11,6 +11,7 @@ import Svg, { Path, Rect, Text as SvgText } from "react-native-svg";
 import { BotonCasa } from "../../components/BotonCasa";
 import { Globo, useRespirar } from "../../components/Personajes";
 import { TOQUE_MINIMO } from "../../lib/tema";
+import { Monedas, useJuego } from "../../lib/juego";
 import { hablar, hablarYEsperar } from "../../lib/voz";
 
 const CLIENTES = ["🐻", "🐰", "🦊", "🐼", "🐸", "🦙"];
@@ -36,6 +37,7 @@ export default function Tiendita() {
   const [dicho, setDicho] = useState("¡Ay, qué alegría! ¿Me ayudas a atender?");
   const entrada = useRef(new Animated.Value(1)).current;
   const rosa = useRespirar(3, 1300);
+  const { ganar } = useJuego();
 
   // El cliente entra caminando y hace su pedido.
   useEffect(() => {
@@ -67,6 +69,7 @@ export default function Tiendita() {
       return;
     }
     setFeliz(true);
+    ganar(2);
     setDicho("¡Perfecto! El cliente se va feliz.");
     // Primero termina de agradecer el cliente, después Doña Rosa, y recién entonces llega otro.
     await hablarYEsperar("¡Gracias! ¡Justo lo que quería!", 200);
@@ -91,6 +94,7 @@ export default function Tiendita() {
         ))}
       </Svg>
       <BotonCasa />
+      <Monedas />
 
       {/* Muralla con estantes llenos */}
       <View style={[estilos.estantes, { width: anchoEstante }]}>

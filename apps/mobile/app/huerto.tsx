@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Path } from "react-native-svg";
 import { Pantalla } from "../components/Pantalla";
 import { Globo } from "../components/Personajes";
+import { useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 
 const ICONOS: Record<Herramienta, { emoji: string; nombre: string }> = {
@@ -17,6 +18,7 @@ const ICONOS: Record<Herramienta, { emoji: string; nombre: string }> = {
 /** El Huerto de Don Pedro: sembrar paso a paso hasta que salga una flor. */
 export default function Huerto() {
   const [etapa, setEtapa] = useState<EtapaPlanta>("tierra");
+  const { ganar } = useJuego();
   const [texto, setTexto] = useState("Hoy sembramos. Primero, un hoyito.");
 
   useEffect(() => void hablar("¡Llegó mi ayudante! Hoy sembramos. Primero, un hoyito."), []);
@@ -29,6 +31,7 @@ export default function Huerto() {
       return;
     }
     const r = usarHerramienta(etapa, h);
+    if (r.etapa === "flor") ganar(2);
     setEtapa(r.etapa);
     setTexto(r.frase);
     hablar(r.frase);

@@ -1,7 +1,7 @@
 import Svg, { Circle, Ellipse, G, Line, Path, Polygon, Rect, Text as SvgText } from "react-native-svg";
 
 /** Dibujos de los lugares del barrio. Todos usan un lienzo de 200×200 con el suelo abajo. */
-export type LugarId = "casa" | "escuelita" | "taller" | "tiendita" | "plaza" | "granja" | "huerto" | "paradero";
+export type LugarId = "casa" | "escuelita" | "taller" | "tiendita" | "plaza" | "granja" | "huerto" | "paradero" | "disfraces";
 
 export function LugarDibujo({ id, tamano }: { id: LugarId; tamano: number }) {
   return (
@@ -130,6 +130,20 @@ const DIBUJOS: Record<LugarId, React.ReactElement> = {
       <Circle cx="160" cy="38" r="14" fill="#FFE0B2" />
       <Path d="M140 30 L180 30 L170 16 L150 16 Z" fill="#FDD835" />
       <Rect x="146" y="58" width="28" height="34" rx="4" fill="#42A5F5" />
+    </G>
+  ),
+  // Tienda de disfraces: rosada, con una corona en el letrero y vitrina.
+  disfraces: (
+    <G>
+      <Polygon points="18,84 100,36 182,84" fill="#AD1457" />
+      <Rect x="30" y="82" width="140" height="108" rx="6" fill="#F48FB1" />
+      <Rect x="50" y="46" width="100" height="26" rx="8" fill="#fff" stroke="#AD1457" strokeWidth="3" />
+      <SvgText x="100" y="65" fontSize="15" fontWeight="bold" fill="#AD1457" textAnchor="middle">DISFRACES</SvgText>
+      <Rect x="42" y="100" width="70" height="56" rx="6" fill="#FCE4EC" stroke="#fff" strokeWidth="4" />
+      <Path d="M58 132 l6 -14 l8 10 l8 -10 l6 14 z" fill="#FDD835" />
+      <Circle cx="96" cy="140" r="8" fill="#7E57C2" />
+      <Rect x="124" y="118" width="34" height="72" rx="14" fill="#880E4F" />
+      <Circle cx="150" cy="156" r="3" fill="#FDD835" />
     </G>
   ),
   // Paradero de los amigos: donde llega el bus con amigos de otros países.

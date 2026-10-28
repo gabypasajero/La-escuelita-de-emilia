@@ -2,6 +2,7 @@ import { ESTADO_INICIAL, registrarRespuesta, type Nivel, type Ronda } from "@esc
 import { useEffect, useState, type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { COLORES, TOQUE_MINIMO } from "../lib/tema";
+import { useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
 
 type RondaCualquiera = Ronda<any>;
@@ -26,6 +27,7 @@ export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion,
   const [dificultad, setDificultad] = useState(ESTADO_INICIAL);
   const [ronda, setRonda] = useState(() => generar(ESTADO_INICIAL.nivel));
   const [celebrando, setCelebrando] = useState(false);
+  const { ganar } = useJuego();
 
   useEffect(() => void hablar(ronda.enunciado), [ronda]);
 
@@ -39,6 +41,7 @@ export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion,
       return;
     }
     setCelebrando(true);
+    ganar(1);
     // La ronda siguiente empieza solo cuando Emilia termina de felicitar.
     hablarYEsperar(alAcertar?.(ronda) ?? "¡Muy bien!").then(() => {
       setCelebrando(false);

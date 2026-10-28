@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../../components/Pantalla";
 import { EmiliaDibujo, Globo } from "../../components/Personajes";
+import { useJuego } from "../../lib/juego";
 import { hablar } from "../../lib/voz";
 
 /**
@@ -19,6 +20,11 @@ export default function Rutina() {
 
   const paso = segundos === null ? null : pasoEn(rutina, segundos);
   const terminado = segundos !== null && paso === null;
+  const { ganar } = useJuego();
+  // Terminar una rutina real (manos o dientes) da 3 monedas.
+  useEffect(() => {
+    if (terminado) ganar(3);
+  }, [terminado, ganar]);
 
   useEffect(() => {
     hablar(rutina.id === "manos" ? "Ve al baño con un adulto. ¿Listos? ¡Toca empezar!" : "Toma tu cepillo con un poquito de pasta. ¡Toca empezar!");

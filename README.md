@@ -4,6 +4,10 @@ Juego educativo multiplataforma (iOS · Android · Web) para niños de **3 a 6 a
 
 ![El barrio de Emilia](docs/capturas/barrio.png)
 
+| Crear personaje | Tienda de disfraces |
+|---|---|
+| ![](docs/capturas/personaje.png) | ![](docs/capturas/disfraces.png) |
+
 | Huerto | Patio de Tito | Pintar | La Tiendita | Memoria |
 |---|---|---|---|---|
 | ![](docs/capturas/huerto.png) | ![](docs/capturas/patio.png) | ![](docs/capturas/pintar.png) | ![](docs/capturas/tiendita.png) | ![](docs/capturas/juegos.png) |

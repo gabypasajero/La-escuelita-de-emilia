@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Monedas } from "../lib/juego";
 import { COLORES } from "../lib/tema";
 import { BotonCasa } from "./BotonCasa";
 
@@ -8,6 +9,7 @@ export function Pantalla({ children, color = COLORES.fondo }: { children: ReactN
   return (
     <SafeAreaView style={[estilos.fondo, { backgroundColor: color }]}>
       <BotonCasa />
+      <Monedas />
       <View style={estilos.contenido}>{children}</View>
     </SafeAreaView>
   );

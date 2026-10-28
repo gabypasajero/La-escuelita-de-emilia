@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Pantalla } from "../../components/Pantalla";
 import { Globo } from "../../components/Personajes";
+import { useJuego } from "../../lib/juego";
 import { COLORES } from "../../lib/tema";
 import { hablar, hablarYEsperar } from "../../lib/voz";
 
@@ -18,6 +19,7 @@ export default function Memoria() {
   const [encontradas, setEncontradas] = useState<Set<string>>(new Set());
   const [dicho, setDicho] = useState("¿Con qué jugamos a la memoria?");
   const { width, height } = useWindowDimensions();
+  const { ganar } = useJuego();
 
   useEffect(() => void hablar("¿Con qué jugamos a la memoria?"), []);
 
@@ -51,6 +53,7 @@ export default function Memoria() {
         void hablar(a!.frase);
         return;
       }
+      ganar(nivel + 1);
       if (nivel < NIVELES_MEMORIA) {
         const frase = "¡Encontraste todas las parejas! ¡Vamos al siguiente nivel!";
         setDicho(frase);
