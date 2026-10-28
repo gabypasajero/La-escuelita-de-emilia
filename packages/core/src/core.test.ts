@@ -5,6 +5,8 @@ import {
   LETRAS,
   presentarLetra,
   rondaSonidoInicial,
+  rondaSuma,
+  rondaAnimalPorLetra,
   fonema,
   type Ronda,
   calcularEstrellas,
@@ -139,6 +141,30 @@ describe("letras por sonido", () => {
       expect(r.opciones).toContain(r.correcta);
       for (const o of r.opciones) if (o !== r.correcta) expect(fonema(o)).not.toBe(fonema(r.correcta));
       expect(r.correcta.sonido).not.toBe("");
+    }
+  });
+});
+
+describe("sumas y animal por letra", () => {
+  it("la suma es correcta y está entre las opciones", () => {
+    const azar = semilla(21);
+    for (let i = 0; i < 200; i++) for (const n of [1, 2, 3] as const) {
+      const r = rondaSuma(n, azar);
+      expect(r.a + r.b).toBe(r.correcta);
+      expect(r.a).toBeGreaterThan(0);
+      expect(r.b).toBeGreaterThan(0);
+      expect(r.opciones).toContain(r.correcta);
+      expect(new Set(r.opciones).size).toBe(r.opciones.length);
+    }
+  });
+
+  it("solo un animal empieza con el sonido pedido", () => {
+    const azar = semilla(5);
+    for (let i = 0; i < 200; i++) {
+      const r = rondaAnimalPorLetra(3, azar);
+      const ini = (a: { nombre: string }) => a.nombre[0]!.toUpperCase();
+      expect(ini(r.correcta)).toBe(r.letra.letra);
+      expect(r.opciones.filter((o) => fonema({ ...r.letra, letra: ini(o) }) === fonema(r.letra))).toHaveLength(1);
     }
   });
 });

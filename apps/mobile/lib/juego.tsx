@@ -43,6 +43,7 @@ export const ACCESORIOS: Accesorio[] = [
   { id: "tito-corona", nombre: "Corona para Tito", emoji: "👑", precio: 15, ranura: "tito" },
 ];
 
+/** Todo lo de un niño: su personaje, sus monedas y lo que compró. */
 interface Estado {
   perfil: Perfil | null;
   monedas: number;
@@ -50,8 +51,18 @@ interface Estado {
   puestos: Partial<Record<Ranura, string>>;
 }
 
+export interface Jugador extends Estado {
+  id: string;
+  perfil: Perfil;
+}
+
 interface Juego extends Estado {
   cargado: boolean;
+  jugadores: Jugador[];
+  /** Quién juega ahora (se pregunta cada vez que se abre el juego). */
+  activoId: string | null;
+  elegirJugador: (id: string | null) => void;
+  /** Crea un jugador nuevo (si no hay activo) o actualiza el personaje del activo. */
   guardarPerfil: (p: Perfil) => void;
   /** Suma monedas por un logro y muestra la animación "+n". */
   ganar: (n: number) => void;
@@ -59,68 +70,124 @@ interface Juego extends Estado {
   /** Pone o saca un accesorio (si ya estaba puesto, lo saca). */
   alternar: (id: string) => void;
   accesorioPuesto: (r: Ranura) => Accesorio | undefined;
+  /** Aviso de Emilia cuando alcanza para algo nuevo (se dice al volver al barrio). */
+  aviso: string | null;
+  limpiarAviso: () => void;
 }
 
-const CLAVE = "escuelita:juego:v1";
-const INICIAL: Estado = { perfil: null, monedas: 0, comprados: [], puestos: {} };
+const CLAVE = "escuelita:jugadores:v2";
+const CLAVE_ANTIGUA = "escuelita:juego:v1";
+const VACIO: Estado = { perfil: null, monedas: 0, comprados: [], puestos: {} };
 const Contexto = createContext<Juego | null>(null);
 
+/** Qué accesorio nuevo alcanza a comprar ahora y antes no (el más caro de esos). */
+export function nuevoAlcanzable(antes: number, ahora: number, comprados: string[]) {
+  return ACCESORIOS.filter((a) => !comprados.includes(a.id) && a.precio > antes && a.precio <= ahora).sort((x, y) => y.precio - x.precio)[0];
+}
+
 export function ProveedorJuego({ children }: { children: ReactNode }) {
-  const [estado, setEstado] = useState<Estado>(INICIAL);
+  const [jugadores, setJugadores] = useState<Jugador[]>([]);
+  const [activoId, setActivoId] = useState<string | null>(null);
   const [cargado, setCargado] = useState(false);
   const [premio, setPremio] = useState<{ n: number; clave: number } | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
 
   useEffect(() => {
-    AsyncStorage.getItem(CLAVE)
-      .then((t) => t && setEstado({ ...INICIAL, ...JSON.parse(t) }))
+    (async () => {
+      const t = await AsyncStorage.getItem(CLAVE);
+      if (t) return setJugadores(JSON.parse(t));
+      // Migra el único personaje de la versión anterior.
+      const viejo = await AsyncStorage.getItem(CLAVE_ANTIGUA);
+      const e = viejo ? (JSON.parse(viejo) as Estado) : null;
+      if (e?.perfil) setJugadores([{ ...VACIO, ...e, perfil: e.perfil, id: "j1" }]);
+    })()
       .catch(() => {})
       .finally(() => setCargado(true));
   }, []);
 
   useEffect(() => {
-    if (cargado) AsyncStorage.setItem(CLAVE, JSON.stringify(estado)).catch(() => {});
-  }, [estado, cargado]);
+    if (cargado) AsyncStorage.setItem(CLAVE, JSON.stringify(jugadores)).catch(() => {});
+  }, [jugadores, cargado]);
 
-  const guardarPerfil = useCallback((perfil: Perfil) => setEstado((e) => ({ ...e, perfil })), []);
-  const ganar = useCallback((n: number) => {
-    setEstado((e) => ({ ...e, monedas: e.monedas + n }));
-    setPremio({ n, clave: Date.now() });
+  const activo = jugadores.find((j) => j.id === activoId);
+  const activoRef = useRef(activo);
+  activoRef.current = activo;
+
+  const actualizar = useCallback((cambio: (j: Jugador) => Jugador) => {
+    setJugadores((js) => js.map((j) => (j.id === activoRef.current?.id ? cambio(j) : j)));
   }, []);
 
-  const estadoRef = useRef(estado);
-  estadoRef.current = estado;
+  const guardarPerfil = useCallback((perfil: Perfil) => {
+    if (activoRef.current) return actualizar((j) => ({ ...j, perfil }));
+    const id = `j${Date.now()}`;
+    setJugadores((js) => [...js, { ...VACIO, perfil, id }]);
+    setActivoId(id);
+  }, [actualizar]);
+
+  const ganar = useCallback((n: number) => {
+    const j = activoRef.current;
+    if (!j) return;
+    const nuevo = nuevoAlcanzable(j.monedas, j.monedas + n, j.comprados);
+    if (nuevo) setAviso(`¡${j.perfil.nombre}, ya tienes suficientes monedas para comprarte: ${nuevo.nombre}! Vamos a la tienda de disfraces.`);
+    actualizar((x) => ({ ...x, monedas: x.monedas + n }));
+    setPremio({ n, clave: Date.now() });
+  }, [actualizar]);
+
   const comprar = useCallback((id: string) => {
     const a = ACCESORIOS.find((x) => x.id === id);
-    const e = estadoRef.current;
-    if (!a || e.comprados.includes(id) || e.monedas < a.precio) return false;
-    setEstado({ ...e, monedas: e.monedas - a.precio, comprados: [...e.comprados, id], puestos: { ...e.puestos, [a.ranura]: id } });
+    const j = activoRef.current;
+    if (!a || !j || j.comprados.includes(id) || j.monedas < a.precio) return false;
+    actualizar((x) => ({ ...x, monedas: x.monedas - a.precio, comprados: [...x.comprados, id], puestos: { ...x.puestos, [a.ranura]: id } }));
     return true;
-  }, []);
+  }, [actualizar]);
 
   const alternar = useCallback((id: string) => {
     const a = ACCESORIOS.find((x) => x.id === id);
     if (!a) return;
-    setEstado((e) => ({ ...e, puestos: { ...e.puestos, [a.ranura]: e.puestos[a.ranura] === id ? undefined : id } }));
-  }, []);
+    actualizar((x) => ({ ...x, puestos: { ...x.puestos, [a.ranura]: x.puestos[a.ranura] === id ? undefined : id } }));
+  }, [actualizar]);
 
-  const valor = useMemo<Juego>(
-    () => ({
-      ...estado,
+  const valor = useMemo<Juego>(() => {
+    const e: Estado = activo ?? VACIO;
+    return {
+      ...e,
       cargado,
+      jugadores,
+      activoId: activo ? activo.id : null,
+      elegirJugador: (id) => { setActivoId(id); setAviso(null); },
       guardarPerfil,
       ganar,
       comprar,
       alternar,
-      accesorioPuesto: (r) => ACCESORIOS.find((a) => a.id === estado.puestos[r]),
-    }),
-    [estado, cargado, guardarPerfil, ganar, comprar, alternar],
-  );
+      accesorioPuesto: (r) => ACCESORIOS.find((a) => a.id === e.puestos[r]),
+      aviso,
+      limpiarAviso: () => setAviso(null),
+    };
+  }, [activo, jugadores, cargado, guardarPerfil, ganar, comprar, alternar, aviso]);
 
   return (
     <Contexto.Provider value={valor}>
       {children}
       {premio && <Premio key={premio.clave} n={premio.n} />}
+      {aviso && <AvisoVisual texto={aviso} />}
     </Contexto.Provider>
+  );
+}
+
+/** Cartelito de Emilia (se ve en cualquier pantalla; la voz lo dice al volver al barrio). */
+function AvisoVisual({ texto }: { texto: string }) {
+  // Se esconde a los 5 s para no tapar el juego; Emilia lo repite con voz al volver al barrio.
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    setVisible(true);
+    const t = setTimeout(() => setVisible(false), 5000);
+    return () => clearTimeout(t);
+  }, [texto]);
+  if (!visible) return null;
+  return (
+    <View style={estilos.aviso} pointerEvents="none">
+      <Text style={estilos.avisoTexto}>👧 {texto}</Text>
+    </View>
   );
 }
 
@@ -168,4 +235,6 @@ const estilos = StyleSheet.create({
   premioTexto: { fontSize: 56, fontWeight: "900", color: "#F9A825", textShadowColor: "#fff", textShadowRadius: 8 },
   monedas: { position: "absolute", top: 16, right: 16, backgroundColor: "#fff", borderRadius: 24, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 3, borderColor: "#F9A825", zIndex: 20 },
   monedasTexto: { fontSize: 22, fontWeight: "900", color: "#3B2F5C" },
+  aviso: { position: "absolute", bottom: 16, left: 16, right: 16, alignItems: "center" },
+  avisoTexto: { backgroundColor: "#FFF8E1", borderColor: "#F9A825", borderWidth: 3, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, fontSize: 18, fontWeight: "800", color: "#3B2F5C", maxWidth: 640, textAlign: "center" },
 });

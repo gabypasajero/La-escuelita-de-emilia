@@ -1,3 +1,4 @@
+import { Redirect } from "expo-router";
 import {
   ESTADO_INICIAL,
   canastaCorrecta,
@@ -37,7 +38,7 @@ export default function Tiendita() {
   const [dicho, setDicho] = useState("¡Ay, qué alegría! ¿Me ayudas a atender?");
   const entrada = useRef(new Animated.Value(1)).current;
   const rosa = useRespirar(3, 1300);
-  const { ganar } = useJuego();
+  const { ganar, cargado, jugadores, activoId } = useJuego();
 
   // El cliente entra caminando y hace su pedido.
   useEffect(() => {
@@ -82,6 +83,7 @@ export default function Tiendita() {
   }
 
   const anchoEstante = Math.min(width - 32, 900);
+  if (cargado && jugadores.length && !activoId) return <Redirect href="/quien-juega" />;
 
   return (
     <View style={estilos.fondo}>

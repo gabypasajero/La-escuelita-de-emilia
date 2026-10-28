@@ -62,3 +62,36 @@ export function rondaSonidoAnimal(nivel: Nivel, azar: Aleatorio = Math.random): 
     correcta,
   };
 }
+
+/** "¿Cuánto es 2 + 1?" con objetos: nivel 1 suma hasta 3, nivel 2 hasta 5, nivel 3 hasta 10. */
+export function rondaSuma(nivel: Nivel, azar: Aleatorio = Math.random): Ronda<number> & { a: number; b: number; objeto: string } {
+  const maximo = MAXIMO_CONTEO[nivel];
+  const total = 2 + Math.floor(azar() * (maximo - 1));
+  const a = 1 + Math.floor(azar() * (total - 1));
+  const b = total - a;
+  const universo = Array.from({ length: Math.max(maximo, OPCIONES_POR_NIVEL[nivel] + 1) }, (_, i) => i + 1);
+  return {
+    enunciado: `¿Cuánto es ${a} más ${b}?`,
+    a,
+    b,
+    objeto: elegir(OBJETOS_PARA_CONTAR, azar),
+    opciones: opcionesCon(total, universo, OPCIONES_POR_NIVEL[nivel], azar).sort((x, y) => x - y),
+    correcta: total,
+  };
+}
+
+/** "¿Qué animal empieza con mmm?": se muestra la letra y se elige el animal. */
+export function rondaAnimalPorLetra(nivel: Nivel, azar: Aleatorio = Math.random): Ronda<Animal> & { letra: Letra } {
+  const inicial = (a: Animal) => a.nombre[0]!.toUpperCase();
+  const conLetra = ANIMALES.filter((a) => LETRAS.some((l) => l.letra === inicial(a) && l.sonido));
+  const correcta = elegir(conLetra, azar);
+  const letra = LETRAS.find((l) => l.letra === inicial(correcta))!;
+  const distintos = ANIMALES.filter((a) => a === correcta || fonemaDeLetra(inicial(a)) !== fonema(letra));
+  return {
+    enunciado: `¿Qué animal empieza con ${letra.sonido}? Es la ${letra.nombre}.`,
+    letra,
+    opciones: opcionesCon(correcta, distintos, OPCIONES_POR_NIVEL[nivel], azar),
+    correcta,
+  };
+}
+const fonemaDeLetra = (letra: string) => MISMO_SONIDO[letra] ?? letra;

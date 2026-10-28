@@ -1,3 +1,4 @@
+import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Avatar, TitoVestido } from "../components/Avatar";
@@ -37,7 +38,7 @@ export default function Disfraces() {
     decir(`¡Compraste: ${a.nombre}! ¡Mírate!`);
   }
 
-  if (!perfil) return null;
+  if (!perfil) return <Redirect href="/quien-juega" />;
 
   return (
     <Pantalla color="#F8BBD0">

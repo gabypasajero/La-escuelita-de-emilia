@@ -30,6 +30,8 @@ export default function Personaje() {
     }
     guardarPerfil({ nombre: n, apariencia: a });
     void hablar(`¡Te ves increíble, ${n}! Ya eres parte del barrio.`);
+    // Vuelve al barrio sin dejar pantallas viejas apiladas ("¿Quién juega?", "Personaje").
+    if (router.canDismiss()) router.dismissAll();
     router.replace("/");
   }
 

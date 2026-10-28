@@ -1,4 +1,4 @@
-import { Redirect, router, type Href } from "expo-router";
+import { Redirect, router, useFocusEffect, type Href } from "expo-router";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
@@ -35,7 +35,7 @@ const LUGARES: Lugar[] = [
   { id: "tiendita", nombre: "Almacén", frase: "Doña Rosa necesita ayuda en el almacén.", ruta: "/juegos/tiendita", x: 1130, y: 360 },
   { id: "disfraces", nombre: "Disfraces", frase: "¡La tienda de disfraces! ¿Qué te compras?", ruta: "/disfraces", x: 1480, y: 360 },
   { id: "casa", nombre: "Casa de Emilia", frase: "¡Esta es mi casa! Ven, te muestro el patio.", ruta: "/casa", x: 300, y: 770 },
-  { id: "plaza", nombre: "Plaza", frase: "¡A la plaza de juegos!", ruta: "/juegos", x: 700, y: 770 },
+  { id: "plaza", nombre: "Parque", frase: "¡Al parque de juegos! Columpio, resbalín y balancín.", ruta: "/plaza", x: 700, y: 770 },
   { id: "huerto", nombre: "Huerto", frase: "Don Pedro nos espera en el huerto.", ruta: "/huerto", x: 1100, y: 770 },
   { id: "granja", nombre: "Granja", frase: "¡Vamos a ver a los animales!", ruta: "/animales", x: 1480, y: 770 },
   { id: "paradero", nombre: "Paradero", frase: "Pronto llegan en bus mis amigos de otros países.", x: 1300, y: 1150 },
@@ -68,12 +68,13 @@ function saludo(nombre: string) {
 export default function Barrio() {
   const juego = useJuego();
   if (!juego.cargado) return <View style={estilos.fondo} />;
-  if (!juego.perfil) return <Redirect href="/personaje" />;
+  if (!juego.jugadores.length) return <Redirect href="/personaje" />;
+  if (!juego.activoId) return <Redirect href="/quien-juega" />;
   return <Mundo />;
 }
 
 function Mundo() {
-  const { perfil, accesorioPuesto } = useJuego();
+  const { perfil, accesorioPuesto, aviso, limpiarAviso, elegirJugador } = useJuego();
   const { width: vw, height: vh } = useWindowDimensions();
   const escala = Math.max(vh / 820, vw / 1500);
   const [dialogo, setDialogo] = useState(() => saludo(perfil!.nombre));
@@ -107,6 +108,18 @@ function Mundo() {
     setDialogo(texto);
     void hablar(texto);
   }, []);
+
+  // Al volver al barrio, Emilia avisa si ya alcanza para algo nuevo en la tienda.
+  useFocusEffect(
+    useCallback(() => {
+      if (!aviso) return;
+      const t = setTimeout(() => {
+        decir(aviso);
+        limpiarAviso();
+      }, 700);
+      return () => clearTimeout(t);
+    }, [aviso, decir, limpiarAviso]),
+  );
 
   const entrar = useCallback(async (l: Lugar) => {
     setDialogo(l.frase);
@@ -274,6 +287,9 @@ function Mundo() {
       <Pressable style={estilos.miPersonaje} onPress={() => router.push("/personaje")} accessibilityLabel="Cambiar mi personaje">
         <Text style={estilos.botonTexto}>✏️ Mi personaje</Text>
       </Pressable>
+      <Pressable style={estilos.cambiarJugador} onPress={() => { elegirJugador(null); router.replace("/quien-juega"); }} accessibilityLabel="Cambiar de jugador">
+        <Text style={estilos.botonTexto}>👫 Cambiar</Text>
+      </Pressable>
       <Pressable style={estilos.padres} accessibilityLabel="Zona de padres" onPress={() => router.push("/padres")}>
         <Text style={estilos.padresTexto}>👪 Padres</Text>
       </Pressable>
@@ -352,6 +368,7 @@ const estilos = StyleSheet.create({
   dialogo: { position: "absolute", top: 14, left: 0, right: 0, alignItems: "center" },
   miPersonaje: { position: "absolute", top: 16, left: 16, backgroundColor: "#fff", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8 },
   botonTexto: { fontSize: 16, fontWeight: "800", color: "#3B2F5C" },
+  cambiarJugador: { position: "absolute", top: 64, left: 16, backgroundColor: "#fff", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8 },
   padres: { position: "absolute", bottom: 12, right: 12, backgroundColor: "rgba(255,255,255,0.85)", borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8 },
   padresTexto: { fontSize: 14, color: "#3B2F5C" },
 });
