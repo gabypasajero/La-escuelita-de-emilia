@@ -56,6 +56,11 @@ export default function QuienJuega() {
           <Text style={estilos.nombre}>Nuevo</Text>
         </Pressable>
       </View>
+      {jugadores.length >= 2 && (
+        <Pressable style={estilos.juntos} onPress={() => router.push("/juntos")} accessibilityLabel="Jugar juntos">
+          <Text style={estilos.juntosTexto}>👫 Jugar juntos</Text>
+        </Pressable>
+      )}
     </SafeAreaView>
   );
 }
@@ -69,4 +74,6 @@ const estilos = StyleSheet.create({
   nombre: { fontSize: 24, fontWeight: "900", color: "#3B2F5C" },
   monedas: { fontSize: 18, fontWeight: "800", color: "#F9A825" },
   mas: { fontSize: 70 },
+  juntos: { marginTop: 22, backgroundColor: "#FB8C00", borderRadius: 30, paddingHorizontal: 30, paddingVertical: 14 },
+  juntosTexto: { color: "#fff", fontSize: 24, fontWeight: "900" },
 });

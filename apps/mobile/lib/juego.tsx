@@ -47,6 +47,8 @@ export const ACCESORIOS: Accesorio[] = [
 interface Estado {
   perfil: Perfil | null;
   monedas: number;
+  /** Se juntan para desbloquear lugares nuevos (no se gastan). */
+  estrellas: number;
   comprados: string[];
   puestos: Partial<Record<Ranura, string>>;
 }
@@ -66,6 +68,8 @@ interface Juego extends Estado {
   guardarPerfil: (p: Perfil) => void;
   /** Suma monedas por un logro y muestra la animación "+n". */
   ganar: (n: number) => void;
+  /** Premia a un jugador específico (en "Jugar juntos"). */
+  ganarPara: (id: string, n: number) => void;
   comprar: (id: string) => boolean;
   /** Pone o saca un accesorio (si ya estaba puesto, lo saca). */
   alternar: (id: string) => void;
@@ -77,7 +81,10 @@ interface Juego extends Estado {
 
 const CLAVE = "escuelita:jugadores:v2";
 const CLAVE_ANTIGUA = "escuelita:juego:v1";
-const VACIO: Estado = { perfil: null, monedas: 0, comprados: [], puestos: {} };
+const VACIO: Estado = { perfil: null, monedas: 0, estrellas: 0, comprados: [], puestos: {} };
+
+/** Lugares que se abren al juntar estrellas. */
+export const DESBLOQUEOS = { arenero: 10 } as const;
 const Contexto = createContext<Juego | null>(null);
 
 /** Qué accesorio nuevo alcanza a comprar ahora y antes no (el más caro de esos). */
@@ -95,7 +102,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       const t = await AsyncStorage.getItem(CLAVE);
-      if (t) return setJugadores(JSON.parse(t));
+      if (t) return setJugadores((JSON.parse(t) as Jugador[]).map((j) => ({ ...VACIO, ...j })));
       // Migra el único personaje de la versión anterior.
       const viejo = await AsyncStorage.getItem(CLAVE_ANTIGUA);
       const e = viejo ? (JSON.parse(viejo) as Estado) : null;
@@ -129,9 +136,14 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
     if (!j) return;
     const nuevo = nuevoAlcanzable(j.monedas, j.monedas + n, j.comprados);
     if (nuevo) setAviso(`¡${j.perfil.nombre}, ya tienes suficientes monedas para comprarte: ${nuevo.nombre}! Vamos a la tienda de disfraces.`);
-    actualizar((x) => ({ ...x, monedas: x.monedas + n }));
+    actualizar((x) => ({ ...x, monedas: x.monedas + n, estrellas: x.estrellas + 1 }));
     setPremio({ n, clave: Date.now() });
   }, [actualizar]);
+
+  const ganarPara = useCallback((id: string, n: number) => {
+    setJugadores((js) => js.map((j) => (j.id === id ? { ...j, monedas: j.monedas + n, estrellas: j.estrellas + 1 } : j)));
+    setPremio({ n, clave: Date.now() });
+  }, []);
 
   const comprar = useCallback((id: string) => {
     const a = ACCESORIOS.find((x) => x.id === id);
@@ -157,13 +169,14 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
       elegirJugador: (id) => { setActivoId(id); setAviso(null); },
       guardarPerfil,
       ganar,
+      ganarPara,
       comprar,
       alternar,
       accesorioPuesto: (r) => ACCESORIOS.find((a) => a.id === e.puestos[r]),
       aviso,
       limpiarAviso: () => setAviso(null),
     };
-  }, [activo, jugadores, cargado, guardarPerfil, ganar, comprar, alternar, aviso]);
+  }, [activo, jugadores, cargado, guardarPerfil, ganar, ganarPara, comprar, alternar, aviso]);
 
   return (
     <Contexto.Provider value={valor}>

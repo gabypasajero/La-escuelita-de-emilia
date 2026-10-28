@@ -1,11 +1,11 @@
-import { Redirect } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, Ellipse, Line, Path, Rect } from "react-native-svg";
 import { Avatar } from "../components/Avatar";
 import { BotonCasa } from "../components/BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Personajes";
-import { Monedas, useJuego } from "../lib/juego";
+import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 
 /**
@@ -25,7 +25,7 @@ const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const animar = (a: Animated.CompositeAnimation) => new Promise<void>((r) => a.start(() => r()));
 
 export default function Plaza() {
-  const { perfil, accesorioPuesto } = useJuego();
+  const { perfil, accesorioPuesto, estrellas } = useJuego();
   const { width, height } = useWindowDimensions();
   const k = Math.min(width / 1100, height / 620);
   const [juego, setJuego] = useState<Juego>(null);
@@ -214,6 +214,20 @@ export default function Plaza() {
             <Text style={estilos.botonTexto}>{n}</Text>
           </Pressable>
         ))}
+        {/* Arenero: se desbloquea al juntar estrellas */}
+        <Pressable
+          style={[estilos.boton, estilos.arenero, estrellas < DESBLOQUEOS.arenero && estilos.bloqueado]}
+          accessibilityLabel="Arenero"
+          onPress={() => {
+            if (juego) return;
+            if (estrellas >= DESBLOQUEOS.arenero) return router.push("/arenero");
+            const faltan = DESBLOQUEOS.arenero - estrellas;
+            void decir(`El arenero está en construcción. Tito está ayudando. Se abre con ${DESBLOQUEOS.arenero} estrellas: ¡te faltan ${faltan}! Gana estrellas jugando en la escuelita.`);
+          }}
+        >
+          <Text style={estilos.botonEmoji}>{estrellas >= DESBLOQUEOS.arenero ? "🏖️" : "🚧"}</Text>
+          <Text style={estilos.botonTexto}>{estrellas >= DESBLOQUEOS.arenero ? "Arenero" : `⭐ ${Math.min(estrellas, DESBLOQUEOS.arenero)}/${DESBLOQUEOS.arenero}`}</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -229,6 +243,8 @@ const estilos = StyleSheet.create({
   botones: { position: "absolute", bottom: 12, left: 0, right: 0, flexDirection: "row", justifyContent: "center", gap: 14 },
   boton: { backgroundColor: "#fff", borderRadius: 22, paddingHorizontal: 16, paddingVertical: 8, alignItems: "center", minWidth: 100 },
   apagado: { opacity: 0.5 },
+  arenero: { borderWidth: 3, borderColor: "#FFB74D" },
+  bloqueado: { backgroundColor: "#ECEFF1" },
   botonEmoji: { fontSize: 30 },
   botonTexto: { fontSize: 15, fontWeight: "800", color: "#3B2F5C" },
 });
