@@ -7,7 +7,7 @@ import { LugarDibujo } from "../components/Lugares";
 import { ARBOLES, LUGARES, VECINOS, type Lugar } from "../lib/lugares";
 import { EmiliaDibujo, Globo } from "../components/Personajes";
 import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
-import { hablar } from "../lib/voz";
+import { hablar, reactivarVoz } from "../lib/voz";
 
 /**
  * El barrio de Emilia como un mundo para caminar (vista desde arriba, estilo
@@ -264,6 +264,9 @@ function Mundo() {
       <Pressable style={estilos.cambiarJugador} onPress={() => { elegirJugador(null); router.replace("/quien-juega"); }} accessibilityLabel="Cambiar de jugador">
         <Text style={estilos.botonTexto}>👫 Cambiar</Text>
       </Pressable>
+      <Pressable style={estilos.sonido} onPress={() => reactivarVoz()} accessibilityLabel="Reactivar sonido">
+        <Text style={estilos.botonTexto}>🔊 Sonido</Text>
+      </Pressable>
       <Pressable style={estilos.padres} accessibilityLabel="Zona de padres" onPress={() => router.push("/padres")}>
         <Text style={estilos.padresTexto}>👪 Padres</Text>
       </Pressable>
@@ -342,6 +345,7 @@ const estilos = StyleSheet.create({
   dialogo: { position: "absolute", top: 14, left: 0, right: 0, alignItems: "center" },
   miPersonaje: { position: "absolute", top: 16, left: 16, backgroundColor: "#fff", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8 },
   botonTexto: { fontSize: 16, fontWeight: "800", color: "#3B2F5C" },
+  sonido: { position: "absolute", top: 160, left: 16, backgroundColor: "#FFF8E1", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 2, borderColor: "#FFB300" },
   probar3d: { position: "absolute", top: 112, left: 16, backgroundColor: "#E1F5FE", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 2, borderColor: "#29B6F6" },
   cambiarJugador: { position: "absolute", top: 64, left: 16, backgroundColor: "#fff", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8 },
   padres: { position: "absolute", bottom: 12, right: 12, backgroundColor: "rgba(255,255,255,0.85)", borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8 },
