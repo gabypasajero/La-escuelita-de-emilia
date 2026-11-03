@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar } from "../components/Avatar";
+import { BotonInstalar } from "../components/BotonInstalar";
 import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
 import { ACCESORIOS, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
@@ -61,6 +62,7 @@ export default function QuienJuega() {
           <Text style={estilos.juntosTexto}>👫 Jugar juntos</Text>
         </Pressable>
       )}
+      <BotonInstalar estilo={estilos.instalar} />
     </SafeAreaView>
   );
 }
@@ -75,5 +77,6 @@ const estilos = StyleSheet.create({
   monedas: { fontSize: 18, fontWeight: "800", color: "#F9A825" },
   mas: { fontSize: 70 },
   juntos: { marginTop: 22, backgroundColor: "#FB8C00", borderRadius: 30, paddingHorizontal: 30, paddingVertical: 14 },
+  instalar: { position: "absolute", top: 16, right: 16 },
   juntosTexto: { color: "#fff", fontSize: 24, fontWeight: "900" },
 });
