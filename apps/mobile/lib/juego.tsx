@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { anunciarDespues } from "./voz";
 
 /** Cómo se ve el personaje del niño. */
 export interface Apariencia {
@@ -69,7 +70,7 @@ interface Juego extends Estado {
   /** Suma monedas por un logro y muestra la animación "+n". */
   ganar: (n: number) => void;
   /** Premia a un jugador específico (en "Jugar juntos"). */
-  ganarPara: (id: string, n: number) => void;
+  ganarPara: (id: string, n: number, anunciar?: boolean) => void;
   comprar: (id: string) => boolean;
   /** Pone o saca un accesorio (si ya estaba puesto, lo saca). */
   alternar: (id: string) => void;
@@ -86,6 +87,14 @@ const VACIO: Estado = { perfil: null, monedas: 0, estrellas: 0, comprados: [], p
 /** Lugares que se abren al juntar estrellas. */
 export const DESBLOQUEOS = { arenero: 10, veterinaria: 20 } as const;
 const Contexto = createContext<Juego | null>(null);
+
+/** Reconocimiento por voz al ganar monedas (varía para no repetirse siempre). */
+const FELICITACIONES = ["¡Muy bien, {n}, lo superaste!", "¡Bien hecho, {n}!", "¡Lo lograste, {n}!", "¡Excelente, {n}!", "¡Qué bien lo hiciste, {n}!"];
+let vecesFelicitado = 0;
+export function fraseMoneda(nombre: string, n: number) {
+  const inicio = FELICITACIONES[vecesFelicitado++ % FELICITACIONES.length]!.replace("{n}", nombre);
+  return `${inicio} Te ganaste ${n === 1 ? "una moneda" : `${n} monedas`}.`;
+}
 
 /** Qué accesorio nuevo alcanza a comprar ahora y antes no (el más caro de esos). */
 export function nuevoAlcanzable(antes: number, ahora: number, comprados: string[]) {
@@ -138,11 +147,16 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
     if (nuevo) setAviso(`¡${j.perfil.nombre}, ya tienes suficientes monedas para comprarte: ${nuevo.nombre}! Vamos a la tienda de disfraces.`);
     actualizar((x) => ({ ...x, monedas: x.monedas + n, estrellas: x.estrellas + 1 }));
     setPremio({ n, clave: Date.now() });
+    anunciarDespues(fraseMoneda(j.perfil.nombre, n));
   }, [actualizar]);
 
-  const ganarPara = useCallback((id: string, n: number) => {
+  const jugadoresRef = useRef(jugadores);
+  jugadoresRef.current = jugadores;
+  const ganarPara = useCallback((id: string, n: number, anunciar = true) => {
     setJugadores((js) => js.map((j) => (j.id === id ? { ...j, monedas: j.monedas + n, estrellas: j.estrellas + 1 } : j)));
     setPremio({ n, clave: Date.now() });
+    const j = jugadoresRef.current.find((x) => x.id === id);
+    if (anunciar && j) anunciarDespues(fraseMoneda(j.perfil.nombre, n));
   }, []);
 
   const comprar = useCallback((id: string) => {

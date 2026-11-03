@@ -120,7 +120,7 @@ function Partida({ equipo, alSalir }: { equipo: Jugador[]; alSalir: () => void }
     await hablarYEsperar(felicitar, 300);
 
     if (total >= META) {
-      equipo.forEach((j) => ganarPara(j.id, 3));
+      equipo.forEach((j) => ganarPara(j.id, 3, false)); // la fiesta ya lo anuncia para todos
       setFiesta(true);
       const texto = "¡Lo lograron juntos! ¡Fiesta de Tito! Tres monedas para cada uno.";
       setDicho(texto);
