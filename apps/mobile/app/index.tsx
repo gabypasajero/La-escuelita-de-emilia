@@ -3,7 +3,8 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
 import { Avatar, TitoVestido } from "../components/Avatar";
-import { LugarDibujo, type LugarId } from "../components/Lugares";
+import { LugarDibujo } from "../components/Lugares";
+import { ARBOLES, LUGARES, VECINOS, type Lugar } from "../lib/lugares";
 import { EmiliaDibujo, Globo } from "../components/Personajes";
 import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
@@ -18,45 +19,6 @@ import { hablar } from "../lib/voz";
 const MUNDO = { ancho: 1800, alto: 1250 };
 const TAMANO_LUGAR = 250;
 const VELOCIDAD = 280; // unidades por segundo
-
-interface Lugar {
-  id: LugarId;
-  nombre: string;
-  frase: string;
-  ruta?: Href;
-  x: number;
-  /** Línea del suelo donde se apoya el edificio (define qué se dibuja delante). */
-  y: number;
-  /** Estrellas necesarias para entrar (lugar desbloqueable). */
-  estrellas?: number;
-}
-
-const LUGARES: Lugar[] = [
-  { id: "escuelita", nombre: "La Escuelita", frase: "¡A la escuelita! Letras y números.", ruta: "/escuelita", x: 430, y: 360 },
-  { id: "taller", nombre: "Taller de arte", frase: "¡Qué entretenido! ¿Pintamos?", ruta: "/pintar", x: 780, y: 360 },
-  { id: "tiendita", nombre: "Almacén", frase: "Doña Rosa necesita ayuda en el almacén.", ruta: "/juegos/tiendita", x: 1130, y: 360 },
-  { id: "disfraces", nombre: "Disfraces", frase: "¡La tienda de disfraces! ¿Qué te compras?", ruta: "/disfraces", x: 1480, y: 360 },
-  { id: "casa", nombre: "Casa de Emilia", frase: "¡Esta es mi casa! Ven, te muestro el patio.", ruta: "/casa", x: 300, y: 770 },
-  { id: "plaza", nombre: "Parque", frase: "¡Al parque de juegos! Columpio, resbalín y balancín.", ruta: "/plaza", x: 700, y: 770 },
-  { id: "huerto", nombre: "Huerto", frase: "Don Pedro nos espera en el huerto.", ruta: "/huerto", x: 1100, y: 770 },
-  { id: "granja", nombre: "Granja", frase: "¡Vamos a ver a los animales de la granja!", ruta: "/granja", x: 1480, y: 770 },
-  { id: "veterinaria", nombre: "Veterinaria", frase: "¡La veterinaria del Dr. Lucas! Vamos a cuidar animales.", ruta: "/veterinaria", x: 560, y: 1150, estrellas: DESBLOQUEOS.veterinaria },
-  { id: "paradero", nombre: "Paradero", frase: "Pronto llegan en bus mis amigos de otros países.", x: 1300, y: 1150 },
-];
-
-const ARBOLES: Array<[number, number]> = [
-  [90, 230], [220, 190], [1680, 210], [1760, 560], [80, 1080], [330, 1170], [1720, 1120],
-  [610, 560], [1290, 560], [990, 1010], [180, 640], [1600, 960], [760, 1060],
-];
-
-const VECINOS: Array<{ emoji: string; x: number; y: number; frase: string }> = [
-  { emoji: "🐄", x: 1620, y: 850, frase: "¡Muuu!" },
-  { emoji: "🐑", x: 1350, y: 870, frase: "¡Beee!" },
-  { emoji: "🐔", x: 1560, y: 900, frase: "¡Kikirikí!" },
-  { emoji: "🐱", x: 470, y: 900, frase: "¡Miau! Es el gato del barrio." },
-  { emoji: "🦆", x: 230, y: 520, frase: "¡Cuac, cuac! Los patos nadan en la laguna." },
-  { emoji: "🦋", x: 950, y: 640, frase: "¡Una mariposa!" },
-];
 
 type Punto = { x: number; y: number };
 const distancia = (a: Punto, b: Punto) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -296,6 +258,9 @@ function Mundo() {
       <Pressable style={estilos.miPersonaje} onPress={() => router.push("/personaje")} accessibilityLabel="Cambiar mi personaje">
         <Text style={estilos.botonTexto}>✏️ Mi personaje</Text>
       </Pressable>
+      <Pressable style={estilos.probar3d} onPress={() => router.push("/barrio3d")} accessibilityLabel="Probar barrio 3D">
+        <Text style={estilos.botonTexto}>🧊 Probar 3D</Text>
+      </Pressable>
       <Pressable style={estilos.cambiarJugador} onPress={() => { elegirJugador(null); router.replace("/quien-juega"); }} accessibilityLabel="Cambiar de jugador">
         <Text style={estilos.botonTexto}>👫 Cambiar</Text>
       </Pressable>
@@ -377,6 +342,7 @@ const estilos = StyleSheet.create({
   dialogo: { position: "absolute", top: 14, left: 0, right: 0, alignItems: "center" },
   miPersonaje: { position: "absolute", top: 16, left: 16, backgroundColor: "#fff", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8 },
   botonTexto: { fontSize: 16, fontWeight: "800", color: "#3B2F5C" },
+  probar3d: { position: "absolute", top: 112, left: 16, backgroundColor: "#E1F5FE", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 2, borderColor: "#29B6F6" },
   cambiarJugador: { position: "absolute", top: 64, left: 16, backgroundColor: "#fff", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8 },
   padres: { position: "absolute", bottom: 12, right: 12, backgroundColor: "rgba(255,255,255,0.85)", borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8 },
   padresTexto: { fontSize: 14, color: "#3B2F5C" },
