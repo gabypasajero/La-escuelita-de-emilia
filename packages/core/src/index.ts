@@ -13,3 +13,4 @@ export * from "./juegos/tiendita";
 export * from "./juegos/huerto";
 export * from "./juegos/rutinas";
 export * from "./puerta-parental";
+export * from "./contenido/ingles";

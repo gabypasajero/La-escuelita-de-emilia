@@ -25,7 +25,7 @@ export const LUGARES: Lugar[] = [
   { id: "huerto", nombre: "Huerto", frase: "Don Pedro nos espera en el huerto.", ruta: "/huerto", x: 1100, y: 770 },
   { id: "granja", nombre: "Granja", frase: "¡Vamos a ver a los animales de la granja!", ruta: "/granja", x: 1480, y: 770 },
   { id: "veterinaria", nombre: "Veterinaria", frase: "¡La veterinaria del Dr. Lucas! Vamos a cuidar animales.", ruta: "/veterinaria", x: 560, y: 1150, estrellas: DESBLOQUEOS.veterinaria },
-  { id: "paradero", nombre: "Paradero", frase: "Pronto llegan en bus mis amigos de otros países.", x: 1300, y: 1150 },
+  { id: "paradero", nombre: "Paradero", frase: "¡Al paradero! Llega el bus con un amigo de otro país.", ruta: "/paradero", x: 1300, y: 1150 },
 ];
 
 export const ARBOLES: Array<[number, number]> = [

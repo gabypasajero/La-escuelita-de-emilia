@@ -28,19 +28,28 @@ let turno = 0;
 const esWeb = Platform.OS === "web" && typeof window !== "undefined" && "speechSynthesis" in window;
 const sintetizador = () => (esWeb ? window.speechSynthesis : null);
 
-// --- Voz en español del navegador (prefiere voces latinoamericanas y locales) ---
-let vozElegida: SpeechSynthesisVoice | null = null;
+// --- Voces del navegador por idioma (español: prefiere latinoamericanas; inglés: EE. UU.) ---
+export type Idioma = "es" | "en";
+const PREFERENCIAS: Record<Idioma, string[]> = {
+  es: ["es-cl", "es-419", "es-us", "es-mx", "es-ar", "es-co", "es-es", "es"],
+  en: ["en-us", "en-gb", "en-au", "en-ca", "en"],
+};
+const LENGUA: Record<Idioma, string> = { es: "es-ES", en: "en-US" };
+const vozElegida: Record<Idioma, SpeechSynthesisVoice | null> = { es: null, en: null };
 function elegirVoz() {
   const s = sintetizador();
   if (!s) return;
-  const voces = s.getVoices().filter((v) => v.lang.toLowerCase().startsWith("es"));
-  const orden = ["es-cl", "es-419", "es-us", "es-mx", "es-ar", "es-co", "es-es", "es"];
-  voces.sort((a, b) => {
-    const ia = orden.findIndex((o) => a.lang.toLowerCase().startsWith(o));
-    const ib = orden.findIndex((o) => b.lang.toLowerCase().startsWith(o));
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || Number(b.localService) - Number(a.localService);
-  });
-  vozElegida = voces[0] ?? null;
+  const todas = s.getVoices();
+  for (const idioma of ["es", "en"] as Idioma[]) {
+    const orden = PREFERENCIAS[idioma];
+    const voces = todas.filter((v) => v.lang.toLowerCase().replace("_", "-").startsWith(idioma));
+    voces.sort((a, b) => {
+      const ia = orden.findIndex((o) => a.lang.toLowerCase().replace("_", "-").startsWith(o));
+      const ib = orden.findIndex((o) => b.lang.toLowerCase().replace("_", "-").startsWith(o));
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || Number(b.localService) - Number(a.localService);
+    });
+    vozElegida[idioma] = voces[0] ?? null;
+  }
 }
 if (esWeb) {
   elegirVoz();
@@ -65,7 +74,7 @@ if (esWeb) {
 let fraseActual: SpeechSynthesisUtterance | null = null;
 const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function decirWeb(texto: string, miTurno: number): Promise<"fin" | "cortada"> {
+async function decirWeb(texto: string, miTurno: number, idioma: Idioma): Promise<"fin" | "cortada"> {
   const s = sintetizador()!;
   if (s.speaking || s.pending) {
     s.cancel();
@@ -76,9 +85,10 @@ async function decirWeb(texto: string, miTurno: number): Promise<"fin" | "cortad
   return new Promise((resolver) => {
     let listo = false;
     const u = new SpeechSynthesisUtterance(texto);
-    u.lang = vozElegida?.lang ?? "es-ES";
-    if (vozElegida) u.voice = vozElegida;
-    u.rate = 0.85;
+    const voz = vozElegida[idioma];
+    u.lang = voz?.lang ?? LENGUA[idioma];
+    if (voz) u.voice = voz;
+    u.rate = idioma === "en" ? 0.8 : 0.85;
     u.pitch = 1.15;
     fraseActual = u;
     const fin = (como: "fin" | "cortada") => {
@@ -103,7 +113,7 @@ async function decirWeb(texto: string, miTurno: number): Promise<"fin" | "cortad
   });
 }
 
-function decirNativo(texto: string): Promise<"fin" | "cortada"> {
+function decirNativo(texto: string, idioma: Idioma): Promise<"fin" | "cortada"> {
   return new Promise((resolver) => {
     let listo = false;
     const fin = (como: "fin" | "cortada") => {
@@ -113,17 +123,18 @@ function decirNativo(texto: string): Promise<"fin" | "cortada"> {
       resolver(como);
     };
     const respaldo = setTimeout(() => fin("fin"), 1200 + texto.length * 85);
-    Speech.speak(texto, { language: "es-ES", rate: 0.85, pitch: 1.15, onDone: () => fin("fin"), onStopped: () => fin("cortada"), onError: () => fin("fin") });
+    Speech.speak(texto, { language: LENGUA[idioma], rate: idioma === "en" ? 0.8 : 0.85, pitch: 1.15, onDone: () => fin("fin"), onStopped: () => fin("cortada"), onError: () => fin("fin") });
   });
 }
 
-const decir = (texto: string, miTurno: number) => (esWeb ? decirWeb(texto, miTurno) : decirNativo(texto));
+const decir = (texto: string, miTurno: number, idioma: Idioma = "es") => (esWeb ? decirWeb(texto, miTurno, idioma) : decirNativo(texto, idioma));
 
-export async function hablar(texto: string): Promise<void> {
+/** Dice una frase (en español, o en inglés para los amigos de otros países). */
+export async function hablar(texto: string, idioma: Idioma = "es"): Promise<void> {
   const miTurno = ++turno;
   if (!esWeb) Speech.stop();
   hablando = true;
-  let como = await decir(texto, miTurno);
+  let como = await decir(texto, miTurno, idioma);
   // Si terminó de forma natural y hay un anuncio esperando, se dice a continuación.
   while (como === "fin" && pendiente && miTurno === turno) {
     const anuncio = pendiente;
@@ -148,8 +159,8 @@ export function anunciarDespues(texto: string) {
 }
 
 /** Espera a que termine la frase (y el anuncio que venga después) y luego una pausa breve. */
-export async function hablarYEsperar(texto: string, pausaMs = 400) {
-  await hablar(texto);
+export async function hablarYEsperar(texto: string, pausaMs = 400, idioma: Idioma = "es") {
+  await hablar(texto, idioma);
   await espera(pausaMs);
 }
 
