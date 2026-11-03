@@ -13,6 +13,7 @@ Juego educativo multiplataforma (iOS · Android · Web) para niños de **3 a 6 a
 | ![](docs/capturas/huerto.png) | ![](docs/capturas/patio.png) | ![](docs/capturas/pintar.png) | ![](docs/capturas/tiendita.png) | ![](docs/capturas/juegos.png) |
 
 ## Documentación
+- 🛟 [Respaldos y cómo volver atrás](docs/RESPALDOS.md)
 - 🌎 [El mundo de Emilia: concepto, sesiones y experiencia del niño](docs/MUNDO_Y_EXPERIENCIA.md)
 - 🌻 [Vida diaria: huerto, cuidado personal y habilidades para la vida](docs/VIDA_DIARIA.md)
 - 💛 [Emilia, compañera de cada niño (lazo y conversación sin internet)](docs/EMILIA_COMPANERA.md)
