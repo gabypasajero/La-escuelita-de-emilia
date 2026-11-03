@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
-import { PanResponder, Pressable, StyleSheet, Text, View, type GestureResponderEvent } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { Pantalla } from "../components/Pantalla";
+import { useSuperficieDibujo } from "../lib/puntero";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
 
@@ -27,41 +28,35 @@ export default function Pintar() {
   const pincel = useRef({ color, grosor });
   pincel.current = { color, grosor };
 
-  // Coordenadas relativas al lienzo. El SVG no recibe toques (pointerEvents="none"),
-  // así locationX/locationY siempre se miden desde el lienzo y no desde un trazo.
-  const punto = (e: GestureResponderEvent) => {
-    const { locationX, locationY } = e.nativeEvent;
-    return `${Math.round(locationX)},${Math.round(locationY)}`;
+  // Acepta dedo, mouse y lápiz óptico. Con lápiz, apretar más hace el trazo más grueso.
+  const presiones = useRef<number[]>([]);
+  const grosorCon = (presion: number, lapiz: boolean) => {
+    if (!lapiz) return pincel.current.grosor;
+    presiones.current.push(presion);
+    const media = presiones.current.reduce((a, b) => a + b, 0) / presiones.current.length;
+    return Math.max(3, Math.round(pincel.current.grosor * (0.4 + media * 1.2)));
   };
-
-  const responder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: (e) => {
-        const p = punto(e);
-        const nuevo: Trazo = { d: `M${p} L${p}`, ...pincel.current };
-        actual.current = nuevo;
-        setTrazos((t) => [...t, nuevo]);
-      },
-      onPanResponderMove: (e) => {
-        const previo = actual.current;
-        if (!previo) return;
-        // Se guarda el trazo en una constante: el actualizador de estado puede
-        // ejecutarse después de soltar el dedo, cuando actual.current ya es null.
-        const siguiente: Trazo = { ...previo, d: `${previo.d} L${punto(e)}` };
-        actual.current = siguiente;
-        setTrazos((t) => [...t.slice(0, -1), siguiente]);
-      },
-      onPanResponderRelease: () => {
-        actual.current = null;
-      },
-      onPanResponderTerminate: () => {
-        actual.current = null;
-      },
-    }),
-  ).current;
+  const { ref: lienzoRef, props: lienzoProps, estilo: lienzoEstilo } = useSuperficieDibujo({
+    empezar: ({ x, y, presion, lapiz }) => {
+      presiones.current = [];
+      const p = `${Math.round(x)},${Math.round(y)}`;
+      const nuevo: Trazo = { d: `M${p} L${p}`, color: pincel.current.color, grosor: grosorCon(presion, lapiz) };
+      actual.current = nuevo;
+      setTrazos((t) => [...t, nuevo]);
+    },
+    seguir: ({ x, y, presion, lapiz }) => {
+      const previo = actual.current;
+      if (!previo) return;
+      // Se guarda el trazo en una constante: el actualizador de estado puede
+      // ejecutarse después de soltar el dedo, cuando actual.current ya es null.
+      const siguiente: Trazo = { ...previo, d: `${previo.d} L${Math.round(x)},${Math.round(y)}`, grosor: grosorCon(presion, lapiz) };
+      actual.current = siguiente;
+      setTrazos((t) => [...t.slice(0, -1), siguiente]);
+    },
+    terminar: () => {
+      actual.current = null;
+    },
+  });
 
   function borrarTodo() {
     if (trazos.length) hablar("¡Hoja nueva! ¿Qué dibujamos ahora?");
@@ -70,7 +65,7 @@ export default function Pintar() {
 
   return (
     <Pantalla color={COLORES.pintar}>
-      <View style={estilos.lienzo} {...responder.panHandlers}>
+      <View ref={lienzoRef} style={[estilos.lienzo, lienzoEstilo]} accessibilityLabel="Lienzo para pintar" {...lienzoProps}>
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <Svg width="100%" height="100%">
             {trazos.map((t, i) => (

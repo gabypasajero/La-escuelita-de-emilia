@@ -1,7 +1,8 @@
 import { GLIFOS, avanzarTrazo, puntosDeControl, type Punto } from "@escuelita/core";
 import { useMemo, useRef, useState } from "react";
-import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Path, Polyline, Text as SvgText } from "react-native-svg";
+import { useSuperficieDibujo } from "../lib/puntero";
 import { hablar } from "../lib/voz";
 
 // Caja de los trazos: x de -10 a 110, y de -25 a 150 (deja espacio a la tilde de la Ñ).
@@ -31,45 +32,26 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
   const demo = useRef(new Animated.Value(0)).current;
   const [mostrandoDemo, setMostrandoDemo] = useState(false);
 
-  // Posición en pantalla de la hoja: el dedo se mide desde ahí (locationX cambia según el elemento tocado).
-  const hojaRef = useRef<View>(null);
-  const origen = useRef({ x: 0, y: 0 });
-  const medir = () => hojaRef.current?.measureInWindow((x, y) => { origen.current = { x, y }; });
-  const aGlifo = (pageX: number, pageY: number): Punto => [
-    ((pageX - origen.current.x) / ancho) * VB.w + VB.x,
-    ((pageY - origen.current.y) / alto) * VB.h + VB.y,
-  ];
-
-  const responder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onStartShouldSetPanResponderCapture: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponderCapture: () => true,
-        onPanResponderTerminationRequest: () => false,
-        onPanResponderGrant: (e) => {
-          medir();
-          const p = aGlifo(e.nativeEvent.pageX, e.nativeEvent.pageY);
-          setTinta((t) => [...t, [p]]);
-          const s = estado.current;
-          const siguiente = controles[s.actual]?.[s.logrados];
-          if (siguiente && Math.hypot(siguiente[0] - p[0], siguiente[1] - p[1]) > 34 && Date.now() - s.ultimoAviso > 4000) {
-            s.ultimoAviso = Date.now();
-            void hablar(s.logrados === 0 ? "Empieza en el punto verde." : "Sigue por los puntitos.");
-          }
-          mover(p);
-        },
-        onPanResponderMove: (e) => {
-          const p = aGlifo(e.nativeEvent.pageX, e.nativeEvent.pageY);
-          setTinta((t) => (t.length ? [...t.slice(0, -1), [...t.at(-1)!, p]] : [[p]]));
-          mover(p);
-        },
-        onPanResponderRelease: () => {},
-        onPanResponderTerminate: () => {},
-      }),
-    [controles, ancho, alto],
-  );
+  // Acepta dedo, mouse y lápiz óptico (ver lib/puntero.ts).
+  const aGlifo = (x: number, y: number): Punto => [(x / ancho) * VB.w + VB.x, (y / alto) * VB.h + VB.y];
+  const { ref: capaRef, props: capaProps, estilo: capaEstilo } = useSuperficieDibujo({
+    empezar: ({ x, y }) => {
+      const p = aGlifo(x, y);
+      setTinta((t) => [...t, [p]]);
+      const s = estado.current;
+      const siguiente = controles[s.actual]?.[s.logrados];
+      if (siguiente && Math.hypot(siguiente[0] - p[0], siguiente[1] - p[1]) > 34 && Date.now() - s.ultimoAviso > 4000) {
+        s.ultimoAviso = Date.now();
+        void hablar(s.logrados === 0 ? "Empieza en el punto verde." : "Sigue por los puntitos.");
+      }
+      mover(p);
+    },
+    seguir: ({ x, y }) => {
+      const p = aGlifo(x, y);
+      setTinta((t) => (t.length ? [...t.slice(0, -1), [...t.at(-1)!, p]] : [[p]]));
+      mover(p);
+    },
+  });
 
   function mover(p: Punto) {
     const s = estado.current;
@@ -116,7 +98,7 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
 
   return (
     <View style={estilos.contenedor}>
-      <View style={[estilos.hoja, { width: ancho, height: alto }]} ref={hojaRef} onLayout={medir}>
+      <View style={[estilos.hoja, { width: ancho, height: alto }]}>
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <Svg width={ancho} height={alto} viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`}>
             {/* Renglones como en un cuaderno */}
@@ -160,7 +142,7 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
           </Animated.Text>
         )}
         {/* Capa transparente que recibe el dedo: el dibujo de abajo cambia y no debe cortar el gesto. */}
-        <View style={StyleSheet.absoluteFill} accessibilityLabel="Hoja para escribir" {...responder.panHandlers} />
+        <View ref={capaRef} style={[StyleSheet.absoluteFill, capaEstilo]} accessibilityLabel="Hoja para escribir" {...capaProps} />
       </View>
       <View style={estilos.botones}>
         <Pressable style={estilos.boton} onPress={mirame} accessibilityLabel="Mírame">
