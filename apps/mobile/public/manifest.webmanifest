@@ -1,0 +1,19 @@
+{
+  "name": "La Escuelita de Emilia",
+  "short_name": "Escuelita",
+  "description": "Juego educativo para niños de 3 a 6 años: letras, números, animales, vida diaria y más, con Emilia y Tito.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#FFE082",
+  "theme_color": "#FDD835",
+  "categories": ["education", "kids", "games"],
+  "icons": [
+    { "src": "/iconos/icono-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/iconos/icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/iconos/icono-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

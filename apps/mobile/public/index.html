@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+    <title>%WEB_TITLE%</title>
+    <!-- App instalable (PWA): nombre, ícono, colores y pantalla completa -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#FDD835" />
+    <meta name="description" content="Juego educativo para niños de 3 a 6 años, con Emilia y Tito." />
+    <link rel="icon" type="image/png" sizes="48x48" href="/iconos/icono-48.png" />
+    <link rel="apple-touch-icon" href="/iconos/icono-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Escuelita" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        overflow: hidden;
+        background: #fff8ec;
+        /* Sin zoom ni selección accidental al jugar */
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        overscroll-behavior: none;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+    <script>
+      // Guarda el aviso de instalación para mostrar el botón "Instalar" en la zona de padres.
+      window.addEventListener("beforeinstallprompt", function (e) {
+        e.preventDefault();
+        window.__instalarApp = e;
+      });
+      // Modo sin internet.
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("/sw.js").catch(function () {});
+        });
+      }
+    </script>
+  </head>
+
+  <body>
+    <noscript>Necesitas activar JavaScript para jugar.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
