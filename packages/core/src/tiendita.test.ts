@@ -12,7 +12,7 @@ describe("La Tiendita", () => {
       for (const nivel of [1, 2, 3] as const) {
         const pedido = pedidoTiendita(nivel);
         expect(pedido.estante).toContain(pedido.producto);
-        expect(pedido.estante).toHaveLength(nivel);
+        expect(pedido.estante).toHaveLength({ 1: 3, 2: 4, 3: 6 }[nivel]);
         expect(new Set(pedido.estante).size).toBe(pedido.estante.length);
       }
     }

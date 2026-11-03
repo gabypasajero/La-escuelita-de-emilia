@@ -8,6 +8,7 @@ import { hablar } from "../lib/voz";
 
 /** Todos los juegos educativos viven en la Escuelita. */
 const SALAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; frase: string }> = [
+  { ruta: "/trazar", nombre: "Escribir", emoji: "✏️", color: "#5C6BC0", frase: "¡Vamos a aprender a escribir con el dedo!" },
   { ruta: "/letras", nombre: "Letras", emoji: "🔤", color: "#29B6F6", frase: "¡Vamos a jugar con las letras y sus sonidos!" },
   { ruta: "/numeros", nombre: "Números", emoji: "🔢", color: "#66BB6A", frase: "¡A contar!" },
   { ruta: "/sumas", nombre: "Sumas", emoji: "➕", color: "#FFA726", frase: "¡Vamos a sumar con frutas!" },

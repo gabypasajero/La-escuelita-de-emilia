@@ -1,4 +1,5 @@
 import { NUMEROS, rondaContar } from "@escuelita/core";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../components/Pantalla";
@@ -62,6 +63,11 @@ export default function Numeros() {
                     </Text>
                   ))}
                 </View>
+                {n.valor < 10 && (
+                  <Pressable style={estilos.lapiz} onPress={() => router.push(`/trazar?serie=numeros&c=${n.valor}`)} accessibilityLabel={`Escribir el ${n.palabra}`}>
+                    <Text style={estilos.lapizTexto}>✏️</Text>
+                  </Pressable>
+                )}
               </Pressable>
             );
           })}
@@ -114,6 +120,8 @@ const estilos = StyleSheet.create({
   grilla: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 14, paddingBottom: 24 },
   tarjeta: { width: 150, minHeight: 150, borderRadius: 22, backgroundColor: "#fff", alignItems: "center", padding: 8 },
   tarjetaActiva: { borderWidth: 5, borderColor: "#FDD835" },
+  lapiz: { position: "absolute", top: 6, right: 6, width: 40, height: 40, borderRadius: 20, backgroundColor: "#E3F2FD", alignItems: "center", justifyContent: "center" },
+  lapizTexto: { fontSize: 20 },
   numeroGrande: { fontSize: 52, fontWeight: "800", color: COLORES.texto },
   objetos: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", maxWidth: 130 },
   objeto: { fontSize: 22 },

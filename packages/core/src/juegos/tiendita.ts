@@ -19,7 +19,8 @@ export interface PedidoTiendita {
 export function pedidoTiendita(nivel: Nivel, azar: Aleatorio = Math.random): PedidoTiendita {
   const producto = elegir(PRODUCTOS, azar);
   const cantidad = 1 + Math.floor(azar() * MAXIMO_CONTEO[nivel]);
-  const distractores = nivel === 1 ? 0 : nivel === 2 ? 1 : 2;
+  // Siempre hay entre qué elegir: el niño busca el producto pedido entre otros.
+  const distractores = nivel === 1 ? 2 : nivel === 2 ? 3 : 5;
   const estante = mezclar(
     [producto, ...mezclar(PRODUCTOS.filter((p) => p !== producto), azar).slice(0, distractores)],
     azar,

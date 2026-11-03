@@ -1,4 +1,5 @@
 import { LETRAS, presentarLetra, rondaSonidoInicial, type Letra } from "@escuelita/core";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../components/Pantalla";
@@ -14,6 +15,7 @@ import { hablar } from "../lib/voz";
 export default function Letras() {
   const [jugando, setJugando] = useState(false);
   const [elegida, setElegida] = useState<Letra | null>(null);
+  const [soloVocales, setSoloVocales] = useState(false);
 
   async function presentar(l: Letra) {
     setElegida(l);
@@ -49,10 +51,20 @@ export default function Letras() {
                 {elegida.palabra.slice(1)}
               </Text>
               <Text style={estilos.repetir}>🔊</Text>
+              <Pressable
+                style={estilos.escribir}
+                accessibilityLabel="Escribir esta letra"
+                onPress={() => router.push(`/trazar?serie=${elegida.esVocal ? "vocales" : "abecedario"}&c=${elegida.letra}`)}
+              >
+                <Text style={[estilos.escribirTexto, { color: "#fff" }]}>✏️ Escribir</Text>
+              </Pressable>
             </Pressable>
           )}
+          <Pressable style={[estilos.filtro, soloVocales && estilos.filtroActivo]} onPress={() => { setSoloVocales((v) => !v); void hablar(soloVocales ? "Todo el abecedario" : "Las vocales: a, e, i, o, u"); }} accessibilityLabel="Solo vocales">
+            <Text style={estilos.escribirTexto}>{soloVocales ? "🔤 Ver todas" : "🅰️ Solo vocales"}</Text>
+          </Pressable>
           <ScrollView contentContainerStyle={estilos.grilla}>
-            {LETRAS.map((l) => (
+            {LETRAS.filter((l) => !soloVocales || l.esVocal).map((l) => (
               <Pressable
                 key={l.letra}
                 style={[estilos.tarjeta, elegida === l && estilos.tarjetaActiva]}
@@ -80,6 +92,10 @@ const estilos = StyleSheet.create({
   palabra: { fontSize: 40, fontWeight: "700", color: COLORES.texto },
   inicial: { color: "#E53935", fontWeight: "900" },
   repetir: { fontSize: 32 },
+  escribir: { backgroundColor: "#43A047", borderRadius: 18, paddingHorizontal: 14, paddingVertical: 8 },
+  escribirTexto: { fontSize: 18, fontWeight: "900", color: "#3B2F5C" },
+  filtro: { backgroundColor: "#fff", borderRadius: 18, paddingHorizontal: 14, paddingVertical: 8, marginBottom: 10 },
+  filtroActivo: { backgroundColor: "#FDD835" },
   grilla: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 14, paddingBottom: 24 },
   tarjeta: { width: 110, height: 120, borderRadius: 20, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
   tarjetaActiva: { borderWidth: 5, borderColor: "#FDD835" },
