@@ -2,6 +2,7 @@ import { RUTINA_DIENTES, RUTINA_MANOS, duracionTotal, pasoEn } from "@escuelita/
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AnimacionRutina } from "../../components/AnimacionRutina";
 import { Pantalla } from "../../components/Pantalla";
 import { EmiliaDibujo, Globo } from "../../components/Personajes";
 import { useJuego } from "../../lib/juego";
@@ -49,7 +50,7 @@ export default function Rutina() {
     <Pantalla color={rutina.id === "manos" ? "#B3E5FC" : "#C8E6C9"}>
       <Text style={estilos.titulo}>{rutina.titulo}</Text>
       <View style={estilos.fila}>
-        <EmiliaDibujo alto={150} />
+        <EmiliaDibujo alto={100} />
         <Globo texto={terminado ? rutina.cierre : actual ? actual.frase : "¡Toca empezar!"} alLado="izquierda" />
       </View>
 
@@ -66,8 +67,8 @@ export default function Rutina() {
         </View>
       ) : (
         <View style={estilos.centro}>
-          <Text style={estilos.pasoEmoji}>{actual?.emoji}</Text>
-          <Text style={estilos.tiempo}>{restante}</Text>
+          <AnimacionRutina rutina={rutina.id} paso={paso} />
+          <Text style={estilos.tiempo}>{actual?.emoji} {restante}</Text>
         </View>
       )}
 

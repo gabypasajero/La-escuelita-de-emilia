@@ -39,7 +39,7 @@ const LUGARES: Lugar[] = [
   { id: "casa", nombre: "Casa de Emilia", frase: "¡Esta es mi casa! Ven, te muestro el patio.", ruta: "/casa", x: 300, y: 770 },
   { id: "plaza", nombre: "Parque", frase: "¡Al parque de juegos! Columpio, resbalín y balancín.", ruta: "/plaza", x: 700, y: 770 },
   { id: "huerto", nombre: "Huerto", frase: "Don Pedro nos espera en el huerto.", ruta: "/huerto", x: 1100, y: 770 },
-  { id: "granja", nombre: "Granja", frase: "¡Vamos a ver a los animales!", ruta: "/animales", x: 1480, y: 770 },
+  { id: "granja", nombre: "Granja", frase: "¡Vamos a ver a los animales de la granja!", ruta: "/granja", x: 1480, y: 770 },
   { id: "veterinaria", nombre: "Veterinaria", frase: "¡La veterinaria del Dr. Lucas! Vamos a cuidar animales.", ruta: "/veterinaria", x: 560, y: 1150, estrellas: DESBLOQUEOS.veterinaria },
   { id: "paradero", nombre: "Paradero", frase: "Pronto llegan en bus mis amigos de otros países.", x: 1300, y: 1150 },
 ];

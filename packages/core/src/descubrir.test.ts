@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CUIDADOS, PACIENTES, VERDURAS, rondaColor, rondaForma, rondaMasMenos, rondaPatron, rondaVerdura, rondaVeterinaria } from "./index";
+import { CUIDADOS, PACIENTES, VERDURAS, rondaRopa, rondaSaludable, rondaColor, rondaForma, rondaMasMenos, rondaPatron, rondaVerdura, rondaVeterinaria } from "./index";
 
 const nivelesYVeces = (f: (n: 1 | 2 | 3) => void) => { for (let i = 0; i < 150; i++) for (const n of [1, 2, 3] as const) f(n); };
 
@@ -33,5 +33,17 @@ describe("juegos de descubrir", () => {
   it("cada paciente tiene un cuidado que existe", () => {
     for (const p of PACIENTES) expect(CUIDADOS.map((c) => c.id)).toContain(p.necesita);
     expect(new Set(VERDURAS.map((v) => v.id)).size).toBe(VERDURAS.length);
+  });
+});
+
+describe("ropero y comida sana", () => {
+  it("la prenda correcta va con el clima y solo hay un alimento sano por ronda", () => {
+    for (let i = 0; i < 150; i++) for (const n of [1, 2, 3] as const) {
+      const r = rondaRopa(n);
+      expect(r.correcta.id).toBe(r.clima.necesita);
+      expect(r.opciones).toContain(r.correcta);
+      const s = rondaSaludable(n);
+      expect(s.opciones.filter((a) => a.sano)).toEqual([s.correcta]);
+    }
   });
 });

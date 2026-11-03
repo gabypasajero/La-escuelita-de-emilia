@@ -114,3 +114,50 @@ export function rondaVeterinaria(nivel: Nivel, azar: Aleatorio = Math.random): R
   const correcta = CUIDADOS.find((c) => c.id === paciente.necesita)!;
   return { enunciado: `${paciente.problema} ¿Qué necesita?`, paciente, opciones: opcionesCon(correcta, CUIDADOS, OPCIONES_POR_NIVEL[nivel] + 1, azar), correcta };
 }
+
+/** Ropero: "¿Qué me pongo?" según el clima. */
+export interface Prenda { id: string; nombre: string; emoji: string }
+export const PRENDAS: Prenda[] = [
+  { id: "paraguas", nombre: "paraguas", emoji: "☂️" },
+  { id: "gorro", nombre: "gorro para el sol", emoji: "🧢" },
+  { id: "bufanda", nombre: "bufanda", emoji: "🧣" },
+  { id: "guantes", nombre: "guantes", emoji: "🧤" },
+  { id: "traje", nombre: "traje de baño", emoji: "🩱" },
+];
+export const CLIMAS = [
+  { emoji: "🌧️", frase: "Está lloviendo. ¿Qué me pongo?", necesita: "paraguas", porque: "El paraguas nos protege de la lluvia." },
+  { emoji: "☀️", frase: "Hace mucho sol. ¿Qué me pongo?", necesita: "gorro", porque: "El gorro nos cuida la cabeza del sol." },
+  { emoji: "🌬️", frase: "Hace frío y hay viento. ¿Qué me pongo?", necesita: "bufanda", porque: "La bufanda nos abriga el cuello." },
+  { emoji: "❄️", frase: "Está nevando. ¿Qué me pongo en las manos?", necesita: "guantes", porque: "Los guantes nos abrigan las manos." },
+  { emoji: "🏖️", frase: "Vamos a la piscina. ¿Qué me pongo?", necesita: "traje", porque: "El traje de baño es para nadar." },
+] as const;
+
+export function rondaRopa(nivel: Nivel, azar: Aleatorio = Math.random): Ronda<Prenda> & { clima: (typeof CLIMAS)[number] } {
+  const clima = elegir(CLIMAS, azar);
+  const correcta = PRENDAS.find((p) => p.id === clima.necesita)!;
+  return { enunciado: clima.frase, clima, opciones: opcionesCon(correcta, PRENDAS, OPCIONES_POR_NIVEL[nivel] + 1, azar), correcta };
+}
+
+/** Mesa de la abuela: "¿Qué le hace mejor a tu cuerpo?" (alimento sano contra golosina). */
+export interface Alimento { id: string; nombre: string; emoji: string; sano: boolean }
+export const ALIMENTOS: Alimento[] = [
+  { id: "manzana", nombre: "manzana", emoji: "🍎", sano: true },
+  { id: "zanahoria", nombre: "zanahoria", emoji: "🥕", sano: true },
+  { id: "brocoli", nombre: "brócoli", emoji: "🥦", sano: true },
+  { id: "platano", nombre: "plátano", emoji: "🍌", sano: true },
+  { id: "leche", nombre: "leche", emoji: "🥛", sano: true },
+  { id: "agua", nombre: "agua", emoji: "💧", sano: true },
+  { id: "uvas", nombre: "uvas", emoji: "🍇", sano: true },
+  { id: "ensalada", nombre: "ensalada", emoji: "🥗", sano: true },
+  { id: "dulce", nombre: "dulce", emoji: "🍭", sano: false },
+  { id: "caramelo", nombre: "caramelo", emoji: "🍬", sano: false },
+  { id: "dona", nombre: "dona", emoji: "🍩", sano: false },
+  { id: "bebida", nombre: "bebida con azúcar", emoji: "🥤", sano: false },
+  { id: "papas", nombre: "papas fritas", emoji: "🍟", sano: false },
+];
+
+export function rondaSaludable(nivel: Nivel, azar: Aleatorio = Math.random): Ronda<Alimento> {
+  const correcta = elegir(ALIMENTOS.filter((a) => a.sano), azar);
+  const golosinas = mezclar(ALIMENTOS.filter((a) => !a.sano), azar).slice(0, OPCIONES_POR_NIVEL[nivel] - 1 + (nivel === 3 ? 1 : 0));
+  return { enunciado: "¿Qué le hace mejor a tu cuerpo?", opciones: mezclar([correcta, ...golosinas], azar), correcta };
+}
