@@ -20,6 +20,7 @@ export function TocarParaEmpezar() {
       onPress={() => {
         setVisible(false);
         empezarConToque();
+        pantallaCompleta();
       }}
     >
       <View style={estilos.personajes}>
@@ -32,6 +33,24 @@ export function TocarParaEmpezar() {
       <Text style={estilos.nota}>Toca para escuchar a Emilia</Text>
     </Pressable>
   );
+}
+
+/**
+ * Pantalla completa y horizontal al tocar «¡A jugar!». No va en el manifiesto:
+ * en algunas tablets Android, una app instalada que exige pantalla completa y
+ * horizontal no abre con un toque al ícono (solo en pantalla dividida).
+ */
+function pantallaCompleta() {
+  try {
+    const doc = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
+    if (document.fullscreenElement) return;
+    const pedido = doc.requestFullscreen ? doc.requestFullscreen({ navigationUI: "hide" }) : (doc.webkitRequestFullscreen?.(), undefined);
+    void Promise.resolve(pedido)
+      .then(() => (screen.orientation as unknown as { lock?: (o: string) => Promise<void> }).lock?.("landscape"))
+      .catch(() => {});
+  } catch {
+    /* el navegador no permite pantalla completa: se juega igual */
+  }
 }
 
 const estilos = StyleSheet.create({
