@@ -1,28 +1,38 @@
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { TOQUE_MINIMO } from "../lib/tema";
 
-/** Botón fijo para volver al inicio: siempre visible en cada pantalla. */
+/**
+ * Botones fijos arriba a la izquierda, en cada pantalla:
+ * - ⬅️ Volver: a la pantalla anterior (por ejemplo, de un juego de Max a la casa de Max).
+ * - 🏠 Inicio: directo al barrio.
+ */
 export function BotonCasa() {
+  const volver = () => {
+    if (router.canGoBack()) router.back();
+    else router.replace("/");
+  };
   return (
-    <Pressable accessibilityLabel="Volver al inicio" onPress={() => router.replace("/")} style={estilos.boton}>
-      <Text style={estilos.icono}>🏠</Text>
-    </Pressable>
+    <View style={estilos.fila} pointerEvents="box-none">
+      <Pressable accessibilityLabel="Volver al inicio" onPress={() => router.replace("/")} style={estilos.boton}>
+        <Text style={estilos.icono}>🏠</Text>
+      </Pressable>
+      <Pressable accessibilityLabel="Volver atrás" onPress={volver} style={estilos.boton}>
+        <Text style={estilos.icono}>⬅️</Text>
+      </Pressable>
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
+  fila: { position: "absolute", top: 16, left: 16, flexDirection: "row", gap: 12, zIndex: 10 },
   boton: {
-    position: "absolute",
-    top: 16,
-    left: 16,
     width: TOQUE_MINIMO,
     height: TOQUE_MINIMO,
     borderRadius: TOQUE_MINIMO / 2,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 10,
     elevation: 4,
   },
   icono: { fontSize: 40 },
