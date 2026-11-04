@@ -357,7 +357,8 @@ export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D): Ba
   // Movimiento
   const destino = inicio.clone();
   let entrarA: Lugar | null = null;
-  const rastro: THREE.Vector3[] = Array.from({ length: 20 }, () => inicio.clone());
+  // El camino del niño empieza "detrás" de él, donde esperan Emilia y Tito.
+  const rastro: THREE.Vector3[] = Array.from({ length: 20 }, (_, k) => inicio.clone().add(new THREE.Vector3(-k * 0.7, 0, 0)));
   let fase = 0;
   const VEL = 16;
   // Las casas son sólidas: el niño camina alrededor (los parques, el huerto y el paradero se pueden pisar).
@@ -378,9 +379,10 @@ export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D): Ba
     obj.rotation.y = Math.atan2(dir.x, dir.z);
     return paso;
   };
-  const mover = (obj: THREE.Object3D, hacia: THREE.Vector3, dt: number, vel: number, conChoques = false) => {
+  const mover = (obj: THREE.Object3D, hacia: THREE.Vector3, dt: number, vel: number, conChoques = false, lider?: THREE.Vector3, distanciaMinima = 0) => {
     const d = obj.position.distanceTo(hacia);
     if (d < 0.2) return 0;
+    if (lider && obj.position.distanceTo(lider) < distanciaMinima) return 0;
     const paso = Math.min(d, vel * dt);
     const dir = hacia.clone().sub(obj.position).setY(0).normalize();
     if (conChoques) return avanzar(obj, dir, paso);
@@ -568,8 +570,10 @@ export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D): Ba
       cerca = ahora;
       op.alCerca?.(cerca);
     }
-    const pe = mover(emilia, rastro[6]!, dt, VEL * 1.1);
-    const pt = mover(tito, rastro[11]!, dt, VEL * 1.15);
+    // Emilia y Tito siguen el camino del niño, pero se detienen a un paso de él
+    // (antes llegaban a su mismo lugar, se encimaban y tiritaban).
+    const pe = emilia.position.distanceTo(nino.position) > 3.6 || paso ? mover(emilia, rastro[6]!, dt, VEL * 1.1, false, nino.position, 3.4) : 0;
+    const pt = tito.position.distanceTo(nino.position) > 6 || paso ? mover(tito, rastro[11]!, dt, VEL * 1.15, false, nino.position, 5.8) : 0;
     fase += (paso + pe * 0.4) * 1.4;
     nino.position.y = paso ? Math.abs(Math.sin(fase)) * 0.6 : 0;
     emilia.position.y = pe ? Math.abs(Math.sin(fase + 1)) * 0.5 : 0;

@@ -99,8 +99,54 @@ function Mundo() {
     await Promise.race([hablar(l.frase), new Promise((r) => setTimeout(r, 2500))]);
     router.push(ruta);
   }, []);
+  const teclasRecien = useRef(false);
   const entrarRef = useRef(entrar);
   entrarRef.current = entrar;
+
+  // Teclado de la tablet: flechas (o WASD) para caminar y Enter para entrar al lugar de enfrente.
+  const teclas = useRef(new Set<string>());
+  const cerca = useRef<Lugar | null>(null);
+  // Solo mientras el barrio está a la vista (no cuando hay un juego o el 3D encima).
+  const enFoco = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      enFoco.current = true;
+      return () => {
+        enFoco.current = false;
+        teclas.current.clear();
+      };
+    }, []),
+  );
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.addEventListener) return;
+    const DIR: Record<string, string> = { ArrowUp: "u", ArrowDown: "d", ArrowLeft: "l", ArrowRight: "r", w: "u", s: "d", a: "l", d: "r", W: "u", S: "d", A: "l", D: "r" };
+    const bajar = (e: KeyboardEvent) => {
+      if (!enFoco.current) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+      const d = DIR[e.key];
+      if (d) {
+        e.preventDefault();
+        teclas.current.add(d);
+      } else if ((e.key === "Enter" || e.key === " ") && cerca.current) {
+        e.preventDefault();
+        void entrarRef.current(cerca.current);
+      }
+    };
+    const subir = (e: KeyboardEvent) => {
+      const d = DIR[e.key];
+      if (d) teclas.current.delete(d);
+    };
+    const soltar = () => teclas.current.clear();
+    window.addEventListener("keydown", bajar, true);
+    window.addEventListener("keyup", subir, true);
+    window.addEventListener("blur", soltar);
+    return () => {
+      window.removeEventListener("keydown", bajar, true);
+      window.removeEventListener("keyup", subir, true);
+      window.removeEventListener("blur", soltar);
+    };
+  }, []);
 
   // Bucle de animación: mueve al personaje, a sus acompañantes y la cámara.
   useEffect(() => {
@@ -119,6 +165,29 @@ function Mundo() {
       const dt = Math.min(0.05, (ahora - anterior) / 1000);
       anterior = ahora;
       const p = pos.current;
+      // Con flechas: el destino va siempre un poco más adelante en esa dirección.
+      const k = teclas.current;
+      if (k.size) {
+        const dx = (k.has("r") ? 1 : 0) - (k.has("l") ? 1 : 0);
+        const dy = (k.has("d") ? 1 : 0) - (k.has("u") ? 1 : 0);
+        if (dx || dy) {
+          const n = Math.hypot(dx, dy);
+          entrarA.current = null;
+          destino.current = {
+            x: Math.min(Math.max(p.x + (dx / n) * 40, 40), MUNDO.ancho - 40),
+            y: Math.min(Math.max(p.y + (dy / n) * 40, 180), MUNDO.alto - 30),
+          };
+        }
+      } else if (!entrarA.current && distancia(p, destino.current) > 3 && distancia(p, destino.current) <= 40 && teclasRecien.current) {
+        destino.current = { ...p }; // al soltar la flecha se detiene ahí mismo
+      }
+      teclasRecien.current = k.size > 0;
+      // ¿Quedó frente a una puerta? Emilia recuerda cómo entrar con el teclado.
+      const frente = LUGARES.find((l) => distancia(p, puerta(l)) < 70) ?? null;
+      if (frente !== cerca.current) {
+        cerca.current = frente;
+        if (frente && k.size) setDialogo(`${frente.nombre}: presiona Enter para entrar.`);
+      }
       const d = distancia(p, destino.current);
       let movio = 0;
       if (d > 3) {
