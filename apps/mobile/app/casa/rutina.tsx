@@ -44,6 +44,9 @@ export default function Rutina() {
   }, [paso, segundos, rutina]);
 
   const actual = paso === null ? null : rutina.pasos[paso]!;
+  // Cuánto va del paso actual (0 a 1): los bichitos se borran de a poco.
+  const inicioPaso = paso === null ? 0 : rutina.pasos.slice(0, paso).reduce((a, x) => a + x.segundos, 0);
+  const progreso = paso === null || segundos === null ? 0 : Math.min(1, (segundos + 1 - inicioPaso) / actual!.segundos);
   const restante = segundos === null ? total : Math.max(0, total - segundos);
 
   return (
@@ -67,7 +70,7 @@ export default function Rutina() {
         </View>
       ) : (
         <View style={estilos.centro}>
-          <AnimacionRutina rutina={rutina.id} paso={paso} />
+          <AnimacionRutina rutina={rutina.id} paso={paso} progreso={progreso} />
           <Text style={estilos.tiempo}>{actual?.emoji} {restante}</Text>
         </View>
       )}
