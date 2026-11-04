@@ -51,3 +51,13 @@
 | VID-D5 | Lengua | Emilia sticks out her tongue and gently brushes it from back to front, then smiles. | Saca la lengua, la cepilla suavecito de atrás hacia adelante y sonríe. |
 
 Todos los videos: Kling 3.0, 3 segundos, modo estándar, sin sonido, formato 1:1, con la imagen base como primer cuadro y el estilo común agregado al final.
+
+## Próxima versión: video continuo (sin bucles)
+
+> Idea anotada en noviembre 2026, después de probar los 13 videos en bucle. Para los niños el bucle funciona (repetir el movimiento ayuda a imitarlo), pero un video continuo se verá más natural y profesional.
+
+- **Un video por rutina:** unos 40 segundos para el lavado de manos y unos 2 minutos para el cepillado (el tiempo recomendado por los dentistas).
+- **Encadenar tramos:** cada tramo parte del último cuadro del anterior (extensión de video de Seedance 2.5, hasta 30 segundos por tramo), para que no haya saltos entre pasos.
+- **Sincronizar la app con el video:** los pasos, la voz de Emilia y los indicadores de abajo avanzan según el segundo del video, en vez de un temporizador aparte.
+- **Costo estimado:** 100 a 150 créditos para las dos rutinas en calidad pro (cabe en un mes del plan Plus).
+- Partir de las mismas imágenes base (`docs/capturas/manos-3d-base-lavado.png` y `docs/capturas/emilia-3d-base-cepillado.png`) para mantener el estilo.
