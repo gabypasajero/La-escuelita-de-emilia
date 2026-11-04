@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Construye el libro de guiones en Word y PDF, con índice paginado (dos pasadas).
 # Uso: tools/libro/construir.sh [carpeta_salida]
+#      GUION=max tools/libro/construir.sh   → solo el guion de Max (inglés)
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 SALIDA="${1:-$DIR/../../docs/imprimible}"
 TMP="$(mktemp -d)"
-NOMBRE="Libro_de_guiones_La_Escuelita_de_Emilia"
+if [ "${GUION:-}" = "max" ]; then NOMBRE="Guion_de_Max_ingles_La_Escuelita_de_Emilia"; else NOMBRE="Libro_de_guiones_La_Escuelita_de_Emilia"; fi
+export GUION="${GUION:-}"
 export DOCX_MODULE="${DOCX_MODULE:-$(npm root -g 2>/dev/null)/docx}"
 [ -d "$DOCX_MODULE" ] || DOCX_MODULE=/opt/node-tools/node_modules/docx
 mkdir -p "$SALIDA"

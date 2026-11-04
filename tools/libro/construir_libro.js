@@ -330,6 +330,25 @@ const PARTES = [
   { titulo: "Parte 11. Canciones y cuentos", md: [NUEVO, comp("Canciones y cuentos")] },
 ];
 
+// Guion de Max (GUION=max): un libro corto solo con el módulo de inglés.
+const ES_MAX = process.env.GUION === "max";
+if (ES_MAX) {
+  const MAX = leer("GUION_MAX.md");
+  PARTES.length = 0;
+  PARTES.push(
+    { titulo: "Parte 1. Guía de grabación", md: [ajustarNiveles(seccion(MAX, "1. Guía de grabación"), 2).replace(/^## 1\. .*$/m, "")] },
+    { titulo: "Parte 2. La llegada al paradero", md: [ajustarNiveles(seccion(MAX, "2. La llegada al paradero"), 2).replace(/^## 2\. .*$/m, "")] },
+    { titulo: "Parte 3. La casa de Max", md: [ajustarNiveles(seccion(MAX, "3. La casa de Max"), 2).replace(/^## 3\. .*$/m, "")] },
+    { titulo: "Parte 4. Los juegos: lo que dice Max", md: [ajustarNiveles(seccion(MAX, "4. Los juegos: lo que dice Max"), 2).replace(/^## 4\. .*$/m, "")] },
+    { titulo: "Parte 5. Elogios y ánimo de Max", md: [ajustarNiveles(seccion(MAX, "5. Elogios y ánimo de Max"), 2).replace(/^## 5\. .*$/m, "")] },
+    { titulo: "Parte 6. Ayudas de Emilia", md: [ajustarNiveles(seccion(MAX, "6. Ayudas de Emilia (botón «Ayuda»)"), 2).replace(/^## 6\. .*$/m, "")] },
+    { titulo: "Parte 7. Lista de palabras para la educadora", md: [ajustarNiveles(seccion(MAX, "7. Lista de palabras para la educadora"), 2).replace(/^## 7\. .*$/m, "")] },
+  );
+}
+const TEXTOS = ES_MAX
+  ? { subtitulo: "Guion de Max (inglés)", bajada: "Paradero, casa de Max y sus 6 juegos de inglés: frases para leer, revisar y grabar", version: "Versión 1 · Borrador para revisión y grabación · Noviembre 2026", encabezado: "La Escuelita de Emilia · Guion de Max (inglés) · Borrador v1", titulo: "Guion de Max (inglés) — La Escuelita de Emilia" }
+  : { subtitulo: "Libro de guiones", bajada: "Todos los personajes, frases, conversaciones, canciones y cuentos del juego", version: "Versión 1 · Borrador para revisión · Octubre 2026", encabezado: "La Escuelita de Emilia · Libro de guiones · Borrador v1", titulo: "Libro de guiones — La Escuelita de Emilia" };
+
 // ---------- Portada, instrucciones e índice ----------
 function portada() {
   const centro = (texto, base, despues = 200) =>
@@ -337,9 +356,9 @@ function portada() {
   return [
     new Paragraph({ spacing: { before: 2400 }, children: [] }),
     centro("La Escuelita de Emilia", { size: 64, bold: true, color: COLOR.titulo }, 240),
-    centro("Libro de guiones", { size: 44, color: COLOR.acento }, 120),
-    centro("Todos los personajes, frases, conversaciones, canciones y cuentos del juego", { size: 24, color: COLOR.suave }, 1200),
-    centro("Versión 1 · Borrador para revisión · Octubre 2026", { size: 22, color: COLOR.suave }, 1600),
+    centro(TEXTOS.subtitulo, { size: 44, color: COLOR.acento }, 120),
+    centro(TEXTOS.bajada, { size: 24, color: COLOR.suave }, 1200),
+    centro(TEXTOS.version, { size: 22, color: COLOR.suave }, 1600),
     centro("Revisado por: ______________________________________", { size: 24 }, 360),
     centro("Fecha de revisión: _____________________", { size: 24 }, 360),
     centro("Firma: _____________________", { size: 24 }, 200),
@@ -419,7 +438,7 @@ for (const parte of PARTES) {
 }
 
 cuerpo.push(titulo(1, "Anexo. Dudas pendientes y notas finales"));
-if (PENDIENTES.length) {
+if (PENDIENTES.length && !ES_MAX) {
   cuerpo.push(parrafo("Durante la redacción quedaron estas dudas para que las decidan la educadora y el equipo. Escribe la decisión en la columna de la derecha."));
   cuerpo.push(...tabla([["#", "Parte", "Duda"], ...PENDIENTES.map((p, k) => [String(k + 1), p.parte, p.duda])]));
 }
@@ -427,7 +446,7 @@ cuerpo.push(...lineasParaNotas("Notas finales", 14));
 
 const doc = new Document({
   creator: "La Escuelita de Emilia",
-  title: "Libro de guiones — La Escuelita de Emilia",
+  title: TEXTOS.titulo,
   description: "Guiones completos de los personajes para imprimir y corregir",
   styles: {
     default: { document: { run: { font: "Calibri", size: 21 } } },
@@ -461,7 +480,7 @@ const doc = new Document({
   },
   sections: [{
     properties: { page: { size: { width: ANCHO_PAGINA, height: ALTO_PAGINA }, margin: { top: MARGEN, bottom: MARGEN, left: MARGEN, right: MARGEN, header: 500, footer: 500 } } },
-    headers: { default: new Header({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: runs("La Escuelita de Emilia · Libro de guiones · Borrador v1", { size: 16, color: COLOR.suave }) })] }) },
+    headers: { default: new Header({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: runs(TEXTOS.encabezado, { size: 16, color: COLOR.suave }) })] }) },
     footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [
       new TextRun({ children: ["Página ", PageNumber.CURRENT, " de ", PageNumber.TOTAL_PAGES], size: 16, color: COLOR.suave, font: FUENTE }),
     ] })] }) },
