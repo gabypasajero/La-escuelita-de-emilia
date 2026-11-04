@@ -29,24 +29,30 @@ const esWeb = Platform.OS === "web" && typeof window !== "undefined" && "speechS
 const sintetizador = () => (esWeb ? window.speechSynthesis : null);
 
 // --- Voces del navegador por idioma (español: prefiere latinoamericanas; inglés: EE. UU.) ---
-export type Idioma = "es" | "en";
+export type Idioma = "es" | "en" | "pt" | "fr" | "zh";
 const PREFERENCIAS: Record<Idioma, string[]> = {
   es: ["es-cl", "es-419", "es-us", "es-mx", "es-ar", "es-co", "es-es", "es"],
   en: ["en-us", "en-gb", "en-au", "en-ca", "en"],
+  pt: ["pt-br", "pt-pt", "pt"],
+  fr: ["fr-fr", "fr-ca", "fr-be", "fr"],
+  zh: ["zh-cn", "cmn-cn", "cmn-hans", "zh-hans", "zh-tw", "cmn", "zh"],
 };
-const LENGUA: Record<Idioma, string> = { es: "es-ES", en: "en-US" };
-const vozElegida: Record<Idioma, SpeechSynthesisVoice | null> = { es: null, en: null };
+const LENGUA: Record<Idioma, string> = { es: "es-ES", en: "en-US", pt: "pt-BR", fr: "fr-FR", zh: "zh-CN" };
+const IDIOMAS: Idioma[] = ["es", "en", "pt", "fr", "zh"];
+const vozElegida: Record<Idioma, SpeechSynthesisVoice | null> = { es: null, en: null, pt: null, fr: null, zh: null };
+/** ¿Hay una voz instalada en la tablet para este idioma? (si no, el navegador intenta igual). */
+export const hayVoz = (idioma: Idioma) => !esWeb || !!vozElegida[idioma];
 function elegirVoz() {
   const s = sintetizador();
   if (!s) return;
   const todas = s.getVoices();
-  for (const idioma of ["es", "en"] as Idioma[]) {
+  for (const idioma of IDIOMAS) {
     const orden = PREFERENCIAS[idioma];
-    const voces = todas.filter((v) => v.lang.toLowerCase().replace("_", "-").startsWith(idioma));
+    const voces = todas.filter((v) => orden.some((o) => v.lang.toLowerCase().replace("_", "-").startsWith(o)));
     voces.sort((a, b) => {
       const ia = orden.findIndex((o) => a.lang.toLowerCase().replace("_", "-").startsWith(o));
       const ib = orden.findIndex((o) => b.lang.toLowerCase().replace("_", "-").startsWith(o));
-      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || Number(b.localService) - Number(a.localService);
+      return Number(b.localService) - Number(a.localService) || (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
     });
     vozElegida[idioma] = voces[0] ?? null;
   }
@@ -58,16 +64,37 @@ if (esWeb) {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") reactivarVoz(false);
   });
-  // Algunos navegadores solo permiten hablar después del primer toque: se "despierta" la voz ahí.
-  const despertar = () => {
-    try {
-      const u = new SpeechSynthesisUtterance(" ");
-      u.volume = 0;
-      window.speechSynthesis.speak(u);
-    } catch { /* sin voz disponible */ }
-    window.removeEventListener("pointerdown", despertar);
-  };
-  window.addEventListener("pointerdown", despertar);
+}
+
+/** Última frase pedida: se repite al tocar «A jugar» si el navegador la bloqueó. */
+let ultima: { texto: string; idioma: Idioma } | null = null;
+let bloqueada = false;
+const avisosBloqueo = new Set<() => void>();
+/** Aviso cuando el navegador no deja hablar hasta que se toque la pantalla. */
+export function alBloquearVoz(f: () => void) {
+  avisosBloqueo.add(f);
+  return () => void avisosBloqueo.delete(f);
+}
+/**
+ * ¿Hace falta un primer toque para que suene? En la web, el navegador no deja
+ * hablar hasta que el niño toca la pantalla (por eso al abrir no se escuchaba
+ * nada y después la voz llegaba de golpe).
+ */
+export function necesitaToque(): boolean {
+  if (!esWeb) return false;
+  const activacion = (navigator as unknown as { userActivation?: { hasBeenActive: boolean } }).userActivation;
+  return activacion ? !activacion.hasBeenActive : false;
+}
+/** Después del primer toque: repite la última frase para que el niño la escuche. */
+export function empezarConToque() {
+  bloqueada = false;
+  const s = sintetizador();
+  if (s) {
+    s.cancel();
+    if (s.paused) s.resume();
+    elegirVoz();
+  }
+  if (ultima) void hablar(ultima.texto, ultima.idioma);
 }
 
 /** Guarda la frase en curso para que el navegador no la pierda. */
@@ -88,7 +115,7 @@ async function decirWeb(texto: string, miTurno: number, idioma: Idioma): Promise
     const voz = vozElegida[idioma];
     u.lang = voz?.lang ?? LENGUA[idioma];
     if (voz) u.voice = voz;
-    u.rate = idioma === "en" ? 0.8 : 0.85;
+    u.rate = idioma === "es" ? 0.85 : 0.8;
     u.pitch = 1.15;
     fraseActual = u;
     const fin = (como: "fin" | "cortada") => {
@@ -104,7 +131,13 @@ async function decirWeb(texto: string, miTurno: number, idioma: Idioma): Promise
       fin("fin");
     }, 2500 + texto.length * 95);
     u.onend = () => fin(miTurno === turno ? "fin" : "cortada");
-    u.onerror = (e) => fin(e.error === "interrupted" || e.error === "canceled" ? "cortada" : "fin");
+    u.onerror = (e) => {
+      if (e.error === "not-allowed") {
+        bloqueada = true;
+        avisosBloqueo.forEach((f) => f());
+      }
+      fin(e.error === "interrupted" || e.error === "canceled" ? "cortada" : "fin");
+    };
     try {
       s.speak(u);
     } catch {
@@ -123,7 +156,7 @@ function decirNativo(texto: string, idioma: Idioma): Promise<"fin" | "cortada"> 
       resolver(como);
     };
     const respaldo = setTimeout(() => fin("fin"), 1200 + texto.length * 85);
-    Speech.speak(texto, { language: LENGUA[idioma], rate: idioma === "en" ? 0.8 : 0.85, pitch: 1.15, onDone: () => fin("fin"), onStopped: () => fin("cortada"), onError: () => fin("fin") });
+    Speech.speak(texto, { language: LENGUA[idioma], rate: idioma === "es" ? 0.85 : 0.8, pitch: 1.15, onDone: () => fin("fin"), onStopped: () => fin("cortada"), onError: () => fin("fin") });
   });
 }
 
@@ -131,6 +164,7 @@ const decir = (texto: string, miTurno: number, idioma: Idioma = "es") => (esWeb 
 
 /** Dice una frase (en español, o en inglés para los amigos de otros países). */
 export async function hablar(texto: string, idioma: Idioma = "es"): Promise<void> {
+  ultima = { texto, idioma };
   const miTurno = ++turno;
   if (!esWeb) Speech.stop();
   hablando = true;

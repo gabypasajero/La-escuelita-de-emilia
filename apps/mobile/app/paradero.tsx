@@ -1,65 +1,102 @@
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { Pantalla } from "../components/Pantalla";
-import { EmiliaDibujo, Globo, MaxDibujo, TitoDibujo, useRespirar, useSalto } from "../components/Personajes";
+import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Personajes";
+import { AMIGOS, type Amigo, type AmigoId } from "../lib/amigos";
 import { useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
 
-/** Ya se conocieron en esta sesión: la segunda vez la llegada es más corta. */
-let maxConocido = false;
+/** Amigos que el niño ya conoció en esta sesión (la segunda vez es más corto). */
+const conocidos = new Set<AmigoId>();
+let busVisto = false;
 
-const FRASES_MAX = (nombre: string) => [`Hello, ${nombre}!`, "High five!", "I like animals!", "Let's play!", "You are my friend!"];
+type Quien = "emilia" | AmigoId;
 
 /**
- * Paradero de los amigos: llega el bus y baja Max, que viene de lejos y habla
- * inglés. Emilia lo presenta en español la primera vez; Max habla solo inglés.
+ * Paradero de los amigos: llega el bus y bajan Max (inglés), Bia (portugués),
+ * Léa (francés) y Xiao Lin (chino). El niño toca a uno para conocerlo e ir a
+ * su casa. Emilia los presenta en español; cada amigo habla solo su idioma.
  */
 export default function Paradero() {
   const { width } = useWindowDimensions();
   const { perfil } = useJuego();
-  const nombre = perfil?.nombre ?? "friend";
+  const nombre = perfil?.nombre ?? "";
   const bus = useRef(new Animated.Value(width + 50)).current;
-  const max = useRef(new Animated.Value(0)).current;
-  const [globo, setGlobo] = useState({ quien: "emilia" as "emilia" | "max", texto: "¡Llegó el bus!" });
-  const [listo, setListo] = useState(false);
+  const bajan = useRef(new Animated.Value(0)).current;
+  const [globo, setGlobo] = useState<{ quien: Quien; texto: string }>({ quien: "emilia", texto: "¡Llegó el bus!" });
+  const [listos, setListos] = useState(false);
+  const [elegido, setElegido] = useState<Amigo | null>(null);
+  const [puedeIr, setPuedeIr] = useState(false);
+  const ocupado = useRef(false);
   const respirar = useRespirar(3);
-  const { y: salto, saltar } = useSalto();
+  const saltos = useRef(Object.fromEntries(AMIGOS.map((a) => [a.id, new Animated.Value(0)])) as Record<AmigoId, Animated.Value>).current;
+  const vivo = useRef(true);
+
+  const decir = async (quien: Quien, texto: string) => {
+    if (!vivo.current) return;
+    setGlobo({ quien, texto });
+    const amigo = AMIGOS.find((a) => a.id === quien);
+    await hablarYEsperar(texto, 250, amigo ? amigo.idioma : "es");
+  };
+  const saltar = (id: AmigoId) =>
+    Animated.sequence([
+      Animated.timing(saltos[id], { toValue: -26, duration: 170, easing: Easing.out(Easing.quad), useNativeDriver: false }),
+      Animated.timing(saltos[id], { toValue: 0, duration: 230, easing: Easing.bounce, useNativeDriver: false }),
+    ]).start();
 
   useEffect(() => {
-    let vivo = true;
-    const decir = async (quien: "emilia" | "max", texto: string) => {
-      if (!vivo) return;
-      setGlobo({ quien, texto });
-      await hablarYEsperar(texto, 300, quien === "max" ? "en" : "es");
-    };
+    vivo.current = true;
     const llegada = new Promise<void>((r) =>
-      Animated.timing(bus, { toValue: 0, duration: 2600, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start(() => r()),
+      Animated.timing(bus, { toValue: 0, duration: 2400, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start(() => r()),
     );
     (async () => {
-      if (!maxConocido) await decir("emilia", "¡Llegó el bus! Hoy viene un amigo de muy lejos.");
+      if (!busVisto) await decir("emilia", "¡Llegó el bus! Hoy vienen mis amigos de otros países.");
       await llegada;
-      if (!vivo) return;
-      Animated.timing(max, { toValue: 1, duration: 600, useNativeDriver: false }).start();
-      await decir("max", maxConocido ? `Hello again, ${nombre}!` : `Hello! I'm Max! Hello, ${nombre}!`);
-      if (!maxConocido) await decir("emilia", "Es Max. Él habla inglés, otro idioma. ¡Escuchemos bien y juguemos con él!");
-      await decir("max", "Come to my house! Let's play!");
-      maxConocido = true;
-      if (vivo) setListo(true);
+      if (!vivo.current) return;
+      Animated.timing(bajan, { toValue: 1, duration: 700, useNativeDriver: false }).start();
+      if (!busVisto) {
+        // Cada amigo saluda en su idioma al bajar.
+        for (const a of AMIGOS) {
+          saltar(a.id);
+          await decir(a.id, a.hola);
+        }
+      }
+      busVisto = true;
+      setListos(true);
+      await decir("emilia", "¿Con quién quieres jugar? Toca a un amigo para conocerlo.");
     })();
     return () => {
-      vivo = false;
+      vivo.current = false;
     };
-  }, [bus, max, nombre]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const tocarMax = () => {
-    saltar();
-    const frases = FRASES_MAX(nombre);
-    const f = frases[Math.floor(Math.random() * frases.length)]!;
-    setGlobo({ quien: "max", texto: f });
-    void hablar(f, "en");
+  const tocar = async (a: Amigo) => {
+    if (!listos || ocupado.current) return;
+    saltar(a.id);
+    if (elegido?.id === a.id && puedeIr) {
+      const f = a.toques(nombre)[Math.floor(Math.random() * 5)]!;
+      setGlobo({ quien: a.id, texto: f });
+      return void hablar(f, a.idioma);
+    }
+    ocupado.current = true;
+    setElegido(a);
+    setPuedeIr(false);
+    if (!conocidos.has(a.id)) {
+      await decir(a.id, a.presentarse(nombre));
+      await decir("emilia", a.presentacion);
+      conocidos.add(a.id);
+    } else {
+      await decir(a.id, a.deNuevo(nombre));
+    }
+    await decir(a.id, a.invitar);
+    ocupado.current = false;
+    if (vivo.current) setPuedeIr(true);
   };
+
+  const posicion = (quien: Quien) => (quien === "emilia" ? 120 : 300 + AMIGOS.findIndex((a) => a.id === quien) * 125);
 
   return (
     <Pantalla color="#B3E5FC">
@@ -82,26 +119,31 @@ export default function Paradero() {
         </View>
         {/* Emilia y Tito esperando */}
         <Animated.View style={[estilos.emilia, { transform: [{ translateY: respirar }] }]}>
-          <EmiliaDibujo alto={200} />
-          <TitoDibujo alto={74} />
+          <EmiliaDibujo alto={190} />
+          <TitoDibujo alto={70} />
         </Animated.View>
         {/* El bus */}
         <Animated.View style={[estilos.bus, { transform: [{ translateX: bus }] }]}>
           <Bus />
         </Animated.View>
-        {/* Max baja del bus */}
-        <Animated.View style={[estilos.max, { opacity: max, transform: [{ translateY: salto }] }]}>
-          <Pressable onPress={tocarMax} accessibilityLabel="Max">
-            <MaxDibujo alto={205} saludando />
-          </Pressable>
-        </Animated.View>
-        <View style={[estilos.globo, globo.quien === "max" ? estilos.globoMax : estilos.globoEmilia]}>
+        {/* Los amigos bajan del bus */}
+        {AMIGOS.map((a, i) => (
+          <Animated.View key={a.id} style={[estilos.amigo, { left: 300 + i * 125, opacity: bajan, transform: [{ translateY: saltos[a.id] }] }]}>
+            <Pressable onPress={() => void tocar(a)} accessibilityLabel={a.nombre} style={estilos.amigoToque}>
+              <a.Dibujo alto={175} saludando={globo.quien === a.id} />
+              <View style={[estilos.placa, { backgroundColor: a.color }, elegido?.id === a.id && estilos.placaElegida]}>
+                <Text style={estilos.placaTexto}>{a.bandera} {a.nombre}</Text>
+              </View>
+            </Pressable>
+          </Animated.View>
+        ))}
+        <View style={[estilos.globo, { left: Math.max(90, posicion(globo.quien) - 40) }]} pointerEvents="none">
           <Globo texto={globo.texto} />
         </View>
       </View>
-      {listo && (
-        <Pressable style={estilos.casa} onPress={() => router.push("/max")} accessibilityLabel="Casa de Max">
-          <Text style={estilos.casaTexto}>🏠 Casa de Max</Text>
+      {elegido && puedeIr && (
+        <Pressable style={[estilos.casa, { backgroundColor: elegido.color }]} onPress={() => router.push(`/amigo/${elegido.id}` as Href)} accessibilityLabel={`Casa de ${elegido.nombre}`}>
+          <Text style={estilos.casaTexto}>🏠 Casa de {elegido.nombre}</Text>
         </Pressable>
       )}
     </Pantalla>
@@ -153,17 +195,19 @@ function Bus() {
 }
 
 const estilos = StyleSheet.create({
-  escena: { width: "100%", maxWidth: 1100, flex: 1, position: "relative" },
+  escena: { width: "100%", maxWidth: 1100, flex: 1, position: "relative", overflow: "hidden" },
   vereda: { position: "absolute", left: 0, right: 0, bottom: 70, height: 50, backgroundColor: "#CFD8DC" },
   calle: { position: "absolute", left: 0, right: 0, bottom: 0, height: 70, backgroundColor: "#546E7A", flexDirection: "row", alignItems: "center", justifyContent: "space-around" },
   linea: { width: 40, height: 6, backgroundColor: "#FFF59D", borderRadius: 3 },
-  letrero: { position: "absolute", left: 30, bottom: 95 },
-  emilia: { position: "absolute", left: 110, bottom: 85, flexDirection: "row", alignItems: "flex-end" },
-  bus: { position: "absolute", right: 20, bottom: 40 },
-  max: { position: "absolute", right: 360, bottom: 85 },
-  globo: { position: "absolute", bottom: 310, maxWidth: 420 },
-  globoEmilia: { left: 120 },
-  globoMax: { right: 300 },
-  casa: { position: "absolute", top: 20, right: 150, backgroundColor: "#1E88E5", borderRadius: 30, paddingHorizontal: 26, paddingVertical: 14, borderWidth: 4, borderColor: "#fff" },
+  letrero: { position: "absolute", left: 20, bottom: 95 },
+  emilia: { position: "absolute", left: 90, bottom: 85, flexDirection: "row", alignItems: "flex-end" },
+  bus: { position: "absolute", right: -150, bottom: 40 },
+  amigo: { position: "absolute", bottom: 78, alignItems: "center" },
+  amigoToque: { alignItems: "center" },
+  placa: { marginTop: -4, borderRadius: 12, paddingHorizontal: 8, paddingVertical: 2, borderWidth: 2, borderColor: "#fff" },
+  placaElegida: { borderColor: "#FFD54F", transform: [{ scale: 1.12 }] },
+  placaTexto: { color: "#fff", fontWeight: "900", fontSize: 14 },
+  globo: { position: "absolute", bottom: 300, maxWidth: 440 },
+  casa: { position: "absolute", top: 20, right: 150, borderRadius: 30, paddingHorizontal: 26, paddingVertical: 14, borderWidth: 4, borderColor: "#fff" },
   casaTexto: { color: "#fff", fontSize: 24, fontWeight: "900" },
 });

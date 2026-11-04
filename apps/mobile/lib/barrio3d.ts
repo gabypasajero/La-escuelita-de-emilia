@@ -13,6 +13,22 @@ export interface OpcionesBarrio3D {
   nombre: string;
   alEntrar: (l: Lugar) => void;
   alTocarVecino: (frase: string) => void;
+  /** Cuando el niño queda frente a una puerta (o se aleja: null). */
+  alCerca?: (l: Lugar | null) => void;
+}
+
+export type Direccion = "arriba" | "abajo" | "izquierda" | "derecha";
+
+export interface Barrio3D {
+  destruir: () => void;
+  /** Botones de flechas en pantalla: mantener apretado para caminar. */
+  flecha: (d: Direccion, apretada: boolean) => void;
+  /** Entrar al lugar que está al frente. */
+  entrar: () => void;
+  /** Acercar (+1) o alejar (-1) la cámara. */
+  zoom: (paso: number) => void;
+  /** La cámara vuelve a seguir al niño. */
+  centrar: () => void;
 }
 
 const A3 = (v: number) => v / 10;
@@ -251,7 +267,7 @@ function tito3d() {
   return g;
 }
 
-export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D) {
+export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D): Barrio3D {
   const noche = new Date().getHours() >= 20 || new Date().getHours() < 7;
   const escena = new THREE.Scene();
   escena.background = new THREE.Color(noche ? "#1A237E" : "#9FDBFF");
@@ -344,24 +360,123 @@ export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D) {
   const rastro: THREE.Vector3[] = Array.from({ length: 20 }, () => inicio.clone());
   let fase = 0;
   const VEL = 16;
-  const mover = (obj: THREE.Object3D, hacia: THREE.Vector3, dt: number, vel: number) => {
+  // Las casas son sólidas: el niño camina alrededor (los parques, el huerto y el paradero se pueden pisar).
+  const solidos = LUGARES.filter((l) => COLOR_LUGAR[l.id]).map((l) => {
+    const medio = (l.id === "granja" ? 18 : 16) / 2 + 1;
+    return { x0: A3(l.x) - medio, x1: A3(l.x) + medio, z0: A3(l.y) - 13, z1: A3(l.y) + 0.8 };
+  });
+  const libre = (x: number, z: number) =>
+    x >= 2 && x <= 178 && z >= 14 && z <= 122 && !solidos.some((b) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1);
+  /** Avanza sin atravesar casas (si choca de frente, se desliza por la pared). */
+  const avanzar = (obj: THREE.Object3D, dir: THREE.Vector3, paso: number) => {
+    const p = obj.position;
+    const nx = p.x + dir.x * paso, nz = p.z + dir.z * paso;
+    if (libre(nx, nz)) p.set(nx, p.y, nz);
+    else if (Math.abs(dir.x) > 0.2 && libre(nx, p.z)) p.x = nx;
+    else if (Math.abs(dir.z) > 0.2 && libre(p.x, nz)) p.z = nz;
+    else return 0;
+    obj.rotation.y = Math.atan2(dir.x, dir.z);
+    return paso;
+  };
+  const mover = (obj: THREE.Object3D, hacia: THREE.Vector3, dt: number, vel: number, conChoques = false) => {
     const d = obj.position.distanceTo(hacia);
     if (d < 0.2) return 0;
     const paso = Math.min(d, vel * dt);
     const dir = hacia.clone().sub(obj.position).setY(0).normalize();
+    if (conChoques) return avanzar(obj, dir, paso);
     obj.position.addScaledVector(dir, paso);
     obj.rotation.y = Math.atan2(dir.x, dir.z);
     return paso;
   };
 
-  // Toques: suelo para caminar, casa para entrar, animal para escucharlo
+  // Teclado (flechas o WASD) y flechas en pantalla
+  const teclas = new Set<Direccion>();
+  const TECLAS: Record<string, Direccion> = {
+    ArrowUp: "arriba", ArrowDown: "abajo", ArrowLeft: "izquierda", ArrowRight: "derecha",
+    w: "arriba", s: "abajo", a: "izquierda", d: "derecha", W: "arriba", S: "abajo", A: "izquierda", D: "derecha",
+  };
+  let cerca: Lugar | null = null;
+  const entrarCerca = () => {
+    if (cerca) op.alEntrar(cerca);
+  };
+  const alTecla = (e: KeyboardEvent) => {
+    const d = TECLAS[e.key];
+    if (d) {
+      e.preventDefault();
+      teclas.add(d);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      entrarCerca();
+    } else if (e.key === "+" || e.key === "=") zoomA(zoom - 0.15);
+    else if (e.key === "-") zoomA(zoom + 0.15);
+  };
+  const alSoltarTecla = (e: KeyboardEvent) => {
+    const d = TECLAS[e.key];
+    if (d) teclas.delete(d);
+  };
+  // En fase de captura: así funciona aunque un botón de la pantalla tenga el foco.
+  window.addEventListener("keydown", alTecla, true);
+  window.addEventListener("keyup", alSoltarTecla, true);
+  const soltarTodo = () => teclas.clear();
+  window.addEventListener("blur", soltarTodo);
+
+  // Cámara: zoom (pellizco, rueda o botones) y paseo por el mapa arrastrando el dedo.
+  let zoom = 1;
+  const zoomA = (z: number) => { zoom = Math.min(1.8, Math.max(0.45, z)); };
+  const paseo = new THREE.Vector3(); // cuánto se corrió la vista respecto del niño
+  let siguiendo = true;
+
+  // Toques: tocar el suelo para caminar, una casa para entrar, un animal para escucharlo.
+  // Arrastrar un dedo mueve la vista por el mapa; dos dedos (pellizco) acercan o alejan.
   const ray = new THREE.Raycaster();
   const puntero = new THREE.Vector2();
+  const dedos = new Map<number, { x: number; y: number }>();
   let inicioToque: { x: number; y: number } | null = null;
-  const alBajar = (e: PointerEvent) => { inicioToque = { x: e.clientX, y: e.clientY }; };
+  let arrastrando = false;
+  let distanciaPellizco = 0;
+  const lienzo = renderer.domElement;
+  const alBajar = (e: PointerEvent) => {
+    try { lienzo.setPointerCapture(e.pointerId); } catch { /* sin captura */ }
+    dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (dedos.size === 1) {
+      inicioToque = { x: e.clientX, y: e.clientY };
+      arrastrando = false;
+    } else {
+      inicioToque = null; // con dos dedos no se camina
+      const [a, b] = [...dedos.values()];
+      distanciaPellizco = Math.hypot(a!.x - b!.x, a!.y - b!.y);
+    }
+  };
+  const alMover = (e: PointerEvent) => {
+    const antes = dedos.get(e.pointerId);
+    if (!antes) return;
+    const ahora = { x: e.clientX, y: e.clientY };
+    dedos.set(e.pointerId, ahora);
+    if (dedos.size >= 2) {
+      const [a, b] = [...dedos.values()];
+      const d = Math.hypot(a!.x - b!.x, a!.y - b!.y);
+      if (distanciaPellizco > 0) zoomA(zoom * (distanciaPellizco / d));
+      distanciaPellizco = d;
+      return;
+    }
+    if (inicioToque && !arrastrando && Math.hypot(ahora.x - inicioToque.x, ahora.y - inicioToque.y) > 12) arrastrando = true;
+    if (arrastrando) {
+      // El mapa sigue al dedo: unidades del mundo por pixel según la distancia de la cámara.
+      const k = (2 * 63 * zoom * Math.tan((camara.fov * Math.PI) / 360)) / Math.max(1, lienzo.clientHeight);
+      paseo.x -= (ahora.x - antes.x) * k;
+      paseo.z -= (ahora.y - antes.y) * k * 1.35;
+      siguiendo = false;
+    }
+  };
   const alSubir = (e: PointerEvent) => {
-    if (!inicioToque || Math.hypot(e.clientX - inicioToque.x, e.clientY - inicioToque.y) > 12) return;
-    const r = renderer.domElement.getBoundingClientRect();
+    dedos.delete(e.pointerId);
+    if (dedos.size < 2) distanciaPellizco = 0;
+    if (!inicioToque || arrastrando || dedos.size > 0) {
+      if (dedos.size === 0) inicioToque = null;
+      return;
+    }
+    inicioToque = null;
+    const r = lienzo.getBoundingClientRect();
     puntero.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(puntero, camara);
     const vec = ray.intersectObjects(vecinos)[0];
@@ -374,17 +489,30 @@ export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D) {
         const l = o.userData.lugar as Lugar;
         destino.set(A3(l.x), 0, A3(l.y) + 3);
         entrarA = l;
+        siguiendo = true;
         return;
       }
     }
     const enSuelo = ray.intersectObject(suelo)[0];
     if (enSuelo) {
       entrarA = null;
+      siguiendo = true;
       destino.set(Math.min(Math.max(enSuelo.point.x, 2), 178), 0, Math.min(Math.max(enSuelo.point.z, 14), 122));
     }
   };
-  renderer.domElement.addEventListener("pointerdown", alBajar);
-  renderer.domElement.addEventListener("pointerup", alSubir);
+  const alRueda = (e: WheelEvent) => {
+    e.preventDefault();
+    zoomA(zoom * (e.deltaY > 0 ? 1.1 : 0.9));
+  };
+  const alCancelar = (e: PointerEvent) => {
+    dedos.delete(e.pointerId);
+    inicioToque = null;
+  };
+  lienzo.addEventListener("pointerdown", alBajar);
+  lienzo.addEventListener("pointermove", alMover);
+  lienzo.addEventListener("pointerup", alSubir);
+  lienzo.addEventListener("pointercancel", alCancelar);
+  lienzo.addEventListener("wheel", alRueda, { passive: false });
 
   const ajustar = () => {
     const { clientWidth: w, clientHeight: h } = contenedor;
@@ -400,14 +528,45 @@ export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D) {
   const reloj = new THREE.Clock();
   const ojo = new THREE.Vector3();
   let cuadro = 0;
+  let atascado = 0;
+  const dirTeclas = new THREE.Vector3();
   const animar = () => {
     const dt = Math.min(0.05, reloj.getDelta());
-    const paso = mover(nino, destino, dt, VEL);
+    let paso = 0;
+    dirTeclas.set(
+      (teclas.has("derecha") ? 1 : 0) - (teclas.has("izquierda") ? 1 : 0),
+      0,
+      (teclas.has("abajo") ? 1 : 0) - (teclas.has("arriba") ? 1 : 0),
+    );
+    if (dirTeclas.lengthSq() > 0) {
+      // Con flechas: camina directo en esa dirección (cancela el camino tocado).
+      paso = avanzar(nino, dirTeclas.normalize(), VEL * dt);
+      destino.copy(nino.position);
+      entrarA = null;
+      siguiendo = true;
+    } else {
+      paso = mover(nino, destino, dt, VEL, true);
+      const falta = nino.position.distanceTo(destino);
+      // Si choca con una casa camino a otro lado, se detiene (o entra, si iba a esa casa).
+      if (!paso && falta >= 0.2) {
+        atascado += dt;
+        if (atascado > 0.3) {
+          destino.copy(nino.position);
+          atascado = 0;
+        }
+      } else atascado = 0;
+    }
     if (paso && rastro[0]!.distanceTo(nino.position) > 0.8) rastro.unshift(nino.position.clone()) && rastro.pop();
     if (!paso && entrarA) {
       const l = entrarA;
       entrarA = null;
       op.alEntrar(l);
+    }
+    // ¿Está frente a una puerta?
+    const ahora = LUGARES.find((l) => Math.hypot(nino.position.x - A3(l.x), nino.position.z - (A3(l.y) + 3)) < 6) ?? null;
+    if (ahora !== cerca) {
+      cerca = ahora;
+      op.alCerca?.(cerca);
     }
     const pe = mover(emilia, rastro[6]!, dt, VEL * 1.1);
     const pt = mover(tito, rastro[11]!, dt, VEL * 1.15);
@@ -417,13 +576,19 @@ export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D) {
     tito.position.y = pt ? Math.abs(Math.sin(fase * 1.6)) * 0.6 : 0;
     vecinos.forEach((v, i) => { v.position.y = (v.scale.x < 4 ? 8 : 2.5) + Math.sin(reloj.elapsedTime * 2 + i) * 0.3; });
 
-    // La cámara sigue al niño desde arriba y atrás, suavemente.
-    ojo.set(nino.position.x, 44, nino.position.z + 46);
-    camara.position.lerp(ojo, 0.08);
-    camara.lookAt(nino.position.x, 2, nino.position.z - 2);
-    sol.position.set(nino.position.x + 30, 60, nino.position.z + 20);
-    sol.target.position.copy(nino.position);
+    // La cámara sigue al niño; si el niño arrastró el mapa, mira hacia donde lo dejó
+    // (dentro del barrio) hasta que vuelva a caminar.
+    if (siguiendo) paseo.multiplyScalar(0.9);
+    const fx = Math.min(178, Math.max(2, nino.position.x + paseo.x));
+    const fz = Math.min(124, Math.max(10, nino.position.z + paseo.z));
+    paseo.set(fx - nino.position.x, 0, fz - nino.position.z);
+    ojo.set(fx, 44 * zoom, fz + 46 * zoom);
+    camara.position.lerp(ojo, 0.12);
+    camara.lookAt(camara.position.x, 2, camara.position.z - 46 * zoom - 2);
+    sol.position.set(fx + 30, 60, fz + 20);
+    sol.target.position.set(fx, 0, fz);
     renderer.render(escena, camara);
+    contenedor.dataset.nino = `${nino.position.x.toFixed(1)},${nino.position.z.toFixed(1)}`;
     cuadro = requestAnimationFrame(animar);
   };
   camara.position.set(inicio.x, 44, inicio.z + 46);
@@ -433,10 +598,27 @@ export function crearBarrio3D(contenedor: HTMLElement, op: OpcionesBarrio3D) {
     destruir() {
       cancelAnimationFrame(cuadro);
       observador.disconnect();
-      renderer.domElement.removeEventListener("pointerdown", alBajar);
-      renderer.domElement.removeEventListener("pointerup", alSubir);
+      lienzo.removeEventListener("pointerdown", alBajar);
+      lienzo.removeEventListener("pointermove", alMover);
+      lienzo.removeEventListener("pointerup", alSubir);
+      lienzo.removeEventListener("pointercancel", alCancelar);
+      lienzo.removeEventListener("wheel", alRueda);
+      window.removeEventListener("keydown", alTecla, true);
+      window.removeEventListener("keyup", alSoltarTecla, true);
+      window.removeEventListener("blur", soltarTodo);
       renderer.dispose();
       renderer.domElement.remove();
+    },
+    flecha(d, apretada) {
+      if (apretada) teclas.add(d);
+      else teclas.delete(d);
+    },
+    entrar: entrarCerca,
+    zoom(pasoZoom) {
+      zoomA(zoom - pasoZoom * 0.2);
+    },
+    centrar() {
+      siguiendo = true;
     },
   };
 }

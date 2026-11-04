@@ -3,7 +3,7 @@
 > Línea de suscripción para que niños de 3 a 6 años aprendan **inglés, portugués, francés, chino mandarín** y más idiomas, jugando con los mismos juegos que ya conocen.
 > Complementa el estudio principal ([ESTUDIO.md](ESTUDIO.md)). Octubre 2026.
 
-> **Estado (noviembre 2026):** piloto jugable de **Max (inglés), nivel «Hello»**. En el barrio, el 🚌 Paradero lleva a la llegada de Max en bus y a su casa con 6 juegos de escuchar y tocar: *Hello!*, *Colors*, *Numbers*, *Animals*, *My body* y *Max says*. Son 41 palabras en `packages/core/src/contenido/ingles.ts`. Max habla solo inglés, Emilia explica cada juego en español la primera vez, y hay un botón «🤔 Ayuda» donde Emilia dice en español lo que pidió Max. Por ahora usa la voz en inglés de la tablet; la versión final tendrá audio grabado por nativos.
+> **Estado (noviembre 2026):** piloto jugable con **los cuatro amigos**: Max (inglés), Bia (portugués de Brasil), Léa (francés) y Xiao Lin (chino mandarín), nivel «Hello». En el 🚌 Paradero llega el bus y bajan los cuatro; el niño toca a uno para conocerlo e ir a su casa, con 6 juegos de escuchar y tocar (saludos, colores, números, animales, cuerpo y «X dice»). Son las mismas 41 palabras en los cuatro idiomas (`packages/core/src/contenido/ingles.ts` y `amigos.ts`). Cada amigo habla solo su idioma; Emilia los presenta y explica en español, y el botón «🤔 Ayuda» dice en español lo que pidió el amigo. Por ahora usan las voces de la tablet; la versión final tendrá audio grabado por hablantes nativos, y las traducciones deben revisarlas nativos antes de publicar.
 
 ---
 
