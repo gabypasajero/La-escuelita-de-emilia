@@ -53,6 +53,33 @@
 
   <body>
     <noscript>Necesitas activar JavaScript para jugar.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Pantalla de carga: React la reemplaza al abrir el juego. -->
+      <div id="cargando" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#FFE082;font-family:system-ui,sans-serif;color:#3B2F5C;text-align:center;padding:16px">
+        <img src="/iconos/icono-192.png" width="120" height="120" alt="" style="border-radius:28px" />
+        <div style="font-size:26px;font-weight:800">La Escuelita de Emilia</div>
+        <div id="cargando-texto" style="font-size:18px">Cargando…</div>
+        <button id="reintentar" style="display:none;font-size:20px;font-weight:800;padding:14px 28px;border-radius:24px;border:0;background:#43A047;color:#fff">🔄 Reintentar</button>
+      </div>
+    </div>
+    <script>
+      // Si el juego no abre en 12 segundos (por ejemplo, quedó una copia vieja guardada),
+      // se ofrece "Reintentar": borra la copia guardada y vuelve a descargar el juego.
+      (function () {
+        function reparar() {
+          var tareas = [];
+          if ("serviceWorker" in navigator) tareas.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+          if (window.caches) tareas.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+          Promise.all(tareas).catch(function () {}).then(function () { location.replace("/"); });
+        }
+        setTimeout(function () {
+          if (!document.getElementById("cargando")) return; // ya abrió
+          document.getElementById("cargando-texto").textContent = "Está tardando mucho. Revisa el internet y toca Reintentar.";
+          var b = document.getElementById("reintentar");
+          b.style.display = "block";
+          b.onclick = function () { b.textContent = "Reparando…"; reparar(); };
+        }, 12000);
+      })();
+    </script>
   </body>
 </html>

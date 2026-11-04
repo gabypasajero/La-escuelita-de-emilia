@@ -32,16 +32,20 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   if (req.method !== "GET" || url.origin !== self.location.origin) return;
 
-  // Páginas: primero internet, si no hay, la copia guardada (la app es de una sola página).
+  // Páginas: primero internet, pero si tarda más de 3 segundos (wifi lento) o no hay
+  // conexión, se abre la copia guardada para que la app nunca quede en blanco.
   if (req.mode === "navigate") {
+    const red = fetch(req).then((r) => {
+      if (r.ok) {
+        const copia = r.clone();
+        caches.open(VERSION).then((c) => c.put("/index.html", copia));
+      }
+      return r;
+    });
     e.respondWith(
-      fetch(req)
-        .then((r) => {
-          const copia = r.clone();
-          caches.open(VERSION).then((c) => c.put("/index.html", copia));
-          return r;
-        })
-        .catch(() => caches.match("/index.html")),
+      Promise.race([red, new Promise((listo) => setTimeout(listo, 3000))])
+        .then((r) => r || caches.match("/index.html").then((guardada) => guardada || red))
+        .catch(() => caches.match("/index.html").then((guardada) => guardada || Response.error())),
     );
     return;
   }
