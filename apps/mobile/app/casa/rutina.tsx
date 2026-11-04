@@ -2,7 +2,7 @@ import { RUTINA_DIENTES, RUTINA_MANOS, duracionTotal, pasoEn } from "@escuelita/
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { AnimacionRutina } from "../../components/AnimacionRutina";
+import { VideoRutina } from "../../components/VideoRutina";
 import { Pantalla } from "../../components/Pantalla";
 import { EmiliaDibujo, Globo } from "../../components/Personajes";
 import { useJuego } from "../../lib/juego";
@@ -44,9 +44,6 @@ export default function Rutina() {
   }, [paso, segundos, rutina]);
 
   const actual = paso === null ? null : rutina.pasos[paso]!;
-  // Cuánto va del paso actual (0 a 1): los bichitos se borran de a poco.
-  const inicioPaso = paso === null ? 0 : rutina.pasos.slice(0, paso).reduce((a, x) => a + x.segundos, 0);
-  const progreso = paso === null || segundos === null ? 0 : Math.min(1, (segundos + 1 - inicioPaso) / actual!.segundos);
   const restante = segundos === null ? total : Math.max(0, total - segundos);
 
   return (
@@ -70,7 +67,7 @@ export default function Rutina() {
         </View>
       ) : (
         <View style={estilos.centro}>
-          <AnimacionRutina rutina={rutina.id} paso={paso} progreso={progreso} />
+          <VideoRutina rutina={rutina.id} paso={paso!} tamano={400} />
           <Text style={estilos.tiempo}>{actual?.emoji} {restante}</Text>
         </View>
       )}
