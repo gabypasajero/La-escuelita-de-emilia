@@ -8,7 +8,7 @@ import { angulo, onda, Pieza, useCiclo, useParpadeo } from "./Articulados";
  * gesticulan y mueven la boca cuando hablan, y pueden saludar.
  * Lienzo de 100×180 unidades, de frente.
  */
-export type AdultoId = "pedro" | "rosa" | "lucas" | "tia" | "artista";
+export type AdultoId = "pedro" | "rosa" | "lucas" | "tia" | "artista" | "nina";
 
 interface Estilo {
   piel: string;
@@ -26,6 +26,31 @@ interface Estilo {
 }
 
 const ESTILOS: Record<AdultoId, Estilo> = {
+  // La abuela Nina: pelo blanco crespito, lentes redondos, chaleco coral y delantal de cuadritos.
+  nina: {
+    piel: "#F5D0B5", pelo: "#F5F5F5", camisa: "#E57373", piernas: "#8D6E63", zapatos: "#6D4C41", falda: true,
+    encima: () => (
+      <G>
+        <Path d="M38 86 L62 86 L66 134 L34 134 Z" fill="#FFF59D" />
+        {[0, 1, 2, 3].map((f) => <Path key={`h${f}`} d={`M${35 + f * 0.5} ${96 + f * 10} H${65 - f * 0.5}`} stroke="#FFB300" strokeWidth="1.5" opacity="0.7" />)}
+        {[42, 50, 58].map((x) => <Path key={x} d={`M${x} 86 V134`} stroke="#FFB300" strokeWidth="1.5" opacity="0.7" />)}
+        <Path d="M38 86 Q50 80 62 86" stroke="#F9A825" strokeWidth="2" fill="none" />
+        <Rect x="43" y="112" width="14" height="10" rx="3" fill="#FFCA28" />
+        {[[34, 80], [66, 80]].map(([x, y]) => <Circle key={x} cx={x} cy={y} r="2" fill="#fff" />)}
+      </G>
+    ),
+    peloAtras: <G>{[[24, 44], [76, 44], [26, 56], [74, 56]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="7" fill="#F5F5F5" />)}</G>,
+    cabeza: (
+      <G>
+        {[26, 34, 42, 50, 58, 66, 74].map((x, i) => <Circle key={x} cx={x} cy={i % 2 ? 18 : 24} r="9" fill="#F5F5F5" stroke="#E0E0E0" strokeWidth="1" />)}
+        <Circle cx="40" cy="41" r="7.5" fill="#E3F2FD" fillOpacity="0.35" stroke="#8D6E63" strokeWidth="2" />
+        <Circle cx="60" cy="41" r="7.5" fill="#E3F2FD" fillOpacity="0.35" stroke="#8D6E63" strokeWidth="2" />
+        <Path d="M47.5 41 L52.5 41" stroke="#8D6E63" strokeWidth="2" />
+        <Circle cx="25" cy="52" r="2.4" fill="#fff" stroke="#E0E0E0" strokeWidth="0.8" />
+        <Circle cx="75" cy="52" r="2.4" fill="#fff" stroke="#E0E0E0" strokeWidth="0.8" />
+      </G>
+    ),
+  },
   // El profe Tomás del taller de arte: pelo crespo, boina roja y cotona manchada de pintura.
   artista: {
     piel: "#C68B59", pelo: "#212121", camisa: "#FFB300", piernas: "#455A64", zapatos: "#3E2723",
