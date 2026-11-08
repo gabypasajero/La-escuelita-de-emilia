@@ -1,7 +1,9 @@
 import { router, type Href } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import Svg, { Circle, Path, Rect } from "react-native-svg";
+import Svg, { Circle, Ellipse, G, Line, Path, Rect } from "react-native-svg";
+import { Bandada, Nube, Sol } from "../components/Ambiente";
+import { AnimalVivo } from "../components/AnimalesVivos";
 import { Pantalla } from "../components/Pantalla";
 import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Personajes";
 import { AMIGOS, type Amigo, type AmigoId } from "../lib/amigos";
@@ -20,7 +22,7 @@ type Quien = "emilia" | AmigoId;
  * su casa. Emilia los presenta en español; cada amigo habla solo su idioma.
  */
 export default function Paradero() {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const { perfil } = useJuego();
   const nombre = perfil?.nombre ?? "";
   const bus = useRef(new Animated.Value(width + 50)).current;
@@ -100,13 +102,16 @@ export default function Paradero() {
 
   return (
     <Pantalla color="#B3E5FC">
-      <View style={estilos.escena}>
-        <Fondo />
-        {/* Calle */}
+      {/* Fondo a pantalla completa: cielo, barrio, vereda y calle */}
+      <View pointerEvents="none" style={[estilos.mundo, { width, height }]}>
+        <Fondo ancho={width} />
         <View style={estilos.vereda} />
         <View style={estilos.calle}>
-          {Array.from({ length: 12 }, (_, i) => <View key={i} style={estilos.linea} />)}
+          {Array.from({ length: Math.ceil(width / 90) }, (_, i) => <View key={i} style={estilos.linea} />)}
         </View>
+      </View>
+      <View style={estilos.escena}>
+        <Refugio />
         {/* Letrero del paradero */}
         <View style={estilos.letrero}>
           <Svg width={70} height={170} viewBox="0 0 70 170">
@@ -150,24 +155,69 @@ export default function Paradero() {
   );
 }
 
-/** Cielo con sol y nubes, cerros y casitas del barrio al fondo. */
-function Fondo() {
+/** Cielo con sol y nubes que pasan, pájaros, cerros, casitas y árboles del barrio. */
+function Fondo({ ancho }: { ancho: number }) {
+  const e = ancho / 1100;
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <View style={StyleSheet.absoluteFill}>
       <Svg width="100%" height="100%" viewBox="0 0 1100 600" preserveAspectRatio="xMidYMax slice">
-        <Circle cx="980" cy="70" r="46" fill="#FFEE58" />
-        {([[160, 80], [520, 50], [780, 120]] as const).map(([x, y]) => (
-          <Path key={x} d={`M${x} ${y} q20 -30 50 -10 q30 -25 60 5 q30 0 25 25 h-140 q-15 -20 5 -20 Z`} fill="#fff" opacity="0.95" />
-        ))}
         <Path d="M0 420 Q150 250 320 400 Q480 230 660 400 Q820 260 1100 390 V600 H0 Z" fill="#AED581" />
         <Path d="M0 460 Q200 360 420 450 Q650 350 880 450 Q1000 400 1100 440 V600 H0 Z" fill="#9CCC65" />
-        {[[260, "#FFAB91"], [560, "#CE93D8"], [860, "#90CAF9"]].map(([x, c]) => (
-          <Path key={x as number} d={`M${x} 470 v-70 l50 -45 l50 45 v70 Z`} fill={c as string} stroke="#fff" strokeWidth="4" />
+        {[[200, "#FFAB91", "#E64A19"], [470, "#CE93D8", "#7B1FA2"], [760, "#90CAF9", "#1565C0"]].map(([x, c, t]) => (
+          <G key={x as number}>
+            <Rect x={x as number} y="400" width="100" height="70" fill={c as string} stroke="#fff" strokeWidth="3" />
+            <Path d={`M${(x as number) - 10} 402 L${(x as number) + 50} 352 L${(x as number) + 110} 402 Z`} fill={t as string} />
+            <Rect x={(x as number) + 14} y="416" width="22" height="20" fill="#FFF9C4" stroke="#fff" strokeWidth="2" />
+            <Rect x={(x as number) + 60} y="430" width="24" height="40" rx="3" fill="#795548" />
+          </G>
         ))}
-        {([[120, 470], [430, 470], [720, 470], [1010, 470]] as const).map(([x, y]) => (
-          <Path key={x} d={`M${x - 4} ${y} h8 v-30 h-8 Z M${x} ${y - 70} a28 32 0 1 0 0.1 0 Z`} fill="#43A047" />
+        {([[120, 470], [380, 470], [680, 470], [1010, 470]] as const).map(([x, y]) => (
+          <G key={x}>
+            <Rect x={x - 5} y={y - 34} width="10" height="34" fill="#6D4C41" />
+            <Circle cx={x} cy={y - 56} r="28" fill="#43A047" />
+            <Circle cx={x - 18} cy={y - 40} r="18" fill="#43A047" />
+            <Circle cx={x + 18} cy={y - 42} r="19" fill="#388E3C" />
+          </G>
+        ))}
+        {/* Arbustos con flores a la orilla de la vereda */}
+        {Array.from({ length: 12 }, (_, i) => 40 + i * 95).map((x, i) => (
+          <G key={x}>
+            <Ellipse cx={x} cy="478" rx="30" ry="14" fill="#7CB342" />
+            <Circle cx={x - 10} cy="472" r="4" fill={["#F06292", "#FFCA28", "#BA68C8"][i % 3]} />
+            <Circle cx={x + 12} cy="474" r="4" fill={["#FFCA28", "#BA68C8", "#F06292"][i % 3]} />
+          </G>
         ))}
       </Svg>
+      <Sol k={e} x={880} y={90} r={40} />
+      <Nube escala={e} ancho={1100} y={40} ms={70000} retraso={0} tam={170} sombra={false} />
+      <Nube escala={e} ancho={1100} y={150} ms={95000} retraso={25000} tam={140} sombra={false} />
+      <Nube escala={e} ancho={1100} y={90} ms={80000} retraso={50000} tam={120} sombra={false} />
+      <Bandada escala={e} ancho={1100} y={200} ms={17000} retraso={5000} />
+    </View>
+  );
+}
+
+/** Refugio del paradero: techo, vidrio con mapa, banca y un pajarito en el techo. */
+function Refugio() {
+  return (
+    <View style={estilos.refugio} pointerEvents="none">
+      <Svg width={250} height={217} viewBox="0 0 300 260">
+        <Rect x="10" y="40" width="10" height="220" fill="#78909C" />
+        <Rect x="280" y="40" width="10" height="220" fill="#78909C" />
+        <Path d="M0 30 L300 30 L290 52 L10 52 Z" fill="#26A69A" />
+        <Rect x="0" y="22" width="300" height="10" rx="4" fill="#00897B" />
+        <Rect x="24" y="60" width="252" height="130" rx="6" fill="#E0F7FA" opacity="0.55" stroke="#B2EBF2" strokeWidth="3" />
+        {/* Mapa del recorrido */}
+        <Rect x="200" y="74" width="62" height="80" rx="4" fill="#fff" />
+        <Path d="M210 140 Q220 110 236 120 T254 86" stroke="#E53935" strokeWidth="3" fill="none" />
+        {[[210, 140], [236, 120], [254, 86]].map(([x, y]) => <Circle key={x} cx={x} cy={y} r="4" fill="#1E88E5" />)}
+        <Line x1="40" y1="80" x2="80" y2="120" stroke="#fff" strokeWidth="5" opacity="0.7" />
+        {/* Banca */}
+        <Rect x="30" y="200" width="160" height="12" rx="4" fill="#8D6E63" />
+        <Rect x="40" y="212" width="8" height="46" fill="#5D4037" />
+        <Rect x="172" y="212" width="8" height="46" fill="#5D4037" />
+      </Svg>
+      <View style={estilos.pajaroTecho}><AnimalVivo id="pajaro" alto={30} /></View>
     </View>
   );
 }
@@ -180,12 +230,20 @@ function Bus() {
       {[30, 100, 170].map((x) => (
         <Rect key={x} x={x} y="40" width="56" height="48" rx="8" fill="#B3E5FC" stroke="#fff" strokeWidth="3" />
       ))}
+      {/* Pasajeros y el chofer saludando */}
+      <Circle cx="58" cy="70" r="10" fill="#FFCC80" />
+      <Path d="M48 66 Q58 54 68 66 Z" fill="#5D4037" />
+      <Circle cx="128" cy="72" r="9" fill="#C68B59" />
+      <Path d="M119 68 Q128 58 137 68 Z" fill="#212121" />
+      <Path d="M318 60 h20 v40 h-20 Z" fill="#B3E5FC" />
+      <Circle cx="330" cy="76" r="8" fill="#F1C7A5" />
+      <Rect x="322" y="64" width="16" height="5" rx="2" fill="#1565C0" />
       {/* Puerta */}
       <Rect x="250" y="40" width="58" height="110" rx="6" fill="#81D4FA" stroke="#fff" strokeWidth="4" />
       <Path d="M279 42 V148" stroke="#fff" strokeWidth="3" />
       {/* Letrero del bus */}
       <Rect x="40" y="2" width="200" height="26" rx="8" fill="#3B2F5C" />
-      <Path d="M326 60 h16 v26 h-16 Z" fill="#fff" opacity="0.8" />
+      <Circle cx="340" cy="140" r="6" fill="#FFF59D" />
       <Circle cx="80" cy="162" r="24" fill="#37474F" />
       <Circle cx="80" cy="162" r="10" fill="#B0BEC5" />
       <Circle cx="280" cy="162" r="24" fill="#37474F" />
@@ -195,7 +253,10 @@ function Bus() {
 }
 
 const estilos = StyleSheet.create({
-  escena: { width: "100%", maxWidth: 1100, flex: 1, position: "relative", overflow: "hidden" },
+  mundo: { position: "absolute", top: 0, left: 0 },
+  escena: { width: "100%", maxWidth: 1100, flex: 1, position: "relative" },
+  refugio: { position: "absolute", left: 70, bottom: 92 },
+  pajaroTecho: { position: "absolute", left: 180, top: -10 },
   vereda: { position: "absolute", left: 0, right: 0, bottom: 70, height: 50, backgroundColor: "#CFD8DC" },
   calle: { position: "absolute", left: 0, right: 0, bottom: 0, height: 70, backgroundColor: "#546E7A", flexDirection: "row", alignItems: "center", justifyContent: "space-around" },
   linea: { width: 40, height: 6, backgroundColor: "#FFF59D", borderRadius: 3 },

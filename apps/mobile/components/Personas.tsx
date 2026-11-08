@@ -8,7 +8,7 @@ import { angulo, onda, Pieza, useCiclo, useParpadeo } from "./Articulados";
  * gesticulan y mueven la boca cuando hablan, y pueden saludar.
  * Lienzo de 100×180 unidades, de frente.
  */
-export type AdultoId = "pedro" | "rosa" | "lucas";
+export type AdultoId = "pedro" | "rosa" | "lucas" | "tia" | "artista";
 
 interface Estilo {
   piel: string;
@@ -26,6 +26,44 @@ interface Estilo {
 }
 
 const ESTILOS: Record<AdultoId, Estilo> = {
+  // El profe Tomás del taller de arte: pelo crespo, boina roja y cotona manchada de pintura.
+  artista: {
+    piel: "#C68B59", pelo: "#212121", camisa: "#FFB300", piernas: "#455A64", zapatos: "#3E2723",
+    encima: () => (
+      <G>
+        <Path d="M32 80 L68 80 L70 132 L30 132 Z" fill="#ECEFF1" />
+        {([[40, 94, "#E53935"], [58, 100, "#1E88E5"], [46, 116, "#43A047"], [62, 122, "#FDD835"], [36, 124, "#8E24AA"]] as const).map(([x, y, c]) => <Circle key={x} cx={x} cy={y} r="3.2" fill={c} />)}
+        <Path d="M50 80 L50 132" stroke="#CFD8DC" strokeWidth="1.5" />
+      </G>
+    ),
+    cabeza: (
+      <G>
+        {[28, 36, 44, 52, 60, 68, 72].map((x, i) => <Circle key={x} cx={x} cy={i % 2 ? 22 : 26} r="8" fill="#212121" />)}
+        <Circle cx="26" cy="36" r="6" fill="#212121" />
+        <Circle cx="74" cy="36" r="6" fill="#212121" />
+        <Ellipse cx="46" cy="14" rx="26" ry="8" fill="#D32F2F" />
+        <Rect x="44" y="3" width="4" height="5" rx="2" fill="#D32F2F" />
+      </G>
+    ),
+  },
+  // La tía de la escuelita: cola de caballo, chaleco verde y delantal con estrellitas.
+  tia: {
+    piel: "#F1C7A5", pelo: "#6D4C41", camisa: "#26A69A", piernas: "#5C6BC0", zapatos: "#5D4037", falda: true,
+    encima: () => (
+      <G>
+        <Path d="M38 84 L62 84 L66 128 L34 128 Z" fill="#FFF8E1" />
+        {([[44, 96], [56, 104], [46, 116]] as const).map(([x, y]) => <Path key={x} d={`M${x} ${y - 4} L${x + 1.4} ${y - 1} L${x + 4.5} ${y - 1} L${x + 2} ${y + 1} L${x + 3} ${y + 4} L${x} ${y + 2} L${x - 3} ${y + 4} L${x - 2} ${y + 1} L${x - 4.5} ${y - 1} L${x - 1.4} ${y - 1} Z`} fill="#FFCA28" />)}
+        <Rect x="44" y="76" width="12" height="6" rx="2" fill="#FF7043" />
+      </G>
+    ),
+    peloAtras: <Path d="M70 24 Q90 30 84 60 Q78 46 70 40 Z" fill="#6D4C41" />,
+    cabeza: (
+      <G>
+        <Path d="M25 38 Q24 12 50 12 Q76 12 75 38 Q70 22 50 22 Q34 22 30 30 Q28 34 25 38 Z" fill="#6D4C41" />
+        <Circle cx="70" cy="22" r="4" fill="#FF7043" />
+      </G>
+    ),
+  },
   pedro: {
     piel: "#E0A878", pelo: "#9E9E9E", camisa: "#C62828", piernas: "#1565C0", zapatos: "#4E342E",
     encima: () => (

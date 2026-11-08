@@ -1,7 +1,9 @@
 import { Redirect, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import Svg, { Circle, Ellipse, Line, Path, Rect } from "react-native-svg";
+import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
+import { Abeja, Bandada, MariposaVolando, Nube, Sol } from "../components/Ambiente";
+import { AnimalPaseando, AnimalVivo } from "../components/AnimalesVivos";
 import { Avatar } from "../components/Avatar";
 import { BotonCasa } from "../components/BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Personajes";
@@ -127,13 +129,10 @@ export default function Plaza() {
 
   return (
     <View style={estilos.fondo}>
+      <View pointerEvents="none" style={estilos.pasto} />
       <View style={{ width: 1100 * k, height: 620 * k, alignSelf: "center" }}>
         <Svg width={1100 * k} height={620 * k} viewBox="0 0 1100 620" style={StyleSheet.absoluteFill}>
-          <Rect x="0" y="0" width="1100" height="620" fill="#B3E5FC" />
-          <Circle cx="1010" cy="80" r="50" fill="#FFEB3B" />
-          <Ellipse cx="200" cy="90" rx="80" ry="26" fill="#fff" />
-          <Rect x="0" y="470" width="1100" height="150" fill="#9CCC65" />
-          <Ellipse cx="550" cy="560" rx="520" ry="60" fill="#FFE0B2" />
+          <FondoParque />
           {/* Estructura de los columpios */}
           <Line x1="110" y1="215" x2="70" y2="560" stroke="#E53935" strokeWidth="14" strokeLinecap="round" />
           <Line x1="350" y1="215" x2="390" y2="560" stroke="#E53935" strokeWidth="14" strokeLinecap="round" />
@@ -147,6 +146,7 @@ export default function Plaza() {
           {/* Base del balancín */}
           <Path d={`M${BALANCIN.x - 30} ${SUELO} L${BALANCIN.x} ${BALANCIN.y} L${BALANCIN.x + 30} ${SUELO} Z`} fill="#8D6E63" />
         </Svg>
+        <VidaParque k={k} />
 
         <Columpio x={COLUMPIOS.ninoX} quien="nino" />
         <Columpio x={COLUMPIOS.emiliaX} quien="emilia" />
@@ -234,7 +234,8 @@ export default function Plaza() {
 }
 
 const estilos = StyleSheet.create({
-  fondo: { flex: 1, backgroundColor: "#9CCC65", justifyContent: "center" },
+  fondo: { flex: 1, backgroundColor: "#81D4FA", justifyContent: "center" },
+  pasto: { position: "absolute", left: 0, right: 0, bottom: 0, height: "50%", backgroundColor: "#9CCC65" },
   cuerda: { position: "absolute", top: 0, width: 4, backgroundColor: "#5D4037" },
   asiento: { position: "absolute", left: 10, right: 10, borderRadius: 6, backgroundColor: "#FB8C00" },
   tabla: { flex: 1, backgroundColor: "#43A047", borderRadius: 8, borderWidth: 3, borderColor: "#2E7D32" },
@@ -248,3 +249,114 @@ const estilos = StyleSheet.create({
   botonEmoji: { fontSize: 30 },
   botonTexto: { fontSize: 15, fontWeight: "800", color: "#3B2F5C" },
 });
+
+/** Cielo, cerros, árboles, reja con flores, banca, laguna, carrito de helados y farol. */
+function FondoParque() {
+  const arbol = (x: number, y: number, r: number, c: string) => (
+    <G key={`${x}-${y}`}>
+      <Rect x={x - 7} y={y - 10} width="14" height={r + 14} fill="#6D4C41" />
+      <Circle cx={x} cy={y - r * 0.6} r={r} fill={c} />
+      <Circle cx={x - r * 0.6} cy={y - r * 0.2} r={r * 0.7} fill={c} />
+      <Circle cx={x + r * 0.6} cy={y - r * 0.25} r={r * 0.72} fill={c} />
+      <Circle cx={x - r * 0.25} cy={y - r * 0.85} r={r * 0.3} fill="#fff" opacity="0.15" />
+    </G>
+  );
+  return (
+    <G>
+      <Defs>
+        <LinearGradient id="cieloParque" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor="#81D4FA" />
+          <Stop offset="1" stopColor="#E1F5FE" />
+        </LinearGradient>
+      </Defs>
+      <Rect x="0" y="0" width="1100" height="620" fill="url(#cieloParque)" />
+      {/* Cerros lejanos y edificios del barrio */}
+      <Path d="M0 400 Q160 300 340 380 Q520 290 720 370 Q900 300 1100 360 V480 H0 Z" fill="#C5E1A5" />
+      {[[640, 300, 50, "#FFCCBC"], [700, 280, 40, "#D1C4E9"], [748, 310, 44, "#B2EBF2"]].map(([x, y, w, c]) => (
+        <G key={x as number}>
+          <Rect x={x as number} y={y as number} width={w as number} height={400 - (y as number)} fill={c as string} />
+          {[0, 1, 2].map((f) => <Rect key={f} x={(x as number) + 10} y={(y as number) + 12 + f * 22} width={(w as number) - 20} height="10" fill="#fff" opacity="0.6" />)}
+        </G>
+      ))}
+      <Path d="M0 440 Q200 380 420 430 Q640 380 860 430 Q980 400 1100 420 V480 H0 Z" fill="#AED581" />
+      {/* Árboles detrás de la reja */}
+      {arbol(30, 450, 46, "#66BB6A")}
+      {arbol(470, 445, 40, "#43A047")}
+      {arbol(860, 440, 50, "#558B2F")}
+      {arbol(1080, 450, 44, "#66BB6A")}
+      {/* Pasto */}
+      <Rect x="0" y="470" width="1100" height="150" fill="#9CCC65" />
+      {/* Laguna con patos (detrás de los columpios) */}
+      <Ellipse cx="230" cy="478" rx="110" ry="20" fill="#4FC3F7" />
+      <Ellipse cx="230" cy="474" rx="90" ry="10" fill="#81D4FA" />
+      {/* Reja de madera con flores */}
+      <Rect x="0" y="448" width="1100" height="6" fill="#A1887F" />
+      <Rect x="0" y="462" width="1100" height="6" fill="#A1887F" />
+      {Array.from({ length: 56 }, (_, i) => 10 + i * 20).filter((x) => x < 110 || x > 350).map((x) => (
+        <Path key={x} d={`M${x - 5} 474 V446 L${x} 440 L${x + 5} 446 V474 Z`} fill="#BCAAA4" stroke="#8D6E63" strokeWidth="1" />
+      ))}
+      {[420, 452, 600, 640, 1010, 1046, 70].map((x, i) => (
+        <G key={x}>
+          <Line x1={x} y1="486" x2={x} y2="472" stroke="#558B2F" strokeWidth="2" />
+          <Circle cx={x} cy="470" r="6" fill={["#F06292", "#FFCA28", "#BA68C8", "#FF7043", "#F06292", "#4FC3F7", "#FFCA28"][i]} />
+          <Circle cx={x} cy="470" r="2.2" fill="#FFF59D" />
+        </G>
+      ))}
+      {/* Banca */}
+      <Rect x="398" y="470" width="96" height="9" rx="3" fill="#8D6E63" />
+      <Rect x="398" y="484" width="96" height="9" rx="3" fill="#A1887F" />
+      <Rect x="404" y="493" width="6" height="20" fill="#5D4037" />
+      <Rect x="482" y="493" width="6" height="20" fill="#5D4037" />
+      {/* Carrito de helados */}
+      <G>
+        <Rect x="905" y="410" width="110" height="70" rx="8" fill="#F8BBD0" stroke="#EC407A" strokeWidth="3" />
+        <Path d="M895 410 Q960 360 1025 410 Z" fill="#EC407A" />
+        <Path d="M915 395 Q960 372 1005 395" stroke="#fff" strokeWidth="4" strokeDasharray="10 8" fill="none" />
+        <Line x1="910" y1="410" x2="910" y2="395" stroke="#AD1457" strokeWidth="3" />
+        <Line x1="1010" y1="410" x2="1010" y2="395" stroke="#AD1457" strokeWidth="3" />
+        {[["#FFF59D", 930], ["#A5D6A7", 960], ["#F48FB1", 990]].map(([c, x]) => (
+          <G key={x as number}>
+            <Path d={`M${(x as number) - 8} 438 L${x} 462 L${(x as number) + 8} 438 Z`} fill="#FFCC80" />
+            <Circle cx={x as number} cy="434" r="9" fill={c as string} />
+          </G>
+        ))}
+        <Circle cx="925" cy="484" r="9" fill="#546E7A" />
+        <Circle cx="995" cy="484" r="9" fill="#546E7A" />
+      </G>
+      {/* Farol */}
+      <Rect x="1068" y="380" width="6" height="110" fill="#455A64" />
+      <Path d="M1058 382 L1084 382 L1078 362 L1064 362 Z" fill="#FFF59D" stroke="#455A64" strokeWidth="3" />
+      {/* Arenero del parque */}
+      <Ellipse cx="550" cy="560" rx="520" ry="60" fill="#FFE0B2" />
+      <Ellipse cx="550" cy="552" rx="500" ry="50" fill="none" stroke="#FFCC80" strokeWidth="3" strokeDasharray="4 14" />
+      {/* Matas de pasto */}
+      {([[20, 600], [1080, 596], [60, 520], [1040, 530]] as const).map(([x, y]) => (
+        <Path key={x} d={`M${x - 10} ${y} Q${x - 6} ${y - 16} ${x - 2} ${y} Q${x} ${y - 22} ${x + 3} ${y} Q${x + 8} ${y - 15} ${x + 11} ${y} Z`} fill="#7CB342" />
+      ))}
+    </G>
+  );
+}
+
+/** Lo que se mueve en el parque: sol, nubes, pájaros, mariposas, abejas, patos y un perrito. */
+function VidaParque({ k }: { k: number }) {
+  return (
+    <>
+      <Sol k={k} x={1010} y={80} r={44} />
+      <Nube escala={k} ancho={1100} y={50} ms={60000} retraso={0} tam={170} sombra={false} />
+      <Nube escala={k} ancho={1100} y={150} ms={85000} retraso={20000} tam={130} sombra={false} />
+      <Bandada escala={k} ancho={1100} y={120} ms={15000} retraso={4000} />
+      <MariposaVolando escala={k} x={440} y={440} fase={0} />
+      <MariposaVolando escala={k} x={1020} y={440} fase={2} />
+      <Abeja k={k} x={620} y={455} fase={1} radio={40} />
+      <View pointerEvents="none" style={{ position: "absolute", left: 180 * k, top: 452 * k }}>
+        <AnimalVivo id="pato" alto={30 * k} nadando />
+      </View>
+      <View pointerEvents="none" style={{ position: "absolute", left: 250 * k, top: 458 * k }}>
+        <AnimalVivo id="pato" alto={22 * k} nadando />
+      </View>
+      <View pointerEvents="none" style={{ position: "absolute", left: 700 * k, top: 500 * k }}>
+        <AnimalPaseando id="perro" alto={44 * k} paseo={60 * k} />
+      </View>
+    </>
+  );
+}

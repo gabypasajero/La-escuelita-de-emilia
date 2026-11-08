@@ -18,7 +18,7 @@ export interface Lugar {
 
 export const LUGARES: Lugar[] = [
   { id: "escuelita", nombre: "La Escuelita", frase: "¡A la escuelita! Letras y números.", ruta: "/escuelita", x: 430, y: 360 },
-  { id: "taller", nombre: "Taller de arte", frase: "¡Qué entretenido! ¿Pintamos?", ruta: "/pintar", x: 780, y: 360 },
+  { id: "taller", nombre: "Taller de arte", frase: "¡Qué entretenido! ¿Pintamos?", ruta: "/taller", x: 780, y: 360 },
   { id: "tiendita", nombre: "Almacén", frase: "Doña Rosa necesita ayuda en el almacén.", ruta: "/juegos/tiendita", x: 1130, y: 360 },
   { id: "disfraces", nombre: "Disfraces", frase: "¡La tienda de disfraces! ¿Qué te compras?", ruta: "/disfraces", x: 1480, y: 360 },
   { id: "casa", nombre: "Casa de Emilia", frase: "¡Esta es mi casa! Ven, te muestro el patio.", ruta: "/casa", x: 300, y: 770 },

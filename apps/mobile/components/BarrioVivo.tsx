@@ -32,16 +32,16 @@ function useBucle(ms: number, retraso = 0) {
   return v;
 }
 
-export function Nube({ escala, ancho, y, ms, retraso, tam }: { escala: number; ancho: number; y: number; ms: number; retraso: number; tam: number }) {
+export function Nube({ escala, ancho, y, ms, retraso, tam, sombra = true }: { escala: number; ancho: number; y: number; ms: number; retraso: number; tam: number; sombra?: boolean }) {
   const t = useBucle(ms, retraso);
   const x = t.interpolate({ inputRange: [0, 1], outputRange: [-tam * 1.5 * escala, (ancho + tam) * escala] });
   const w = tam * escala, h = tam * 0.55 * escala;
   return (
     <>
-      {/* Sombra de la nube en el suelo */}
-      <Animated.View pointerEvents="none" style={{ position: "absolute", top: (y + tam * 1.1) * escala, transform: [{ translateX: Animated.add(x, 30 * escala) as never }], zIndex: 1 }}>
+      {/* Sombra de la nube en el suelo (solo en el barrio visto desde arriba) */}
+      {sombra && <Animated.View pointerEvents="none" style={{ position: "absolute", top: (y + tam * 1.1) * escala, transform: [{ translateX: Animated.add(x, 30 * escala) as never }], zIndex: 1 }}>
         <Svg width={w} height={h * 0.7} viewBox="0 0 100 40"><Ellipse cx="50" cy="20" rx="48" ry="18" fill="#000" opacity="0.07" /></Svg>
-      </Animated.View>
+      </Animated.View>}
       <Animated.View pointerEvents="none" style={{ position: "absolute", top: y * escala, transform: [{ translateX: x as never }], zIndex: 2000 }}>
         <Svg width={w} height={h} viewBox="0 0 100 55">
           <Path d="M10 45 Q0 45 4 34 Q6 24 18 26 Q20 10 38 12 Q48 0 64 8 Q80 4 84 20 Q98 22 96 36 Q96 47 84 47 Z" fill="#fff" opacity="0.88" />
