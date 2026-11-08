@@ -1,5 +1,6 @@
 import type { Href } from "expo-router";
 import type { LugarId } from "../components/Lugares";
+import type { AnimalId } from "../components/AnimalesVivos";
 import { DESBLOQUEOS } from "./juego";
 
 /** Lugares del barrio (compartidos por el barrio 2D y la prueba 3D). Unidades de mundo: 1800 × 1250. */
@@ -33,12 +34,12 @@ export const ARBOLES: Array<[number, number]> = [
   [610, 560], [1290, 560], [990, 1010], [180, 640], [1600, 960], [760, 1060],
 ];
 
-export const VECINOS: Array<{ emoji: string; x: number; y: number; frase: string }> = [
-  { emoji: "🐄", x: 1620, y: 850, frase: "¡Muuu!" },
-  { emoji: "🐑", x: 1350, y: 870, frase: "¡Beee!" },
-  { emoji: "🐔", x: 1560, y: 900, frase: "¡Kikirikí!" },
-  { emoji: "🐱", x: 470, y: 900, frase: "¡Miau! Es el gato del barrio." },
-  { emoji: "🦆", x: 230, y: 520, frase: "¡Cuac, cuac! Los patos nadan en la laguna." },
-  { emoji: "🦋", x: 950, y: 640, frase: "¡Una mariposa!" },
+export const VECINOS: Array<{ emoji: string; animal: AnimalId; paseo: number; x: number; y: number; frase: string }> = [
+  { emoji: "🐄", animal: "vaca", paseo: 40, x: 1620, y: 850, frase: "¡Muuu!" },
+  { emoji: "🐑", animal: "oveja", paseo: 35, x: 1350, y: 870, frase: "¡Beee!" },
+  { emoji: "🐔", animal: "gallina", paseo: 45, x: 1560, y: 900, frase: "¡Kikirikí!" },
+  { emoji: "🐱", animal: "gato", paseo: 60, x: 470, y: 900, frase: "¡Miau! Es el gato del barrio." },
+  { emoji: "🦆", animal: "pato", paseo: 45, x: 230, y: 540, frase: "¡Cuac, cuac! Los patos nadan en la laguna." },
+  { emoji: "🦋", animal: "mariposa", paseo: 0, x: 950, y: 640, frase: "¡Una mariposa!" },
 ];
 

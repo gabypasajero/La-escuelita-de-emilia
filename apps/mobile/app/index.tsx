@@ -4,6 +4,8 @@ import { Animated, Pressable, StyleSheet, Text, useWindowDimensions, View } from
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
 import { Avatar, TitoVestido } from "../components/Avatar";
 import { LugarDibujo } from "../components/Lugares";
+import { AnimalPaseando, PROPORCION } from "../components/AnimalesVivos";
+import { BarrioVivo } from "../components/BarrioVivo";
 import { ARBOLES, LUGARES, VECINOS, type Lugar } from "../lib/lugares";
 import { EmiliaDibujo, Globo, type Expresion } from "../components/Personajes";
 import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
@@ -258,8 +260,9 @@ function Mundo() {
   }
 
   const alto = (n: number) => n * escala;
-  const personaje = (y: Animated.ValueXY, w: number, h: number) => ({
-    transform: [{ translateX: Animated.add(y.x, -w / 2) }, { translateY: Animated.add(Animated.add(y.y, -h), salto) }],
+  // Solo el niño usa el rebote genérico; Emilia y Tito ya rebotan con su propia caminata.
+  const personaje = (y: Animated.ValueXY, w: number, h: number, conSalto = false) => ({
+    transform: [{ translateX: Animated.add(y.x, -w / 2) }, { translateY: conSalto ? Animated.add(Animated.add(y.y, -h), salto) : Animated.add(y.y, -h) }],
   });
 
   const avH = alto(150), emH = alto(140), tiH = alto(60);
@@ -297,12 +300,25 @@ function Mundo() {
           </View>
         ))}
 
-        {VECINOS.map((v) => (
-          <Pressable key={v.emoji} onPress={() => decir(v.frase)} accessibilityLabel={v.frase}
-            style={[estilos.objeto, { left: alto(v.x - 25), top: alto(v.y - 50), zIndex: Math.round(v.y / 25) }]}>
-            <Text style={{ fontSize: alto(46) }}>{v.emoji}</Text>
-          </Pressable>
-        ))}
+        {/* Animales vivos del barrio: pasean, pestañean y reaccionan al tocarlos */}
+        {VECINOS.filter((v) => v.animal !== "mariposa").map((v) => {
+          const h = alto(v.animal === "vaca" ? 88 : v.animal === "oveja" ? 74 : 62);
+          const w = h * PROPORCION[v.animal];
+          return (
+            <Pressable key={v.emoji} onPress={() => decir(v.frase)} accessibilityLabel={v.frase}
+              style={[estilos.objeto, { left: alto(v.x) - w / 2, top: alto(v.y) - h, zIndex: Math.round(v.y / 25) }]}>
+              <AnimalPaseando id={v.animal} alto={h} paseo={alto(v.paseo)} nadando={v.animal === "pato"} />
+            </Pressable>
+          );
+        })}
+        <BarrioVivo
+          escala={escala}
+          ancho={MUNDO.ancho}
+          alto={MUNDO.alto}
+          chimenea={{ x: LUGARES.find((l) => l.id === "casa")!.x + 45, y: LUGARES.find((l) => l.id === "casa")!.y - 202 }}
+          laguna={{ x: 230, y: 536 }}
+          flores={[{ x: 950, y: 640 }, { x: 560, y: 980 }, { x: 1230, y: 1030 }]}
+        />
 
         {/* Tito, Emilia y el personaje del niño, con su sombra */}
         <Animated.View pointerEvents="box-none" style={[estilos.objeto, { zIndex: profundidad.t }, personaje(ti, tiW, tiH)]}>
@@ -321,7 +337,7 @@ function Mundo() {
             </Animated.View>
           </Pressable>
         </Animated.View>
-        <Animated.View pointerEvents="box-none" style={[estilos.objeto, { zIndex: profundidad.a }, personaje(av, avW, avH)]}>
+        <Animated.View pointerEvents="box-none" style={[estilos.objeto, { zIndex: profundidad.a }, personaje(av, avW, avH, true)]}>
           <Text style={[estilos.nombreJugador, { fontSize: Math.max(12, alto(18)) }]}>{perfil!.nombre}</Text>
           <Sombra ancho={avW * 0.7} />
           <Animated.View style={{ transform: [{ scaleX: mirada.a }] }}>

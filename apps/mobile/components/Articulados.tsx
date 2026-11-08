@@ -18,7 +18,7 @@ export type Expresion = "feliz" | "saludando" | "celebrando" | "sorprendida" | "
 const PUNTOS = Array.from({ length: 17 }, (_, i) => i / 16);
 
 /** Valor que va de 0 a 1 en bucle mientras `activo`. */
-function useCiclo(ms: number, activo = true) {
+export function useCiclo(ms: number, activo = true) {
   const v = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (!activo) {
@@ -35,7 +35,7 @@ function useCiclo(ms: number, activo = true) {
 }
 
 /** Seno de un ciclo, de -amp a amp (o |seno| si `rebote`). */
-function onda(c: Animated.Value, amp: number, fase = 0, rebote = false) {
+export function onda(c: Animated.Value, amp: number, fase = 0, rebote = false) {
   return c.interpolate({ inputRange: PUNTOS, outputRange: PUNTOS.map((t) => {
     const s = Math.sin(2 * Math.PI * t + fase);
     return amp * (rebote ? -Math.abs(s) : s);
@@ -43,13 +43,13 @@ function onda(c: Animated.Value, amp: number, fase = 0, rebote = false) {
 }
 
 /** Ángulo base + oscilación, como "deg". */
-function angulo(base: number, oscilacion?: Animated.AnimatedInterpolation<number>) {
+export function angulo(base: number, oscilacion?: Animated.AnimatedInterpolation<number>) {
   const a = oscilacion ? Animated.add(base, oscilacion) : new Animated.Value(base);
   return a.interpolate({ inputRange: [-360, 360], outputRange: ["-360deg", "360deg"] });
 }
 
 /** Pestañeo cada unos segundos (escala vertical del ojo). */
-function useParpadeo(cada = 3200) {
+export function useParpadeo(cada = 3200) {
   const v = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     const bucle = Animated.loop(Animated.sequence([
@@ -68,7 +68,7 @@ function useParpadeo(cada = 3200) {
  * unidades) está centrado en la articulación, así el giro de la vista es el
  * giro de la pieza. Los hijos se dibujan en coordenadas del personaje.
  */
-function Pieza({ s, px, py, w, h, rot, children, encima }: {
+export function Pieza({ s, px, py, w, h, rot, children, encima }: {
   s: number; px: number; py: number; w: number; h: number;
   rot?: Animated.AnimatedInterpolation<string | number>; children: ReactNode; encima?: ReactNode;
 }) {

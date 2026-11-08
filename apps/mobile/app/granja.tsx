@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Ellipse, Path, Rect } from "react-native-svg";
+import { AnimalPaseando, PROPORCION, type AnimalId } from "../components/AnimalesVivos";
 import { EscenaRPG, type ObjetoEscena } from "../components/EscenaRPG";
 import { useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
@@ -53,7 +54,7 @@ export default function Granja() {
     ...ANIMALES.map((a): ObjetoEscena => ({
       id: a.id, x: a.x, y: a.y, ancho: 130 + a.paseo * 2, alto: 110, etiqueta: a.nombre,
       llegada: { x: a.x - 90, y: a.y + 10 },
-      dibujo: (k) => <AnimalPaseando emoji={a.emoji} k={k} paseo={a.paseo} feliz={felices.includes(a.id)} />,
+      dibujo: (k) => <AnimalDeGranja id={a.id as AnimalId} k={k} paseo={a.paseo} feliz={felices.includes(a.id)} />,
       alLlegar: () => {
         setCerca(a);
         decir(`${a.sonido} Es ${a.nombre}. ¿Qué come ${a.nombre}?`);
@@ -85,37 +86,16 @@ export default function Granja() {
   );
 }
 
-/** Animal que pasea de un lado a otro de su corral (y salta cuando está feliz). */
-function AnimalPaseando({ emoji, k, paseo, feliz }: { emoji: string; k: number; paseo: number; feliz: boolean }) {
-  const x = useRef(new Animated.Value(0)).current;
-  const y = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    const dur = 2600 + paseo * 20;
-    const bucle = Animated.loop(Animated.sequence([
-      Animated.timing(x, { toValue: paseo, duration: dur, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
-      Animated.delay(700),
-      Animated.timing(x, { toValue: -paseo, duration: dur * 2, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
-      Animated.delay(500),
-      Animated.timing(x, { toValue: 0, duration: dur, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
-    ]));
-    bucle.start();
-    return () => bucle.stop();
-  }, [x, paseo]);
-  useEffect(() => {
-    if (!feliz) return;
-    const saltos = Animated.loop(Animated.sequence([
-      Animated.timing(y, { toValue: -18, duration: 180, useNativeDriver: false }),
-      Animated.timing(y, { toValue: 0, duration: 180, useNativeDriver: false }),
-    ]), { iterations: 5 });
-    saltos.start();
-    return () => saltos.stop();
-  }, [feliz, y]);
+/** Animal vivo (articulado) que pasea por su corral; salta y mueve la cola cuando está feliz. */
+function AnimalDeGranja({ id, k, paseo, feliz }: { id: AnimalId; k: number; paseo: number; feliz: boolean }) {
+  const grande = id === "vaca" || id === "caballo";
+  const alto = (grande ? 100 : id === "oveja" || id === "cerdo" ? 82 : 70) * k;
   return (
-    <Animated.View style={{ alignItems: "center", transform: [{ translateX: Animated.multiply(x, k) }, { translateY: y }] }}>
+    <View style={{ alignItems: "center" }}>
       {feliz && <Text style={{ fontSize: 26 * k }}>💛</Text>}
-      <Text style={{ fontSize: 76 * k }}>{emoji}</Text>
-      <View style={{ width: 70 * k, height: 12 * k, borderRadius: 40, backgroundColor: "rgba(0,0,0,0.15)", marginTop: -8 * k }} />
-    </Animated.View>
+      <AnimalPaseando id={id} alto={alto} paseo={paseo * k} contento={feliz} />
+      <View style={{ width: alto * PROPORCION[id] * 0.6, height: 10 * k, borderRadius: 40, backgroundColor: "rgba(0,0,0,0.14)", marginTop: -8 * k }} />
+    </View>
   );
 }
 
