@@ -62,6 +62,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
   const salto = useRef(new Animated.Value(0)).current;
   const actual = useRef({ ...inicio });
   const [mira, setMira] = useState(1);
+  const [caminando, setCaminando] = useState(false);
   const [profundidad, setProfundidad] = useState(inicio.y);
   const contenedor = useRef<View>(null);
   const origen = useRef({ x: 0, y: 0 });
@@ -88,6 +89,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
       Animated.timing(salto, { toValue: 0, duration: 140, useNativeDriver: false }),
     ]));
     rebote.start();
+    setCaminando(true);
     const anim = Animated.parallel([
       Animated.timing(pos, { toValue: { x, y }, duration: ms, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
       Animated.timing(emilia, { toValue: { x: x - 70 * (x < desde.x ? -1 : 1), y: y + 6 }, duration: ms, delay: 220, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
@@ -96,6 +98,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
     caminata.current = anim;
     anim.start(({ finished }) => {
       rebote.stop();
+      if (finished) setCaminando(false);
       salto.setValue(0);
       if (finished) alLlegar?.();
     });
@@ -154,10 +157,10 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
         {extras?.(k)}
 
         <Animated.View pointerEvents="none" style={[coloca(tito, tiW, tiH, false), { zIndex: Math.round(profundidad) + 1 }]}>
-          <TitoDibujo alto={tiH} />
+          <View style={{ transform: [{ scaleX: -mira }] }}><TitoDibujo alto={tiH} caminando={caminando} /></View>
         </Animated.View>
         <Animated.View pointerEvents="none" style={[coloca(emilia, emW, emH, false), { zIndex: Math.round(profundidad) + 1 }]}>
-          <EmiliaDibujo alto={emH} />
+          <View style={{ transform: [{ scaleX: mira }] }}><EmiliaDibujo alto={emH} caminando={caminando} /></View>
         </Animated.View>
         <Animated.View pointerEvents="none" style={[coloca(pos, avW, avH, true), { zIndex: Math.round(profundidad) + 2 }]}>
           <View style={{ transform: [{ scaleX: mira }] }}>

@@ -5,7 +5,7 @@ import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
 import { Avatar, TitoVestido } from "../components/Avatar";
 import { LugarDibujo } from "../components/Lugares";
 import { ARBOLES, LUGARES, VECINOS, type Lugar } from "../lib/lugares";
-import { EmiliaDibujo, Globo } from "../components/Personajes";
+import { EmiliaDibujo, Globo, type Expresion } from "../components/Personajes";
 import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
 import { hablar, reactivarVoz } from "../lib/voz";
 
@@ -47,6 +47,14 @@ function Mundo() {
   const [dialogo, setDialogo] = useState(() => saludo(perfil!.nombre));
   // Profundidad (qué se dibuja delante) en tramos de 25 unidades, para no redibujar en cada cuadro.
   const [profundidad, setProfundidad] = useState({ a: 0, e: 0, t: 0 });
+  // Si Emilia y Tito están caminando (mueven brazos y piernas) y la expresión de Emilia.
+  const [camina, setCamina] = useState({ e: false, t: false });
+  const caminaRef = useRef({ e: false, t: false });
+  const [expresion, setExpresion] = useState<Expresion>("feliz");
+  const celebrar = useCallback(() => {
+    setExpresion("celebrando");
+    setTimeout(() => setExpresion("feliz"), 1800);
+  }, []);
 
   const inicio = { x: puerta(LUGARES[4]!).x + 70, y: puerta(LUGARES[4]!).y + 40 };
   const pos = useRef<Punto>({ ...inicio });
@@ -211,6 +219,11 @@ function Mundo() {
       const mt = seguir(titoPos.current, { x: pt.x - 10, y: pt.y + 12 }, dt);
       if (me) mirada.e.setValue(pe.x < emiliaPos.current.x ? -1 : 1);
       if (mt) mirada.t.setValue(pt.x < titoPos.current.x ? 1 : -1); // Tito está dibujado mirando a la izquierda
+      const estadoCamina = { e: me > 0.05, t: mt > 0.05 };
+      if (estadoCamina.e !== caminaRef.current.e || estadoCamina.t !== caminaRef.current.t) {
+        caminaRef.current = estadoCamina;
+        setCamina(estadoCamina);
+      }
       fase.current += movio + me * 0.3;
       salto.setValue(movio || me ? -Math.abs(Math.sin(fase.current / 14)) * 7 : 0);
 
@@ -296,15 +309,15 @@ function Mundo() {
           <Sombra ancho={tiW * 0.8} />
           <Pressable onPress={() => decir("¡Pip! Tito está feliz de pasear contigo.")} accessibilityLabel="Tito">
             <Animated.View style={{ transform: [{ scaleX: mirada.t }] }}>
-              <TitoVestido alto={tiH} accesorio={accesorioPuesto("tito")} />
+              <TitoVestido alto={tiH} accesorio={accesorioPuesto("tito")} caminando={camina.t} />
             </Animated.View>
           </Pressable>
         </Animated.View>
         <Animated.View pointerEvents="box-none" style={[estilos.objeto, { zIndex: profundidad.e }, personaje(em, emW, emH)]}>
           <Sombra ancho={emW * 0.7} />
-          <Pressable onPress={() => decir(`¡Me encanta jugar contigo, ${perfil!.nombre}!`)} accessibilityLabel="Emilia">
+          <Pressable onPress={() => { celebrar(); decir(`¡Me encanta jugar contigo, ${perfil!.nombre}!`); }} accessibilityLabel="Emilia">
             <Animated.View style={{ transform: [{ scaleX: mirada.e }] }}>
-              <EmiliaDibujo alto={emH} />
+              <EmiliaDibujo alto={emH} caminando={camina.e} expresion={expresion} />
             </Animated.View>
           </Pressable>
         </Animated.View>

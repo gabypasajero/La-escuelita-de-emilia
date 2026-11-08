@@ -50,7 +50,7 @@ export default function Rutina() {
     <Pantalla color={rutina.id === "manos" ? "#B3E5FC" : "#C8E6C9"}>
       <Text style={estilos.titulo}>{rutina.titulo}</Text>
       <View style={estilos.fila}>
-        <EmiliaDibujo alto={100} />
+        <EmiliaDibujo alto={100} expresion={terminado ? "celebrando" : "feliz"} />
         <Globo texto={terminado ? rutina.cierre : actual ? actual.frase : "¡Toca empezar!"} alLado="izquierda" />
       </View>
 

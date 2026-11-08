@@ -17,7 +17,7 @@ export default function QuienJuega() {
   return (
     <SafeAreaView style={estilos.fondo}>
       <View style={estilos.cabecera}>
-        <EmiliaDibujo alto={130} />
+        <EmiliaDibujo alto={130} expresion="saludando" />
         <TitoDibujo alto={60} />
         <Globo texto="¿Quién juega hoy?" alLado="izquierda" />
       </View>

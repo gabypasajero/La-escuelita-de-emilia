@@ -24,8 +24,8 @@ export function TocarParaEmpezar() {
       }}
     >
       <View style={estilos.personajes}>
-        <EmiliaDibujo alto={190} />
-        <TitoDibujo alto={72} />
+        <EmiliaDibujo alto={190} expresion="saludando" />
+        <TitoDibujo alto={72} contento />
       </View>
       <View style={estilos.boton}>
         <Text style={estilos.botonTexto}>▶️ ¡A jugar!</Text>

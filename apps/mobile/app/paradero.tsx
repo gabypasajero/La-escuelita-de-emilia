@@ -119,7 +119,7 @@ export default function Paradero() {
         </View>
         {/* Emilia y Tito esperando */}
         <Animated.View style={[estilos.emilia, { transform: [{ translateY: respirar }] }]}>
-          <EmiliaDibujo alto={190} />
+          <EmiliaDibujo alto={190} expresion={globo.quien === "emilia" ? "saludando" : "feliz"} />
           <TitoDibujo alto={70} />
         </Animated.View>
         {/* El bus */}

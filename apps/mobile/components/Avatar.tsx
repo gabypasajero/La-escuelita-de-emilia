@@ -67,11 +67,11 @@ export function Avatar({ apariencia: a, alto = 160, accesorios = {} }: Props) {
 }
 
 /** Tito con su accesorio de la tienda, si tiene uno puesto. */
-export function TitoVestido({ alto = 70, accesorio }: { alto?: number; accesorio?: Accesorio }) {
+export function TitoVestido({ alto = 70, accesorio, caminando = false }: { alto?: number; accesorio?: Accesorio; caminando?: boolean }) {
   const k = alto / 80;
   return (
     <View>
-      <TitoDibujo alto={alto} />
+      <TitoDibujo alto={alto} caminando={caminando} />
       {accesorio && <Text style={[estilos.acc, { fontSize: 22 * k, top: -8 * k, left: 12 * k }]}>{accesorio.emoji}</Text>}
     </View>
   );
