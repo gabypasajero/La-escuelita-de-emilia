@@ -1,7 +1,9 @@
 import { VERDURAS, type Verdura } from "@escuelita/core";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import Svg, { Circle, Ellipse, Path, Rect } from "react-native-svg";
+import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
+import { Abeja, MariposaVolando, Nube, Sol } from "../components/Ambiente";
+import { Adulto } from "../components/Personas";
 import { Avatar } from "../components/Avatar";
 import { BotonCasa } from "../components/BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
@@ -82,7 +84,20 @@ export default function Huerto() {
     return () => clearInterval(t);
   }, [guardado]);
 
-  const decir = (t: string) => { setDicho(t); void hablar(t); };
+  // Don Pedro habla (mueve boca y manos) mientras dice cada frase.
+  const [pedroHabla, setPedroHabla] = useState(true);
+  const silencio = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const callarPedro = (ms: number) => {
+    if (silencio.current) clearTimeout(silencio.current);
+    silencio.current = setTimeout(() => setPedroHabla(false), ms);
+  };
+  useEffect(() => callarPedro(4500), []);
+  const decir = (t: string) => {
+    setDicho(t);
+    void hablar(t);
+    setPedroHabla(true);
+    callarPedro(Math.max(2500, t.length * 75));
+  };
 
   function caminar(x: number, y: number, alLlegar?: () => void) {
     const desde = actual.current;
@@ -167,9 +182,21 @@ export default function Huerto() {
           <Fondo k={k} />
         </Pressable>
 
-        {/* Don Pedro junto a su galpón */}
-        <View pointerEvents="none" style={{ position: "absolute", left: 960 * k, top: 120 * k, alignItems: "center" }}>
-          <Text style={{ fontSize: 80 * k }}>👨‍🌾</Text>
+        {/* Vida del huerto: sol, nubes, mariposas y abejas sobre las plantas */}
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <Sol k={k} x={790} y={64} r={36} />
+          <Nube escala={k} ancho={1100} y={24} ms={65000} retraso={0} tam={150} />
+          <Nube escala={k} ancho={1100} y={80} ms={90000} retraso={35000} tam={110} />
+          <MariposaVolando escala={k} x={180} y={560} fase={1} />
+          <MariposaVolando escala={k} x={720} y={420} fase={3} />
+          <Abeja k={k} x={420} y={300} fase={0} />
+          <Abeja k={k} x={640} y={470} fase={2} radio={50} />
+          <Abeja k={k} x={300} y={500} fase={4} radio={45} />
+        </View>
+
+        {/* Don Pedro junto a su galpón: habla moviendo boca y manos */}
+        <View pointerEvents="none" style={{ position: "absolute", left: 935 * k, top: 92 * k, alignItems: "center", zIndex: 5 }}>
+          <Adulto id="pedro" alto={140 * k} hablando={pedroHabla} />
           <Text style={estilos.nombre}>Don Pedro</Text>
         </View>
 
@@ -248,10 +275,21 @@ function Fondo({ k }: { k: number }) {
       <Rect x="0" y="0" width="1100" height="170" fill="#B3E5FC" />
       <Path d="M0 170 Q 250 110 520 160 T 1100 150 V 200 H 0 Z" fill="#8BC34A" />
       <Rect x="0" y="190" width="1100" height="510" fill="#9CCC65" />
-      {/* Galpón de Don Pedro */}
+      {/* Cerros al fondo */}
+      <Path d="M0 160 Q120 100 240 150 Q360 90 480 150 Q600 105 720 150 L720 175 L0 175 Z" fill="#AED581" opacity="0.8" />
+      {/* Galpón de Don Pedro, con tablas, ventana y herramientas */}
       <Path d="M900 120 L990 70 L1080 120 Z" fill="#B71C1C" />
+      <Path d="M900 120 L990 70 L1080 120" stroke="#fff" strokeWidth="4" fill="none" />
       <Rect x="910" y="118" width="160" height="90" fill="#E57373" />
+      {[930, 950, 970, 1010, 1030, 1050].map((x) => <Rect key={x} x={x} y="120" width="2" height="86" fill="#D84343" />)}
       <Rect x="975" y="150" width="34" height="58" fill="#5D4037" />
+      <Rect x="1024" y="134" width="30" height="24" fill="#BBDEFB" stroke="#fff" strokeWidth="3" />
+      <Path d="M918 208 L930 150 M926 150 L934 150" stroke="#8D6E63" strokeWidth="4" />
+      <Path d="M926 150 Q930 142 938 146" stroke="#90A4AE" strokeWidth="5" fill="none" />
+      {/* Regadera y sacos */}
+      <Path d="M850 214 L878 214 L874 236 L854 236 Z" fill="#26A69A" />
+      <Path d="M878 218 L896 206" stroke="#26A69A" strokeWidth="4" />
+      <Path d="M800 236 Q798 210 812 206 Q826 210 824 236 Z" fill="#D7CCC8" />
       {/* Espantapájaros */}
       <Rect x="96" y="250" width="8" height="110" fill="#8D6E63" />
       <Rect x="66" y="280" width="68" height="8" fill="#8D6E63" />
@@ -261,6 +299,10 @@ function Fondo({ k }: { k: number }) {
       {/* Cerca */}
       {Array.from({ length: 23 }, (_, i) => <Rect key={i} x={10 + i * 48} y="200" width="8" height="34" fill="#A1887F" />)}
       <Rect x="6" y="208" width="1090" height="6" fill="#A1887F" />
+      {/* Flores al borde del huerto */}
+      {Array.from({ length: 22 }, (_, i) => (
+        <G key={i}><Path d={`M${30 + i * 50} 612 l0 -14`} stroke="#558B2F" strokeWidth="2" /><Circle cx={30 + i * 50} cy={596} r="5" fill={["#F06292", "#FFF176", "#BA68C8", "#fff"][i % 4]} /></G>
+      ))}
       {/* Camino y árbol */}
       <Ellipse cx="560" cy="650" rx="560" ry="40" fill="#D7B98E" />
       <Rect x="60" y="430" width="16" height="70" fill="#6D4C41" />

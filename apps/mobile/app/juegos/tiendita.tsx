@@ -1,12 +1,16 @@
 import { ESTADO_INICIAL, PRODUCTOS, canastaCorrecta, pedidoTiendita, registrarRespuesta, type Producto } from "@escuelita/core";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
-import Svg, { Path, Rect, Text as SvgText } from "react-native-svg";
+import Svg, { Circle, Path, Rect, Text as SvgText } from "react-native-svg";
+import { AnimalVivo, type AnimalId } from "../../components/AnimalesVivos";
+import { LamparaColgante, Reloj } from "../../components/Ambiente";
 import { EscenaRPG, type EscenaRPGRef, type ObjetoEscena } from "../../components/EscenaRPG";
+import { Adulto } from "../../components/Personas";
 import { useJuego } from "../../lib/juego";
 import { hablar, hablarYEsperar } from "../../lib/voz";
 
-const CLIENTES = ["🐻", "🐰", "🦊", "🐼", "🐸", "🦙"];
+/** Clientes: animales vivos que entran caminando por la puerta. */
+const CLIENTES: AnimalId[] = ["oso", "conejo", "zorro", "panda", "rana", "llama"];
 const ESTANTE_X = PRODUCTOS.map((_, i) => 100 + i * 112);
 const MESON = { x: 900, y: 560 };
 
@@ -27,12 +31,24 @@ export default function Tiendita() {
   const escena = useRef<EscenaRPGRef>(null);
   const ocupado = useRef(false);
 
-  const decir = (t: string) => { setDicho(t); void hablar(t); };
+  const [clienteCamina, setClienteCamina] = useState(false);
+  // Doña Rosa mueve la boca y las manos cuando se habla en el almacén.
+  const [rosaHabla, setRosaHabla] = useState(true);
+  const silencio = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hablaRosa = (ms: number) => {
+    setRosaHabla(true);
+    if (silencio.current) clearTimeout(silencio.current);
+    silencio.current = setTimeout(() => setRosaHabla(false), ms);
+  };
+  useEffect(() => hablaRosa(3500), []);
+  const decir = (t: string) => { setDicho(t); void hablar(t); hablaRosa(Math.max(2200, t.length * 70)); };
 
   // El cliente entra por la puerta y hace su pedido.
   useEffect(() => {
     entrada.setValue(1);
-    Animated.timing(entrada, { toValue: 0, duration: 1400, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start(() => {
+    setClienteCamina(true);
+    Animated.timing(entrada, { toValue: 0, duration: 1800, easing: Easing.out(Easing.quad), useNativeDriver: false }).start(() => {
+      setClienteCamina(false);
       setDicho(pedido.enunciado);
       void hablar(`${pedido.enunciado}. Busca en los estantes.`);
     });
@@ -85,7 +101,7 @@ export default function Tiendita() {
       alLlegar: () => sacar(p),
     })),
     { id: "rosa", x: MESON.x + 60, y: MESON.y - 70, ancho: 110, alto: 150, etiqueta: "Doña Rosa", letrero: "Doña Rosa",
-      dibujo: (k) => <Text style={{ fontSize: 96 * k }}>👵</Text>, llegada: { x: MESON.x - 60, y: MESON.y + 70 }, alLlegar: () => void entregar() },
+      dibujo: (k) => <Adulto id="rosa" alto={150 * k} hablando={rosaHabla} saludando={feliz} />, llegada: { x: MESON.x - 60, y: MESON.y + 70 }, alLlegar: () => void entregar() },
     { id: "meson", x: MESON.x, y: MESON.y, ancho: 260, alto: 90, etiqueta: "Mesón para entregar", letrero: "Entregar aquí",
       dibujo: (k) => <Meson k={k} />, llegada: { x: MESON.x - 60, y: MESON.y + 70 }, alLlegar: () => void entregar() },
   ];
@@ -100,6 +116,11 @@ export default function Tiendita() {
       dialogo={dicho}
       colorFondo="#FFE0B2"
       extras={(k) => (
+        <>
+        {/* El gato de Doña Rosa, arriba del primer estante */}
+        <View pointerEvents="none" style={{ position: "absolute", left: (ESTANTE_X[0]! - 34) * k, top: 118 * k, zIndex: 371 }}>
+          <AnimalVivo id="gato" alto={52 * k} />
+        </View>
         <Animated.View
           pointerEvents="none"
           style={{ position: "absolute", left: (MESON.x - 130) * k, top: (MESON.y - 10) * k, zIndex: MESON.y + 5, alignItems: "center",
@@ -108,8 +129,10 @@ export default function Tiendita() {
           <View style={estilos.pedido}>
             <Text style={[estilos.pedidoTexto, { fontSize: 26 * k }]}>{pedido.cantidad} × {pedido.producto.emoji}</Text>
           </View>
-          <Text style={{ fontSize: 90 * k }}>{feliz ? "😍" : cliente}</Text>
+          {feliz && <Text style={{ fontSize: 30 * k }}>💛</Text>}
+          <AnimalVivo id={cliente} alto={(cliente === "llama" ? 120 : cliente === "rana" || cliente === "conejo" ? 70 : 90) * k} caminando={clienteCamina} contento={feliz} />
         </Animated.View>
+        </>
       )}
     >
       {/* La canasta del niño */}
@@ -145,17 +168,34 @@ const Meson = ({ k }: { k: number }) => (
 
 function Almacen({ k }: { k: number }) {
   return (
-    <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700">
-      <Rect x="0" y="0" width="1100" height="380" fill="#FFF3E0" />
-      <Rect x="0" y="0" width="1100" height="70" fill="#fff" />
-      <SvgText x="200" y="46" fontSize="30" fontWeight="bold" fill="#8D6E63" textAnchor="middle">ALMACÉN</SvgText>
-      <SvgText x="900" y="46" fontSize="30" fontWeight="bold" fill="#8D6E63" textAnchor="middle">DOÑA ROSA</SvgText>
-      {Array.from({ length: 22 }, (_, i) => <Path key={i} d={`M${i * 50} 70 h50 v26 q-25 18 -50 0 z`} fill={i % 2 ? "#fff" : "#E53935"} />)}
-      <Rect x="0" y="380" width="1100" height="320" fill="#D7A86E" />
-      {Array.from({ length: 12 }, (_, i) => <Path key={i} d={`M${i * 100} 380 V700`} stroke="#C49358" strokeWidth="3" />)}
-      {/* Puerta de entrada */}
-      <Rect x="1040" y="420" width="60" height="200" fill="#8D6E63" />
-    </Svg>
+    <>
+      <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700">
+        <Rect x="0" y="0" width="1100" height="380" fill="#FFF3E0" />
+        {/* Papel mural con florcitas */}
+        {Array.from({ length: 60 }, (_, i) => <Circle key={i} cx={(i * 97) % 1100} cy={110 + ((i * 53) % 250)} r="3" fill="#FFCC80" opacity="0.6" />)}
+        <Rect x="0" y="0" width="1100" height="70" fill="#fff" />
+        <SvgText x="200" y="46" fontSize="30" fontWeight="bold" fill="#8D6E63" textAnchor="middle">ALMACÉN</SvgText>
+        <SvgText x="900" y="46" fontSize="30" fontWeight="bold" fill="#8D6E63" textAnchor="middle">DOÑA ROSA</SvgText>
+        {Array.from({ length: 22 }, (_, i) => <Path key={i} d={`M${i * 50} 70 h50 v26 q-25 18 -50 0 z`} fill={i % 2 ? "#fff" : "#E53935"} />)}
+        {/* Ventana a la calle */}
+        <Rect x="960" y="120" width="120" height="110" rx="6" fill="#B3E5FC" stroke="#8D6E63" strokeWidth="8" />
+        <Circle cx="1050" cy="148" r="12" fill="#FFEB3B" />
+        <Path d="M964 210 Q1000 180 1040 205 Q1060 195 1076 206 V226 H964 Z" fill="#81C784" />
+        <Path d="M1020 124 V226 M964 175 H1076" stroke="#8D6E63" strokeWidth="5" />
+        {/* Piso de madera y zócalo */}
+        <Rect x="0" y="372" width="1100" height="10" fill="#A1887F" />
+        <Rect x="0" y="380" width="1100" height="320" fill="#D7A86E" />
+        {Array.from({ length: 12 }, (_, i) => <Path key={i} d={`M${i * 100} 380 V700`} stroke="#C49358" strokeWidth="3" />)}
+        {Array.from({ length: 5 }, (_, i) => <Path key={i} d={`M0 ${440 + i * 60} H1100`} stroke="#C49358" strokeWidth="1.5" opacity="0.6" />)}
+        {/* Puerta de entrada */}
+        <Rect x="1040" y="420" width="60" height="200" fill="#8D6E63" />
+        <Rect x="1050" y="440" width="40" height="70" rx="4" fill="#BBDEFB" opacity="0.8" />
+        <Circle cx="1048" cy="530" r="4" fill="#FFD54F" />
+      </Svg>
+      <LamparaColgante k={k} x={330} y={100} largo={44} />
+      <LamparaColgante k={k} x={760} y={100} largo={44} color="#E57373" />
+      <Reloj k={k} x={560} y={140} r={26} />
+    </>
   );
 }
 

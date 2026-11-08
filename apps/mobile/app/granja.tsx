@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import Svg, { Ellipse, Path, Rect } from "react-native-svg";
+import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
+import { Bandada, MariposaVolando, Nube, Sol } from "../components/Ambiente";
+import { Adulto } from "../components/Personas";
 import { AnimalPaseando, PROPORCION, type AnimalId } from "../components/AnimalesVivos";
 import { EscenaRPG, type ObjetoEscena } from "../components/EscenaRPG";
 import { useJuego } from "../lib/juego";
@@ -36,6 +38,15 @@ export default function Granja() {
   useEffect(() => void hablar("¡Bienvenidos a la granja! Los animales tienen hambre. ¿Me ayudas a darles comida?"), []);
 
   const decir = (t: string) => { setDicho(t); void hablar(t); };
+  // Don Pedro saluda al llegar y mueve la boca y las manos cuando habla.
+  const [pedroHabla, setPedroHabla] = useState(false);
+  const [pedroSaluda, setPedroSaluda] = useState(true);
+  useEffect(() => { const t = setTimeout(() => setPedroSaluda(false), 3500); return () => clearTimeout(t); }, []);
+  const decirPedro = (t: string) => {
+    decir(t);
+    setPedroHabla(true);
+    setTimeout(() => setPedroHabla(false), Math.max(2500, t.length * 75));
+  };
 
   function dar(comida: (typeof COMIDAS)[number]) {
     if (!cerca) return;
@@ -49,8 +60,8 @@ export default function Granja() {
 
   const objetos: ObjetoEscena[] = [
     { id: "pedro", x: 860, y: 330, ancho: 110, alto: 150, etiqueta: "Don Pedro", letrero: "Don Pedro",
-      dibujo: (k) => <Text style={{ fontSize: 90 * k }}>👨‍🌾</Text>,
-      alLlegar: () => decir("¿Sabías que las vacas comen pasto casi todo el día? ¡Con paciencia todo crece!") },
+      dibujo: (k) => <Adulto id="pedro" alto={150 * k} hablando={pedroHabla} saludando={pedroSaluda} />,
+      alLlegar: () => decirPedro("¿Sabías que las vacas comen pasto casi todo el día? ¡Con paciencia todo crece!") },
     ...ANIMALES.map((a): ObjetoEscena => ({
       id: a.id, x: a.x, y: a.y, ancho: 130 + a.paseo * 2, alto: 110, etiqueta: a.nombre,
       llegada: { x: a.x - 90, y: a.y + 10 },
@@ -101,27 +112,69 @@ function AnimalDeGranja({ id, k, paseo, feliz }: { id: AnimalId; k: number; pase
 
 function Campo({ k }: { k: number }) {
   return (
-    <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700">
-      <Rect x="0" y="0" width="1100" height="200" fill="#B3E5FC" />
-      <Path d="M0 200 Q 300 130 600 190 T 1100 180 V 260 H 0 Z" fill="#8BC34A" />
-      <Rect x="0" y="240" width="1100" height="460" fill="#9CCC65" />
-      {/* Granero */}
-      <Path d="M40 230 L140 140 L240 230 Z" fill="#B71C1C" />
-      <Rect x="55" y="228" width="170" height="110" fill="#E53935" />
-      <Rect x="110" y="260" width="60" height="78" fill="#fff" />
-      <Path d="M110 260 L170 338 M170 260 L110 338" stroke="#E53935" strokeWidth="6" />
-      {/* Corral grande */}
-      {Array.from({ length: 14 }, (_, i) => <Rect key={i} x={250 + i * 40} y="360" width="7" height="40" fill="#A1887F" />)}
-      <Rect x="248" y="368" width="530" height="6" fill="#A1887F" />
-      <Rect x="248" y="386" width="530" height="6" fill="#A1887F" />
-      {/* Gallinero y camino */}
-      <Path d="M110 560 L180 520 L250 560 Z" fill="#8D6E63" />
-      <Rect x="120" y="558" width="120" height="60" fill="#FFCC80" />
-      <Ellipse cx="560" cy="600" rx="430" ry="40" fill="#C5E1A5" />
-      {/* Laguna del pato */}
-      <Ellipse cx="920" cy="620" rx="140" ry="60" fill="#4FC3F7" />
-      <Ellipse cx="900" cy="605" rx="40" ry="10" fill="#fff" opacity="0.4" />
-    </Svg>
+    <>
+      <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700">
+        {/* Cielo y cordillera */}
+        <Rect x="0" y="0" width="1100" height="120" fill="#81D4FA" />
+        <Rect x="0" y="110" width="1100" height="100" fill="#B3E5FC" />
+        <Path d="M0 190 L120 110 L210 170 L330 90 L450 175 L560 120 L680 185 L800 100 L930 170 L1040 115 L1100 150 V210 H0 Z" fill="#B0BEC5" />
+        <Path d="M300 106 L330 90 L356 106 L342 112 L330 104 L318 112 Z M780 112 L800 100 L820 112 L808 116 L800 110 L792 116 Z" fill="#fff" />
+        <Path d="M0 200 Q 300 130 600 190 T 1100 180 V 260 H 0 Z" fill="#8BC34A" />
+        <Rect x="0" y="240" width="1100" height="460" fill="#9CCC65" />
+        {Array.from({ length: 40 }, (_, i) => <Path key={i} d={`M${(i * 173) % 1100} ${270 + ((i * 97) % 420)} l3 -9 l3 9`} stroke="#7CB342" strokeWidth="2" fill="none" />)}
+        {/* Silo */}
+        <Rect x="244" y="150" width="46" height="150" fill="#B0BEC5" />
+        <Path d="M244 150 Q267 118 290 150 Z" fill="#78909C" />
+        {[180, 210, 240, 270].map((y) => <Rect key={y} x="244" y={y} width="46" height="3" fill="#90A4AE" />)}
+        {/* Granero con tablas, altillo con paja y veleta */}
+        <Path d="M30 232 L140 132 L250 232 Z" fill="#B71C1C" />
+        <Path d="M30 232 L140 132 L250 232" stroke="#fff" strokeWidth="5" fill="none" />
+        <Rect x="50" y="228" width="180" height="112" fill="#E53935" />
+        {[70, 90, 110, 130, 150, 170, 190, 210].map((x) => <Rect key={x} x={x} y="232" width="2" height="106" fill="#C62828" />)}
+        <Rect x="117" y="170" width="46" height="36" fill="#5D4037" stroke="#fff" strokeWidth="4" />
+        <Path d="M121 204 Q130 188 140 200 Q150 186 159 204 Z" fill="#FBC02D" />
+        <Rect x="105" y="258" width="70" height="82" fill="#fff" />
+        <Rect x="110" y="263" width="60" height="77" fill="#E53935" />
+        <Path d="M110 263 L170 340 M170 263 L110 340" stroke="#fff" strokeWidth="6" />
+        <Path d="M140 132 L140 108 M128 112 L152 112 M132 104 L148 120" stroke="#5D4037" strokeWidth="3" />
+        {/* Fardos de paja */}
+        {([[300, 330], [338, 336]] as const).map(([x, y]) => (
+          <G key={x}><Ellipse cx={x} cy={y} rx="26" ry="20" fill="#FBC02D" /><Ellipse cx={x - 14} cy={y} rx="9" ry="20" fill="#F9A825" /><Path d={`M${x - 14} ${y - 12} Q${x - 8} ${y} ${x - 14} ${y + 12}`} stroke="#E68A00" strokeWidth="2" fill="none" /></G>
+        ))}
+        {/* Corral */}
+        {Array.from({ length: 14 }, (_, i) => <Rect key={i} x={250 + i * 40} y="358" width="8" height="44" rx="2" fill="#A1887F" />)}
+        <Rect x="248" y="368" width="530" height="7" rx="3" fill="#BCAAA4" />
+        <Rect x="248" y="386" width="530" height="7" rx="3" fill="#BCAAA4" />
+        {/* Bebedero */}
+        <Path d="M690 420 L770 420 L762 444 L698 444 Z" fill="#8D6E63" />
+        <Rect x="694" y="420" width="72" height="6" fill="#4FC3F7" />
+        {/* Árbol */}
+        <Rect x="1010" y="250" width="14" height="70" fill="#6D4C41" />
+        <Circle cx="1017" cy="230" r="44" fill="#43A047" />
+        <Circle cx="995" cy="220" r="10" fill="#E53935" /><Circle cx="1035" cy="240" r="9" fill="#E53935" />
+        {/* Gallinero con rampa */}
+        <Path d="M105 560 L180 516 L255 560 Z" fill="#8D6E63" />
+        <Rect x="118" y="558" width="124" height="62" fill="#FFCC80" />
+        <Rect x="166" y="580" width="28" height="40" rx="12" fill="#5D4037" />
+        <Path d="M194 620 L240 640" stroke="#A1887F" strokeWidth="7" />
+        <Ellipse cx="560" cy="600" rx="430" ry="40" fill="#C5E1A5" />
+        {/* Laguna con nenúfares y juncos */}
+        <Ellipse cx="920" cy="620" rx="140" ry="60" fill="#4FC3F7" />
+        <Ellipse cx="920" cy="620" rx="140" ry="60" fill="none" stroke="#81D4FA" strokeWidth="6" />
+        <Ellipse cx="900" cy="605" rx="40" ry="10" fill="#fff" opacity="0.4" />
+        <Ellipse cx="860" cy="640" rx="14" ry="6" fill="#66BB6A" /><Circle cx="864" cy="636" r="3.5" fill="#F48FB1" />
+        <Ellipse cx="985" cy="600" rx="12" ry="5" fill="#66BB6A" />
+        {[1040, 1050, 1060].map((x, i) => <Path key={x} d={`M${x} 640 Q${x - 4} ${600 - i * 6} ${x + 2} ${586 - i * 8}`} stroke="#558B2F" strokeWidth="3" fill="none" />)}
+        {/* Flores */}
+        {Array.from({ length: 26 }, (_, i) => <Circle key={i} cx={(i * 211) % 1080 + 10} cy={430 + ((i * 131) % 250)} r="4" fill={["#F06292", "#FFF176", "#fff", "#BA68C8"][i % 4]} />)}
+      </Svg>
+      <Sol k={k} x={980} y={70} r={40} />
+      <Nube escala={k} ancho={1100} y={30} ms={60000} retraso={0} tam={170} />
+      <Nube escala={k} ancho={1100} y={90} ms={85000} retraso={30000} tam={130} />
+      <Bandada escala={k} ancho={1100} y={60} ms={14000} retraso={4000} />
+      <MariposaVolando escala={k} x={560} y={500} fase={0} />
+      <MariposaVolando escala={k} x={360} y={650} fase={2} />
+    </>
   );
 }
 

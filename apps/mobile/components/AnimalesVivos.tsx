@@ -10,7 +10,7 @@ import { angulo, onda, Pieza, useCiclo, useParpadeo } from "./Articulados";
  * aletea). Todos miran a la IZQUIERDA, como Tito; para que miren a la derecha
  * se voltean con scaleX: -1.
  */
-export type AnimalId = "vaca" | "oveja" | "caballo" | "cerdo" | "gato" | "gallina" | "pato" | "conejo" | "mariposa" | "pajaro";
+export type AnimalId = "vaca" | "oveja" | "caballo" | "cerdo" | "gato" | "gallina" | "pato" | "conejo" | "mariposa" | "pajaro" | "perro" | "oso" | "panda" | "zorro" | "llama" | "rana";
 
 interface Props {
   alto?: number;
@@ -395,10 +395,147 @@ function Pajaro({ alto }: { alto: number }) {
   );
 }
 
-const CUADRUPEDOS: Partial<Record<AnimalId, Cuadrupedo>> = { vaca: VACA, oveja: OVEJA, caballo: CABALLO, cerdo: CERDO, gato: GATO };
+
+const PERRO: Cuadrupedo = {
+  ancho: 110, altoLienzo: 80,
+  patas: { xs: [44, 52, 74, 82], y: 58, largo: 18, grosor: 7, color: "#C68642", colorAtras: "#A86B32" },
+  cuerpo: (
+    <G>
+      <Ellipse cx="62" cy="50" rx="28" ry="14" fill="#C68642" />
+      <Ellipse cx="46" cy="54" rx="9" ry="8" fill="#FFF3E0" />
+      <Ellipse cx="72" cy="44" rx="9" ry="6" fill="#8D5524" opacity="0.6" />
+    </G>
+  ),
+  cabeza: {
+    px: 38, py: 46, w: 50, h: 46,
+    dibujo: (
+      <G>
+        <Circle cx="28" cy="44" r="12" fill="#C68642" />
+        <Ellipse cx="17" cy="49" rx="8" ry="6" fill="#FFE0B2" />
+        <Circle cx="11" cy="46.5" r="2.8" fill="#212121" />
+        <Path d="M14 53 Q18 55 22 52" stroke="#5D4037" strokeWidth="1.3" fill="none" />
+        <Ellipse cx="33" cy="45" rx="5" ry="10" fill="#8D5524" transform="rotate(12 33 45)" />
+      </G>
+    ),
+    ojo: { x: 24, y: 41, r: 2.3 },
+  },
+  cola: { px: 89, py: 44, w: 34, h: 40, dibujo: <Path d="M89 44 Q100 36 98 26" stroke="#C68642" strokeWidth="4.5" fill="none" strokeLinecap="round" /> },
+  colaCalma: 22,
+};
+
+const oso = (pelaje: string, patas: string, patasAtras: string, oreja: string, hocico: string, mancha?: string): Cuadrupedo => ({
+  ancho: 120, altoLienzo: 90,
+  patas: { xs: [42, 52, 82, 92], y: 62, largo: 18, grosor: 11, color: patas, colorAtras: patasAtras },
+  cuerpo: (
+    <G>
+      <Ellipse cx="66" cy="50" rx="34" ry="20" fill={pelaje} />
+      {mancha && <Ellipse cx="48" cy="46" rx="12" ry="16" fill={mancha} />}
+    </G>
+  ),
+  cabeza: {
+    px: 38, py: 46, w: 56, h: 52,
+    dibujo: (
+      <G>
+        <Circle cx="18" cy="31" r="5.5" fill={oreja} />
+        <Circle cx="33" cy="29" r="5.5" fill={oreja} />
+        <Circle cx="25" cy="45" r="15" fill={pelaje} />
+        {mancha && <Ellipse cx="22" cy="41" rx="5.5" ry="6.5" fill={mancha} transform="rotate(-15 22 41)" />}
+        <Ellipse cx="13" cy="51" rx="8" ry="6" fill={hocico} />
+        <Ellipse cx="8" cy="49" rx="3" ry="2.3" fill="#212121" />
+      </G>
+    ),
+    ojo: { x: 22, y: 41, r: 2.4, claro: !!mancha },
+  },
+  cola: { px: 98, py: 46, w: 20, h: 20, dibujo: <Circle cx="100" cy="46" r="4" fill={pelaje} /> },
+  colaCalma: 6,
+});
+const OSO = oso("#8D6E63", "#795548", "#6D4C41", "#6D4C41", "#D7CCC8");
+const PANDA = oso("#FAFAFA", "#212121", "#111", "#212121", "#FAFAFA", "#212121");
+
+const ZORRO: Cuadrupedo = {
+  ancho: 116, altoLienzo: 80,
+  patas: { xs: [44, 52, 74, 82], y: 58, largo: 18, grosor: 6, color: "#4E342E", colorAtras: "#3E2723" },
+  cuerpo: (
+    <G>
+      <Ellipse cx="62" cy="50" rx="27" ry="12" fill="#FB8C00" />
+      <Ellipse cx="54" cy="56" rx="14" ry="5" fill="#FFF3E0" />
+    </G>
+  ),
+  cabeza: {
+    px: 40, py: 46, w: 54, h: 48,
+    dibujo: (
+      <G>
+        <Path d="M24 36 L28 22 L34 35 Z" fill="#FB8C00" />
+        <Path d="M33 36 L40 23 L42 38 Z" fill="#FB8C00" />
+        <Path d="M27 25 L28 22 L30 26 Z" fill="#3E2723" />
+        <Path d="M38 36 Q34 32 26 34 Q14 40 9 48 Q20 54 32 52 Q40 48 38 36 Z" fill="#FB8C00" />
+        <Path d="M9 48 Q18 54 30 52 Q22 56 14 54 Z" fill="#FFF3E0" />
+        <Circle cx="9" cy="47.5" r="2.4" fill="#212121" />
+      </G>
+    ),
+    ojo: { x: 25, y: 42, r: 2, color: "#3E2723" },
+  },
+  cola: { px: 88, py: 48, w: 56, h: 44, dibujo: <G><Path d="M88 48 Q104 34 112 48 Q104 60 88 52 Z" fill="#FB8C00" /><Path d="M106 42 Q114 46 112 50 Q108 52 104 50 Z" fill="#FFF3E0" /></G> },
+  colaCalma: 12,
+};
+
+const LLAMA: Cuadrupedo = {
+  ancho: 100, altoLienzo: 110,
+  patas: { xs: [40, 48, 70, 78], y: 72, largo: 30, grosor: 6, color: "#D7CCC8", colorAtras: "#BCAAA4" },
+  cuerpo: (
+    <G>
+      <Ellipse cx="58" cy="62" rx="28" ry="16" fill="#EFEBE9" />
+      {[[40, 56], [50, 50], [62, 50], [74, 54], [82, 62], [70, 72], [52, 72]].map(([x, y]) => <Circle key={`${x}-${y}`} cx={x} cy={y} r="7" fill="#EFEBE9" />)}
+      <Path d="M36 60 Q30 40 28 26 L38 26 Q40 42 46 56 Z" fill="#EFEBE9" />
+      <Path d="M34 46 L44 46 M33 40 L42 40" stroke="#E57373" strokeWidth="3" />
+    </G>
+  ),
+  cabeza: {
+    px: 32, py: 28, w: 48, h: 44,
+    dibujo: (
+      <G>
+        <Path d="M28 16 Q24 6 28 4 Q31 8 31 16 Z" fill="#D7CCC8" />
+        <Path d="M33 16 Q32 6 36 5 Q38 10 35 17 Z" fill="#D7CCC8" />
+        <Ellipse cx="26" cy="22" rx="10" ry="8" fill="#EFEBE9" />
+        <Ellipse cx="16" cy="26" rx="6" ry="4.5" fill="#D7CCC8" />
+        <Path d="M12 27 Q15 29 18 27" stroke="#5D4037" strokeWidth="1.2" fill="none" />
+      </G>
+    ),
+    ojo: { x: 23, y: 20, r: 2.2 },
+  },
+  cola: { px: 86, py: 58, w: 20, h: 20, dibujo: <Circle cx="88" cy="58" r="5" fill="#EFEBE9" /> },
+};
+
+function Rana({ alto, caminando, contento }: Required<Pick<Props, "alto">> & Props) {
+  const s = alto / 60;
+  const salto = useCiclo(560, !!caminando || !!contento);
+  const garganta = useCiclo(1400);
+  const bote = caminando || contento ? onda(salto, 9 * s, 0, true) : new Animated.Value(0);
+  return (
+    <Animated.View pointerEvents="none" style={{ width: 80 * s, height: 60 * s, transform: [{ translateY: bote as never }] }}>
+      <Svg width={80 * s} height={60 * s} viewBox="0 0 80 60" style={{ position: "absolute" }}>
+        <Ellipse cx="22" cy="50" rx="12" ry="6" fill="#43A047" />
+        <Ellipse cx="58" cy="50" rx="12" ry="6" fill="#43A047" />
+        <Ellipse cx="40" cy="40" rx="22" ry="15" fill="#66BB6A" />
+        <Ellipse cx="40" cy="46" rx="14" ry="8" fill="#C5E1A5" />
+        <Circle cx="30" cy="24" r="8" fill="#66BB6A" />
+        <Circle cx="50" cy="24" r="8" fill="#66BB6A" />
+        <Path d="M30 36 Q40 42 50 36" stroke="#2E7D32" strokeWidth="2" fill="none" strokeLinecap="round" />
+        <Circle cx="34" cy="38" r="1.5" fill="#F48FB1" opacity="0.7" />
+      </Svg>
+      <Animated.View style={{ position: "absolute", left: 33 * s, top: 41 * s, width: 14 * s, height: 8 * s, transform: [{ scale: garganta.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.8, 1.25, 0.8] }) as never }] }}>
+        <Svg width={14 * s} height={8 * s} viewBox="0 0 14 8"><Ellipse cx="7" cy="4" rx="6" ry="3.5" fill="#DCEDC8" /></Svg>
+      </Animated.View>
+      <Ojo s={s} x={30} y={23} r={3.6} claro origen={{ x: 0, y: 0 }} />
+      <Ojo s={s} x={50} y={23} r={3.6} claro origen={{ x: 0, y: 0 }} />
+    </Animated.View>
+  );
+}
+
+const CUADRUPEDOS: Partial<Record<AnimalId, Cuadrupedo>> = { vaca: VACA, oveja: OVEJA, caballo: CABALLO, cerdo: CERDO, gato: GATO, perro: PERRO, oso: OSO, panda: PANDA, zorro: ZORRO, llama: LLAMA };
 
 /** Proporción ancho/alto de cada animal (para ubicarlo en pantalla). */
-export const PROPORCION: Record<AnimalId, number> = { vaca: 120 / 90, oveja: 110 / 85, caballo: 120 / 100, cerdo: 110 / 80, gato: 110 / 80, gallina: 1, pato: 1, conejo: 1, mariposa: 1, pajaro: 40 / 30 };
+export const PROPORCION: Record<AnimalId, number> = { vaca: 120 / 90, oveja: 110 / 85, caballo: 120 / 100, cerdo: 110 / 80, gato: 110 / 80, gallina: 1, pato: 1, conejo: 1, mariposa: 1, pajaro: 40 / 30, perro: 110 / 80, oso: 120 / 90, panda: 120 / 90, zorro: 116 / 80, llama: 100 / 110, rana: 80 / 60 };
 
 /** Cualquier animal vivo por su id. */
 export function AnimalVivo({ id, alto = 80, caminando = false, contento = false, nadando = false }: Props & { id: AnimalId }) {
@@ -407,6 +544,7 @@ export function AnimalVivo({ id, alto = 80, caminando = false, contento = false,
   if (id === "gallina") return <Gallina alto={alto} caminando={caminando} contento={contento} />;
   if (id === "pato") return <Pato alto={alto} caminando={caminando} contento={contento} nadando={nadando} />;
   if (id === "conejo") return <Conejo alto={alto} caminando={caminando} contento={contento} />;
+  if (id === "rana") return <Rana alto={alto} caminando={caminando} contento={contento} />;
   if (id === "mariposa") return <Mariposa alto={alto} />;
   return <Pajaro alto={alto} />;
 }

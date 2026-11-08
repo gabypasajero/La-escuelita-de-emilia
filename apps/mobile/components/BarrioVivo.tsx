@@ -32,7 +32,7 @@ function useBucle(ms: number, retraso = 0) {
   return v;
 }
 
-function Nube({ escala, ancho, y, ms, retraso, tam }: { escala: number; ancho: number; y: number; ms: number; retraso: number; tam: number }) {
+export function Nube({ escala, ancho, y, ms, retraso, tam }: { escala: number; ancho: number; y: number; ms: number; retraso: number; tam: number }) {
   const t = useBucle(ms, retraso);
   const x = t.interpolate({ inputRange: [0, 1], outputRange: [-tam * 1.5 * escala, (ancho + tam) * escala] });
   const w = tam * escala, h = tam * 0.55 * escala;
@@ -52,7 +52,7 @@ function Nube({ escala, ancho, y, ms, retraso, tam }: { escala: number; ancho: n
   );
 }
 
-function Bandada({ escala, ancho, y, ms, retraso }: { escala: number; ancho: number; y: number; ms: number; retraso: number }) {
+export function Bandada({ escala, ancho, y, ms, retraso }: { escala: number; ancho: number; y: number; ms: number; retraso: number }) {
   const t = useBucle(ms, retraso);
   // Vuelan de derecha a izquierda (así miran los pájaros), con una ondulación suave.
   const x = t.interpolate({ inputRange: [0, 1], outputRange: [(ancho + 100) * escala, -200 * escala] });
@@ -68,7 +68,7 @@ function Bandada({ escala, ancho, y, ms, retraso }: { escala: number; ancho: num
   );
 }
 
-function MariposaVolando({ escala, x, y, fase }: { escala: number; x: number; y: number; fase: number }) {
+export function MariposaVolando({ escala, x, y, fase }: { escala: number; x: number; y: number; fase: number }) {
   const t = useBucle(9000 + fase * 1300, fase * 400);
   const n = 24;
   const pts = Array.from({ length: n + 1 }, (_, i) => i / n);
