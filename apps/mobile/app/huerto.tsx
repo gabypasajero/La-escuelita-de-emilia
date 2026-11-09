@@ -10,6 +10,7 @@ import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
 import { Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
+import { useVozActiva } from "../lib/habla";
 
 /**
  * Huerto de Don Pedro como escena para caminar (igual que el barrio): el niño
@@ -87,17 +88,18 @@ export default function Huerto() {
 
   // Don Pedro habla (mueve boca y manos) mientras dice cada frase.
   const [pedroHabla, setPedroHabla] = useState(true);
+  const voz = useVozActiva();
   const silencio = useRef<ReturnType<typeof setTimeout> | null>(null);
   const callarPedro = (ms: number) => {
     if (silencio.current) clearTimeout(silencio.current);
     silencio.current = setTimeout(() => setPedroHabla(false), ms);
   };
-  useEffect(() => callarPedro(4500), []);
+  useEffect(() => callarPedro(6000), []);
   const decir = (t: string) => {
     setDicho(t);
     void hablar(t);
     setPedroHabla(true);
-    callarPedro(Math.max(2500, t.length * 75));
+    callarPedro(Math.max(3000, t.length * 120));
   };
 
   function caminar(x: number, y: number, alLlegar?: () => void) {
@@ -199,7 +201,7 @@ export default function Huerto() {
 
         {/* Don Pedro junto a su galpón: habla moviendo boca y manos */}
         <View pointerEvents="none" style={{ position: "absolute", left: 935 * k, top: 92 * k, alignItems: "center", zIndex: 5 }}>
-          <Adulto id="pedro" alto={140 * k} hablando={pedroHabla} />
+          <Adulto id="pedro" alto={140 * k} hablando={pedroHabla && voz} />
           <Text style={estilos.nombre}>Don Pedro</Text>
         </View>
 

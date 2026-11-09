@@ -6,8 +6,9 @@ import { Reloj } from "../../components/Ambiente";
 import { AnimalVivo } from "../../components/AnimalesVivos";
 import { EscenaRPG, type EscenaRPGRef, type ObjetoEscena } from "../../components/EscenaRPG";
 import { Adulto } from "../../components/Personas";
-import { hablar } from "../../lib/voz";
+import { despuesDeHablar, hablar } from "../../lib/voz";
 import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../../lib/hora";
+import { useVozActiva } from "../../lib/habla";
 
 /**
  * Casa de Emilia para recorrer (como el barrio): baño, dormitorio y cocina en
@@ -19,6 +20,7 @@ export default function Casa() {
   const [ninaHabla, setNinaHabla] = useState(false);
   const silencio = useRef<ReturnType<typeof setTimeout> | null>(null);
   const escena = useRef<EscenaRPGRef>(null);
+  const voz = useVozActiva();
   useEffect(() => void hablar("¡Bienvenidos a mi casa! Aquí está el baño, mi pieza y la cocina de la abuela Nina."), []);
 
   const decir = (t: string) => { setDicho(t); void hablar(t); };
@@ -26,11 +28,11 @@ export default function Casa() {
     decir(t);
     setNinaHabla(true);
     if (silencio.current) clearTimeout(silencio.current);
-    silencio.current = setTimeout(() => setNinaHabla(false), Math.max(2500, t.length * 70));
+    silencio.current = setTimeout(() => setNinaHabla(false), Math.max(3000, t.length * 120));
   };
   const ir = (t: string, ruta: Parameters<typeof router.push>[0]) => () => {
     decir(t);
-    setTimeout(() => router.push(ruta), 1200);
+    despuesDeHablar(() => router.push(ruta));
   };
 
   const objetos: ObjetoEscena[] = [
@@ -47,10 +49,10 @@ export default function Casa() {
     { id: "ropero", x: 690, y: 370, ancho: 130, alto: 210, etiqueta: "Ropero", letrero: "¿Qué me pongo?", dibujo: (k) => <Ropero k={k} />,
       alLlegar: ir("Veamos qué ropa nos ponemos según el clima.", "/casa/ropero") },
     { id: "abuela", x: 1030, y: 400, ancho: 100, alto: 190, etiqueta: "Abuela Nina", letrero: "Abuela Nina",
-      dibujo: (k) => <Adulto id="nina" alto={180 * k} hablando={ninaHabla} />, llegada: { x: 980, y: 430 },
+      dibujo: (k) => <Adulto id="nina" alto={180 * k} hablando={ninaHabla && voz} />, llegada: { x: 980, y: 430 },
       alLlegar: () => diceNina("¡Hola, mi tesoro! Estoy cocinando una sopita. Siéntate en la mesa, que vamos a ver qué es lo más sano.") },
     { id: "mesa", x: 870, y: 520, ancho: 220, alto: 120, etiqueta: "Mesa de la cocina", letrero: "¿Qué es sano?", dibujo: (k) => <Mesa k={k} />,
-      alLlegar: () => { diceNina("¡A la mesa! Vamos a ver qué le hace bien a tu cuerpo."); setTimeout(() => router.push("/casa/plato"), 1400); } },
+      alLlegar: () => { diceNina("¡A la mesa! Vamos a ver qué le hace bien a tu cuerpo."); despuesDeHablar(() => router.push("/casa/plato")); } },
     { id: "puerta", x: 1040, y: 690, ancho: 110, alto: 150, etiqueta: "Puerta al patio", letrero: "Patio de Tito", dibujo: (k) => <Puerta k={k} />,
       llegada: { x: 990, y: 680 }, alLlegar: ir("¡Vamos al patio a jugar con Tito!", "/casa/patio") },
   ];

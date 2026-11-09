@@ -3,6 +3,7 @@ import { Animated, Easing, View } from "react-native";
 import Svg, { Circle, Ellipse, Path } from "react-native-svg";
 import { AnimalVivo } from "./AnimalesVivos";
 import { TINTE, useMomento } from "../lib/hora";
+import { Resplandor } from "./LuzDelDia";
 
 /**
  * Lo que hace que el barrio se sienta vivo: nubes que pasan con su sombra,
@@ -20,6 +21,8 @@ interface Props {
   laguna: { x: number; y: number };
   /** Lugares con flores donde revolotean las mariposas. */
   flores: Array<{ x: number; y: number }>;
+  /** Ventanas y faroles que se encienden de tarde y de noche (brillan sobre la oscuridad). */
+  luces?: Array<{ x: number; y: number; r?: number }>;
 }
 
 /** Bucle 0→1 con duración y retraso inicial. */
@@ -152,7 +155,7 @@ export function Luciernaga({ escala, x, y, fase }: { escala: number; x: number; 
   );
 }
 
-export function BarrioVivo({ escala, ancho, alto, chimenea, laguna, flores }: Props) {
+export function BarrioVivo({ escala, ancho, alto, chimenea, laguna, flores, luces = [] }: Props) {
   const momento = useMomento();
   const tinte = { color: TINTE[momento].color, opacidad: TINTE[momento].exterior };
   const luciernagas = useMemo(() => Array.from({ length: 14 }, (_, i) => ({ x: (i * 397) % ancho, y: 220 + ((i * 613) % (alto - 260)), f: i })), [ancho, alto]);
@@ -170,6 +173,11 @@ export function BarrioVivo({ escala, ancho, alto, chimenea, laguna, flores }: Pr
       {[0, 1300].map((r) => <Onda key={r} escala={escala} x={laguna.x} y={laguna.y} retraso={r} />)}
       {tinte.opacidad > 0 && (
         <View pointerEvents="none" style={{ position: "absolute", left: 0, top: 0, width: ancho * escala, height: alto * escala, backgroundColor: tinte.color, opacity: tinte.opacidad, zIndex: 2200 }} />
+      )}
+      {(momento === "noche" || momento === "tarde") && (
+        <View pointerEvents="none" style={{ position: "absolute", left: 0, top: 0, zIndex: 2250 }}>
+          {luces.map((l, i) => <Resplandor key={i} k={escala} x={l.x} y={l.y} r={l.r ?? 70} fuerte={momento === "noche"} />)}
+        </View>
       )}
       {momento === "noche" && luciernagas.map((l) => <Luciernaga key={l.f} escala={escala} x={l.x} y={l.y} fase={l.f} />)}
     </>

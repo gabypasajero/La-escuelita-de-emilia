@@ -66,7 +66,7 @@ function Estrella({ k, x, y, fase }: { k: number; x: number; y: number; fase: nu
 }
 
 /** Luz cálida y redonda de un farol, lámpara o ventana encendida. */
-function Resplandor({ k, x, y, r, fuerte }: { k: number; x: number; y: number; r: number; fuerte: boolean }) {
+export function Resplandor({ k, x, y, r, fuerte }: { k: number; x: number; y: number; r: number; fuerte: boolean }) {
   const id = `luz${Math.round(x)}-${Math.round(y)}`;
   return (
     <View style={{ position: "absolute", left: (x - r) * k, top: (y - r) * k }}>

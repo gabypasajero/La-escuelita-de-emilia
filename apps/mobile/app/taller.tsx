@@ -5,8 +5,9 @@ import Svg, { Circle, Ellipse, G, Line, Path, Polygon, Rect } from "react-native
 import { LamparaColgante, MariposaVolando, Reloj } from "../components/Ambiente";
 import { EscenaRPG, type ObjetoEscena } from "../components/EscenaRPG";
 import { Adulto } from "../components/Personas";
-import { hablar } from "../lib/voz";
+import { despuesDeHablar, hablar } from "../lib/voz";
 import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../lib/hora";
+import { useVozActiva } from "../lib/habla";
 
 const JUEGOS: Record<string, { ruta: Href; frase: string }> = {
   Pintar: { ruta: "/pintar", frase: "¡Al caballete! Pinta lo que tú quieras." },
@@ -32,6 +33,7 @@ export default function Taller() {
   const [dicho, setDicho] = useState("¡Bienvenidos al taller de arte! ¿Qué quieres crear hoy?");
   const [profeHabla, setProfeHabla] = useState(true);
   const [cuadro, setCuadro] = useState(0);
+  const voz = useVozActiva();
   const silencio = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const habla = (ms: number) => {
@@ -44,11 +46,11 @@ export default function Taller() {
     habla(4000);
     return () => { if (silencio.current) clearTimeout(silencio.current); };
   }, []);
-  const decir = (t: string) => { setDicho(t); void hablar(t); habla(Math.max(2200, t.length * 70)); };
+  const decir = (t: string) => { setDicho(t); void hablar(t); habla(Math.max(3000, t.length * 120)); };
   const ir = (nombre: string) => () => {
     const j = JUEGOS[nombre]!;
     decir(j.frase);
-    setTimeout(() => router.push(j.ruta), 1300);
+    despuesDeHablar(() => router.push(j.ruta));
   };
 
   const objetos: ObjetoEscena[] = [
@@ -56,7 +58,7 @@ export default function Taller() {
     { id: "galeria", x: 260, y: 330, ancho: 360, alto: 150, etiqueta: "Galería de dibujos", letrero: "Galería", dibujo: (k) => <Galeria k={k} />, llegada: { x: 260, y: 440 },
       alLlegar: () => { decir(CUADROS[cuadro]!); setCuadro((c) => (c + 1) % CUADROS.length); } },
     { id: "profe", x: 560, y: 420, ancho: 100, alto: 190, etiqueta: "Profe Tomás", letrero: "Profe Tomás",
-      dibujo: (k) => <Adulto id="artista" alto={180 * k} hablando={profeHabla} />, llegada: { x: 620, y: 450 },
+      dibujo: (k) => <Adulto id="artista" alto={180 * k} hablando={profeHabla && voz} />, llegada: { x: 620, y: 450 },
       alLlegar: () => decir("¡Hola, artista! Puedes pintar en el caballete, mezclar colores o recortar formas.") },
     { id: "caballete", x: 800, y: 430, ancho: 170, alto: 230, etiqueta: "Caballete", letrero: "Pintar", dibujo: (k) => <Caballete k={k} />, llegada: { x: 800, y: 460 }, alLlegar: ir("Pintar") },
     { id: "lapices", x: 1000, y: 420, ancho: 120, alto: 160, etiqueta: "Lápices", letrero: "Trazar", dibujo: (k) => <Lapices k={k} />, llegada: { x: 990, y: 450 }, alLlegar: ir("Trazar") },

@@ -9,6 +9,7 @@ import { Adulto } from "../../components/Personas";
 import { useJuego } from "../../lib/juego";
 import { hablar, hablarYEsperar } from "../../lib/voz";
 import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../../lib/hora";
+import { useVozActiva } from "../../lib/habla";
 
 /** Clientes: animales vivos que entran caminando por la puerta. */
 const CLIENTES: AnimalId[] = ["oso", "conejo", "zorro", "panda", "rana", "llama"];
@@ -35,6 +36,7 @@ export default function Tiendita() {
   const [clienteCamina, setClienteCamina] = useState(false);
   // Doña Rosa mueve la boca y las manos cuando se habla en el almacén.
   const [rosaHabla, setRosaHabla] = useState(true);
+  const voz = useVozActiva();
   const silencio = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hablaRosa = (ms: number) => {
     setRosaHabla(true);
@@ -42,7 +44,7 @@ export default function Tiendita() {
     silencio.current = setTimeout(() => setRosaHabla(false), ms);
   };
   useEffect(() => hablaRosa(3500), []);
-  const decir = (t: string) => { setDicho(t); void hablar(t); hablaRosa(Math.max(2200, t.length * 70)); };
+  const decir = (t: string) => { setDicho(t); void hablar(t); hablaRosa(Math.max(3000, t.length * 120)); };
 
   // El cliente entra por la puerta y hace su pedido.
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function Tiendita() {
       alLlegar: () => sacar(p),
     })),
     { id: "rosa", x: MESON.x + 60, y: MESON.y - 70, ancho: 110, alto: 150, etiqueta: "Doña Rosa", letrero: "Doña Rosa",
-      dibujo: (k) => <Adulto id="rosa" alto={150 * k} hablando={rosaHabla} saludando={feliz} />, llegada: { x: MESON.x - 60, y: MESON.y + 70 }, alLlegar: () => void entregar() },
+      dibujo: (k) => <Adulto id="rosa" alto={150 * k} hablando={rosaHabla && voz} saludando={feliz} />, llegada: { x: MESON.x - 60, y: MESON.y + 70 }, alLlegar: () => void entregar() },
     { id: "meson", x: MESON.x, y: MESON.y, ancho: 260, alto: 90, etiqueta: "Mesón para entregar", letrero: "Entregar aquí",
       dibujo: (k) => <Meson k={k} />, llegada: { x: MESON.x - 60, y: MESON.y + 70 }, alLlegar: () => void entregar() },
   ];

@@ -7,6 +7,7 @@ import { AnimalPaseando, PROPORCION, type AnimalId } from "../components/Animale
 import { EscenaRPG, type ObjetoEscena } from "../components/EscenaRPG";
 import { useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
+import { useVozActiva } from "../lib/habla";
 
 /**
  * Granja de Don Pedro para recorrer: los animales pasean por su corral; al
@@ -40,12 +41,13 @@ export default function Granja() {
   const decir = (t: string) => { setDicho(t); void hablar(t); };
   // Don Pedro saluda al llegar y mueve la boca y las manos cuando habla.
   const [pedroHabla, setPedroHabla] = useState(false);
+  const voz = useVozActiva();
   const [pedroSaluda, setPedroSaluda] = useState(true);
   useEffect(() => { const t = setTimeout(() => setPedroSaluda(false), 3500); return () => clearTimeout(t); }, []);
   const decirPedro = (t: string) => {
     decir(t);
     setPedroHabla(true);
-    setTimeout(() => setPedroHabla(false), Math.max(2500, t.length * 75));
+    setTimeout(() => setPedroHabla(false), Math.max(3000, t.length * 120));
   };
 
   function dar(comida: (typeof COMIDAS)[number]) {
@@ -60,7 +62,7 @@ export default function Granja() {
 
   const objetos: ObjetoEscena[] = [
     { id: "pedro", x: 860, y: 330, ancho: 110, alto: 150, etiqueta: "Don Pedro", letrero: "Don Pedro",
-      dibujo: (k) => <Adulto id="pedro" alto={150 * k} hablando={pedroHabla} saludando={pedroSaluda} />,
+      dibujo: (k) => <Adulto id="pedro" alto={150 * k} hablando={pedroHabla && voz} saludando={pedroSaluda} />,
       alLlegar: () => decirPedro("¿Sabías que las vacas comen pasto casi todo el día? ¡Con paciencia todo crece!") },
     ...ANIMALES.map((a): ObjetoEscena => ({
       id: a.id, x: a.x, y: a.y, ancho: 130 + a.paseo * 2, alto: 110, etiqueta: a.nombre,

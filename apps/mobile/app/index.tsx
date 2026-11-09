@@ -1,7 +1,7 @@
 import { Redirect, router, useFocusEffect, type Href } from "expo-router";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
+import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, RadialGradient, Rect, Stop } from "react-native-svg";
 import { Avatar, TitoVestido } from "../components/Avatar";
 import { LugarDibujo } from "../components/Lugares";
 import { AnimalPaseando, PROPORCION } from "../components/AnimalesVivos";
@@ -9,7 +9,8 @@ import { BarrioVivo } from "../components/BarrioVivo";
 import { ARBOLES, LUGARES, VECINOS, type Lugar } from "../lib/lugares";
 import { EmiliaDibujo, Globo, type Expresion } from "../components/Personajes";
 import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
-import { hablar, reactivarVoz } from "../lib/voz";
+import { despuesDeHablar, hablar, reactivarVoz } from "../lib/voz";
+import { horaActual } from "../lib/hora";
 
 /**
  * El barrio de Emilia como un mundo para caminar (vista desde arriba, estilo
@@ -27,7 +28,7 @@ const distancia = (a: Punto, b: Punto) => Math.hypot(a.x - b.x, a.y - b.y);
 const puerta = (l: Lugar): Punto => ({ x: l.x, y: l.y + 40 });
 
 function saludo(nombre: string) {
-  const hora = new Date().getHours();
+  const hora = horaActual();
   const hola = hora < 12 ? "¡Buenos días" : hora < 20 ? "¡Hola" : "¡Buenas noches";
   return `${hola}, ${nombre}! Toca el suelo para caminar. ¡Vamos a jugar!`;
 }
@@ -106,8 +107,8 @@ function Mundo() {
     setDialogo(l.frase);
     if (!l.ruta) return void hablar(l.frase);
     const ruta = l.ruta;
-    await Promise.race([hablar(l.frase), new Promise((r) => setTimeout(r, 2500))]);
-    router.push(ruta);
+    void hablar(l.frase);
+    despuesDeHablar(() => router.push(ruta), { minMs: 1200 });
   }, []);
   const teclasRecien = useRef(false);
   const entrarRef = useRef(entrar);
@@ -318,6 +319,7 @@ function Mundo() {
           chimenea={{ x: LUGARES.find((l) => l.id === "casa")!.x + 45, y: LUGARES.find((l) => l.id === "casa")!.y - 202 }}
           laguna={{ x: 230, y: 536 }}
           flores={[{ x: 950, y: 640 }, { x: 560, y: 980 }, { x: 1230, y: 1030 }]}
+          luces={LUGARES.filter((l) => !["plaza", "huerto"].includes(l.id)).map((l) => ({ x: l.x - 10, y: l.y - 75, r: 95 }))}
         />
 
         {/* Tito, Emilia y el personaje del niño, con su sombra */}
@@ -348,6 +350,8 @@ function Mundo() {
         </Animated.View>
       </Animated.View>
 
+      <Vineta />
+
       {/* Interfaz fija */}
       <View style={estilos.dialogo} pointerEvents="none">
         <Globo texto={dialogo} />
@@ -372,63 +376,223 @@ function Mundo() {
   );
 }
 
+/** Sombra suave (difuminada) bajo los personajes, corrida hacia la derecha por la luz. */
 function Sombra({ ancho }: { ancho: number }) {
-  return <View pointerEvents="none" style={{ position: "absolute", bottom: -ancho * 0.08, alignSelf: "center", width: ancho, height: ancho * 0.22, borderRadius: ancho, backgroundColor: "rgba(0,0,0,0.18)" }} />;
+  return (
+    <View pointerEvents="none" style={{ position: "absolute", bottom: -ancho * 0.12, left: "50%", marginLeft: -ancho * 0.45, width: ancho * 1.1, height: ancho * 0.32 }}>
+      <Svg width="100%" height="100%" viewBox="0 0 110 32">
+        <Defs>
+          <RadialGradient id="sombraSuave" cx="50%" cy="50%" r="50%">
+            <Stop offset="0" stopColor="#1B3A12" stopOpacity="0.42" />
+            <Stop offset="0.6" stopColor="#1B3A12" stopOpacity="0.2" />
+            <Stop offset="1" stopColor="#1B3A12" stopOpacity="0" />
+          </RadialGradient>
+        </Defs>
+        <Ellipse cx="55" cy="16" rx="55" ry="16" fill="url(#sombraSuave)" />
+      </Svg>
+    </View>
+  );
 }
 
+/** Viñeta suave en los bordes de la pantalla: enfoca el centro y da profundidad. */
+function Vineta() {
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <Defs>
+          <RadialGradient id="vineta" cx="50%" cy="48%" r="72%">
+            <Stop offset="0.55" stopColor="#0B2A0B" stopOpacity="0" />
+            <Stop offset="1" stopColor="#0B2A0B" stopOpacity="0.28" />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100" height="100" fill="url(#vineta)" />
+      </Svg>
+    </View>
+  );
+}
+
+const COPAS = [
+  { base: "#2E7D32", medio: "#43A047", luz: "#7CC576" },
+  { base: "#1B5E20", medio: "#388E3C", luz: "#66BB6A" },
+  { base: "#33691E", medio: "#558B2F", luz: "#9CCC65" },
+];
+
+/** Árbol con volumen: luz arriba a la izquierda, sombra abajo a la derecha y sombra proyectada. */
 const Arbol = memo(function Arbol({ tamano, variante }: { tamano: number; variante: number }) {
-  const copa = ["#43A047", "#388E3C", "#66BB6A"][variante]!;
+  const c = COPAS[variante]!;
+  const id = `copa${variante}`;
   return (
     <Svg width={tamano} height={tamano * 1.25} viewBox="0 0 120 150">
-      <Ellipse cx="60" cy="143" rx="44" ry="9" fill="rgba(0,0,0,0.18)" />
-      <Rect x="52" y="90" width="16" height="54" rx="5" fill="#6D4C41" />
-      <Circle cx="60" cy="62" r="42" fill={copa} />
-      <Circle cx="36" cy="78" r="26" fill={copa} />
-      <Circle cx="86" cy="78" r="26" fill={copa} />
-      <Circle cx="48" cy="46" r="14" fill="#fff" opacity="0.15" />
-      {variante === 2 && [40, 70, 58, 84].map((x, i) => <Circle key={i} cx={x} cy={60 + (i % 2) * 22} r="5" fill="#E53935" />)}
+      <Defs>
+        <RadialGradient id={id} cx="35%" cy="30%" r="75%">
+          <Stop offset="0" stopColor={c.luz} />
+          <Stop offset="0.55" stopColor={c.medio} />
+          <Stop offset="1" stopColor={c.base} />
+        </RadialGradient>
+        <LinearGradient id="tronco" x1="0" y1="0" x2="1" y2="0">
+          <Stop offset="0" stopColor="#8D6E63" />
+          <Stop offset="1" stopColor="#4E342E" />
+        </LinearGradient>
+        <RadialGradient id="sombraArbol" cx="50%" cy="50%" r="50%">
+          <Stop offset="0" stopColor="#1B3A12" stopOpacity="0.38" />
+          <Stop offset="1" stopColor="#1B3A12" stopOpacity="0" />
+        </RadialGradient>
+      </Defs>
+      <Ellipse cx="74" cy="142" rx="50" ry="10" fill="url(#sombraArbol)" />
+      <Path d="M52 144 Q54 118 53 90 L67 90 Q66 118 70 144 Q61 147 52 144 Z" fill="url(#tronco)" />
+      <Path d="M60 104 Q50 96 44 98 M62 112 Q72 102 78 104" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" />
+      {/* Copa en racimos */}
+      <Circle cx="38" cy="80" r="26" fill={c.base} />
+      <Circle cx="84" cy="80" r="26" fill={c.base} />
+      <Circle cx="60" cy="62" r="42" fill={`url(#${id})`} />
+      <Circle cx="36" cy="76" r="24" fill={`url(#${id})`} />
+      <Circle cx="84" cy="78" r="23" fill={`url(#${id})`} opacity="0.95" />
+      <Circle cx="62" cy="86" r="20" fill={c.base} opacity="0.35" />
+      {/* Hojitas y brillos */}
+      {[[42, 44], [56, 34], [30, 64], [70, 48], [48, 60]].map(([x, y], i) => <Circle key={i} cx={x} cy={y} r={i % 2 ? 5 : 7} fill="#fff" opacity="0.13" />)}
+      {[[78, 70], [92, 84], [66, 96], [50, 92]].map(([x, y], i) => <Circle key={`s${i}`} cx={x} cy={y} r="6" fill={c.base} opacity="0.4" />)}
+      {variante === 2 && [40, 70, 58, 84, 32].map((x, i) => (
+        <G key={i}><Circle cx={x} cy={58 + (i % 3) * 14} r="5" fill="#E53935" /><Circle cx={x - 1.5} cy={56.5 + (i % 3) * 14} r="1.5" fill="#fff" opacity="0.6" /></G>
+      ))}
     </Svg>
   );
 });
 
-/** Suelo del mundo: cerros al fondo, pasto, caminos de tierra, laguna y flores. */
+/** Números pseudoaleatorios fijos (el suelo se ve igual cada vez). */
+function azar(semilla: number) {
+  const x = Math.sin(semilla * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+/**
+ * Suelo del mundo con profundidad: cielo y cordilleras en capas con neblina,
+ * pasto con degradado (lejos más claro) y briznas, caminos de tierra con
+ * borde, huellas y piedritas, laguna con orilla, nenúfares y juncos.
+ */
 const Suelo = memo(function Suelo({ escala }: { escala: number }) {
   const { ancho, alto } = MUNDO;
-  const flores = Array.from({ length: 70 }, (_, k) => ({ x: (k * 263) % ancho, y: 200 + ((k * 397) % (alto - 220)), c: ["#F06292", "#FFF176", "#fff", "#BA68C8"][k % 4]! }));
+  const enCamino = (x: number, y: number) => (y > 380 && y < 475) || (y > 790 && y < 885) || (x > 855 && x < 955 && y > 380 && y < 1200) || (y > 1150 && y < 1215 && x > 470 && x < 1420) || Math.hypot((x - 210) / 150, (y - 540) / 92) < 1;
+  const briznas = Array.from({ length: 520 }, (_, k) => ({ x: azar(k + 1) * ancho, y: 200 + azar(k + 101) * (alto - 210), t: azar(k + 7) })).filter((b) => !enCamino(b.x, b.y));
+  const flores = Array.from({ length: 90 }, (_, k) => ({ x: azar(k + 501) * ancho, y: 210 + azar(k + 601) * (alto - 230), c: ["#F06292", "#FFF176", "#fff", "#BA68C8", "#FF8A65"][k % 5]! })).filter((f) => !enCamino(f.x, f.y));
+  const piedras = Array.from({ length: 70 }, (_, k) => {
+    const tramo = k % 4;
+    return tramo === 0 ? { x: azar(k) * ancho, y: 404 + azar(k + 3) * 46 } : tramo === 1 ? { x: azar(k) * ancho, y: 814 + azar(k + 3) * 46 } : tramo === 2 ? { x: 878 + azar(k + 5) * 52, y: 470 + azar(k) * 700 } : { x: 490 + azar(k) * 910, y: 1162 + azar(k + 3) * 40 };
+  });
+  const camino = (d: string, k: string) => (
+    <G key={k}>
+      <Path d={d} stroke="#B08D57" strokeWidth="78" strokeLinecap="round" fill="none" />
+      <Path d={d} stroke="#D2B48C" strokeWidth="64" strokeLinecap="round" fill="none" />
+      <Path d={d} stroke="#DEC59C" strokeWidth="34" strokeLinecap="round" fill="none" opacity="0.7" />
+    </G>
+  );
   return (
     <Svg width={ancho * escala} height={alto * escala} viewBox={`0 0 ${ancho} ${alto}`} pointerEvents="none">
-      {/* Cordillera y cerros al fondo, para dar profundidad */}
-      <Rect x="0" y="0" width={ancho} height="180" fill="#B3E5FC" />
-      {[0, 380, 760, 1140, 1520].map((x) => (
+      <Defs>
+        <LinearGradient id="cieloB" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor="#81D4FA" />
+          <Stop offset="1" stopColor="#E1F5FE" />
+        </LinearGradient>
+        <LinearGradient id="pasto" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor="#B5D96E" />
+          <Stop offset="0.35" stopColor="#97C459" />
+          <Stop offset="1" stopColor="#6FA83D" />
+        </LinearGradient>
+        <LinearGradient id="cerroCerca" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor="#8BC34A" />
+          <Stop offset="1" stopColor="#689F38" />
+        </LinearGradient>
+        <RadialGradient id="agua" cx="45%" cy="40%" r="60%">
+          <Stop offset="0" stopColor="#4FC3F7" />
+          <Stop offset="0.7" stopColor="#29B6F6" />
+          <Stop offset="1" stopColor="#0288D1" />
+        </RadialGradient>
+        <RadialGradient id="sombraEdificio" cx="50%" cy="50%" r="50%">
+          <Stop offset="0" stopColor="#1B3A12" stopOpacity="0.4" />
+          <Stop offset="0.7" stopColor="#1B3A12" stopOpacity="0.15" />
+          <Stop offset="1" stopColor="#1B3A12" stopOpacity="0" />
+        </RadialGradient>
+        <RadialGradient id="mancha" cx="50%" cy="50%" r="50%">
+          <Stop offset="0" stopColor="#C5E1A5" stopOpacity="0.55" />
+          <Stop offset="1" stopColor="#C5E1A5" stopOpacity="0" />
+        </RadialGradient>
+        <RadialGradient id="manchaOscura" cx="50%" cy="50%" r="50%">
+          <Stop offset="0" stopColor="#33691E" stopOpacity="0.25" />
+          <Stop offset="1" stopColor="#33691E" stopOpacity="0" />
+        </RadialGradient>
+      </Defs>
+      {/* Cielo y cordilleras en capas (la más lejana más clara por la neblina) */}
+      <Rect x="0" y="0" width={ancho} height="200" fill="url(#cieloB)" />
+      {[-120, 260, 640, 1020, 1400, 1780].map((x, i) => (
+        <Path key={`l${x}`} d={`M${x - 160} 175 L${x + 40 + (i % 2) * 40} ${40 + (i % 3) * 12} L${x + 260} 175 Z`} fill="#B0C4D4" opacity="0.8" />
+      ))}
+      {[0, 380, 760, 1140, 1520].map((x, i) => (
         <G key={x}>
-          <Path d={`M${x - 80} 170 L${x + 150} 30 L${x + 380} 170 Z`} fill="#90A4AE" />
-          <Path d={`M${x + 110} 55 L${x + 150} 30 L${x + 190} 55 Z`} fill="#fff" />
+          <Path d={`M${x - 80} 180 L${x + 150} ${44 + (i % 2) * 14} L${x + 380} 180 Z`} fill="#8FA6B5" />
+          <Path d={`M${x + 150} ${44 + (i % 2) * 14} L${x + 380} 180 L${x + 210} 180 Z`} fill="#7A92A2" />
+          <Path d={`M${x + 112} ${70 + (i % 2) * 14} L${x + 150} ${44 + (i % 2) * 14} L${x + 192} ${72 + (i % 2) * 14} L${x + 170} ${66 + (i % 2) * 14} L${x + 150} ${76 + (i % 2) * 14} L${x + 132} ${66 + (i % 2) * 14} Z`} fill="#fff" />
         </G>
       ))}
-      <Path d={`M0 170 Q 300 110 600 165 T 1200 160 T ${ancho} 165 V 200 H 0 Z`} fill="#7CB342" />
-      <Rect x="0" y="190" width={ancho} height={alto - 190} fill="#8BC34A" />
-      {/* Manchas de pasto más claro */}
-      {[[300, 560, 200], [1350, 1000, 260], [900, 260, 180], [1600, 620, 150]].map(([x, y, r], k) => (
-        <Ellipse key={k} cx={x} cy={y} rx={r} ry={r! * 0.45} fill="#9CCC65" />
+      <Rect x="0" y="150" width={ancho} height="40" fill="#E1F5FE" opacity="0.35" />
+      <Path d={`M0 178 Q 300 120 600 172 T 1200 166 T ${ancho} 170 V 210 H 0 Z`} fill="url(#cerroCerca)" />
+      {/* Pasto con degradado de profundidad y manchas de luz y sombra */}
+      <Rect x="0" y="196" width={ancho} height={alto - 196} fill="url(#pasto)" />
+      {[[300, 640, 260], [1350, 1000, 300], [960, 280, 220], [1600, 620, 200], [520, 1050, 220], [1250, 300, 180]].map(([x, y, r], k) => (
+        <Ellipse key={k} cx={x} cy={y} rx={r} ry={r! * 0.5} fill="url(#mancha)" />
       ))}
-      {/* Caminos de tierra */}
-      <Rect x="0" y="392" width={ancho} height="70" rx="20" fill="#C9A66B" />
-      <Rect x="0" y="400" width={ancho} height="54" rx="18" fill="#D7B98E" />
-      <Rect x="0" y="802" width={ancho} height="70" rx="20" fill="#C9A66B" />
-      <Rect x="0" y="810" width={ancho} height="54" rx="18" fill="#D7B98E" />
-      <Rect x="868" y="392" width="72" height="800" rx="20" fill="#C9A66B" />
-      <Rect x="876" y="392" width="56" height="800" rx="18" fill="#D7B98E" />
-      {/* Sombras de los edificios */}
-      {LUGARES.map((l) => <Ellipse key={l.id} cx={l.x} cy={l.y - 4} rx={TAMANO_LUGAR * 0.42} ry="16" fill="rgba(0,0,0,0.16)" />)}
-      {/* Laguna */}
-      <Ellipse cx="210" cy="540" rx="125" ry="66" fill="#4FC3F7" />
-      <Ellipse cx="210" cy="540" rx="125" ry="66" fill="none" stroke="#81D4FA" strokeWidth="10" />
-      <Ellipse cx="180" cy="525" rx="40" ry="10" fill="#fff" opacity="0.35" />
-      {/* Cerca de la granja */}
-      {[1340, 1390, 1440, 1490, 1540, 1590, 1640, 1690].map((x) => <Rect key={x} x={x} y="900" width="8" height="40" fill="#A1887F" />)}
-      <Rect x="1336" y="908" width="362" height="7" fill="#A1887F" />
-      <Rect x="1336" y="925" width="362" height="7" fill="#A1887F" />
-      {flores.map((f, k) => <Circle key={k} cx={f.x} cy={f.y} r="5" fill={f.c} />)}
+      {[[700, 640, 200], [150, 950, 220], [1500, 360, 160], [1100, 1180, 200]].map(([x, y, r], k) => (
+        <Ellipse key={`o${k}`} cx={x} cy={y} rx={r} ry={r! * 0.45} fill="url(#manchaOscura)" />
+      ))}
+      {/* Caminos de tierra con borde y huellas */}
+      {camino(`M-20 427 H${ancho + 20}`, "c1")}
+      {camino(`M-20 837 H${ancho + 20}`, "c2")}
+      {camino("M904 430 V1180", "c3")}
+      <G>
+        <Path d="M510 1185 H1400" stroke="#B08D57" strokeWidth="50" strokeLinecap="round" fill="none" />
+        <Path d="M510 1185 H1400" stroke="#D2B48C" strokeWidth="38" strokeLinecap="round" fill="none" />
+      </G>
+      {[417, 437, 827, 847].map((y) => <Line key={y} x1="0" y1={y} x2={ancho} y2={y} stroke="#B89A68" strokeWidth="2" strokeDasharray="30 18" opacity="0.6" />)}
+      {[894, 914].map((x) => <Line key={x} x1={x} y1="470" x2={x} y2="1170" stroke="#B89A68" strokeWidth="2" strokeDasharray="30 18" opacity="0.6" />)}
+      {piedras.map((p, k) => <Ellipse key={k} cx={p.x} cy={p.y} rx={2 + azar(k + 9) * 3} ry={1.5 + azar(k + 11) * 2} fill={k % 3 ? "#A88B5E" : "#EFE0C2"} />)}
+      {/* Sombras de los edificios, proyectadas hacia la derecha */}
+      {LUGARES.map((l) => <Ellipse key={l.id} cx={l.x + 34} cy={l.y - 8} rx={TAMANO_LUGAR * 0.56} ry="30" fill="url(#sombraEdificio)" />)}
+      {/* Laguna con orilla, profundidad, reflejos, nenúfares y juncos */}
+      <Ellipse cx="212" cy="546" rx="146" ry="84" fill="#D9C79B" />
+      <Ellipse cx="210" cy="540" rx="132" ry="72" fill="#8D7B55" opacity="0.5" />
+      <Ellipse cx="210" cy="540" rx="126" ry="67" fill="url(#agua)" />
+      <Path d="M100 520 Q150 500 210 505 Q160 512 120 532 Z" fill="#fff" opacity="0.35" />
+      <Ellipse cx="260" cy="570" rx="34" ry="5" fill="#fff" opacity="0.2" />
+      {([[150, 570], [178, 588], [290, 530], [270, 512]] as const).map(([x, y], k) => (
+        <G key={k}>
+          <Path d={`M${x} ${y} m-11 0 a11 6 0 1 0 22 0 a11 6 0 1 0 -22 0 Z`} fill="#43A047" />
+          <Path d={`M${x} ${y} L${x + 11} ${y - 2} L${x + 11} ${y + 2} Z`} fill="#29B6F6" />
+          {k % 2 === 0 && <Circle cx={x - 3} cy={y - 2} r="3.5" fill="#F8BBD0" />}
+        </G>
+      ))}
+      {([[90, 520], [100, 500], [112, 512], [326, 560], [336, 540], [318, 580]] as const).map(([x, y], k) => (
+        <G key={`j${k}`}>
+          <Path d={`M${x} ${y} Q${x - 4} ${y - 30} ${x - 2} ${y - 48}`} stroke="#558B2F" strokeWidth="3" fill="none" />
+          <Path d={`M${x} ${y} Q${x + 6} ${y - 22} ${x + 10} ${y - 34}`} stroke="#689F38" strokeWidth="2.5" fill="none" />
+          <Ellipse cx={x - 2} cy={y - 50} rx="3" ry="8" fill="#6D4C41" />
+        </G>
+      ))}
+      {([[340, 600], [80, 576]] as const).map(([x, y]) => <G key={x}><Ellipse cx={x} cy={y} rx="14" ry="9" fill="#90A4AE" /><Ellipse cx={x - 3} cy={y - 3} rx="7" ry="4" fill="#CFD8DC" /></G>)}
+      {/* Cerca de la granja con sombra */}
+      <Rect x="1336" y="938" width="362" height="6" fill="#000" opacity="0.12" />
+      {[1340, 1390, 1440, 1490, 1540, 1590, 1640, 1690].map((x) => <G key={x}><Rect x={x} y="900" width="8" height="40" fill="#A1887F" /><Rect x={x + 5} y="900" width="3" height="40" fill="#6D4C41" opacity="0.5" /></G>)}
+      <Rect x="1336" y="908" width="362" height="7" fill="#BCAAA4" />
+      <Rect x="1336" y="925" width="362" height="7" fill="#BCAAA4" />
+      {/* Briznas de pasto y flores */}
+      {briznas.map((b, k) => {
+        const h = 7 + b.t * 7, c = b.t > 0.5 ? "#5E9A2E" : "#79B142";
+        return <Path key={k} d={`M${b.x - 4} ${b.y} Q${b.x - 4} ${b.y - h * 0.6} ${b.x - 6} ${b.y - h} M${b.x} ${b.y} Q${b.x + 1} ${b.y - h} ${b.x} ${b.y - h * 1.2} M${b.x + 4} ${b.y} Q${b.x + 4} ${b.y - h * 0.6} ${b.x + 7} ${b.y - h * 0.9}`} stroke={c} strokeWidth="1.8" fill="none" strokeLinecap="round" />;
+      })}
+      {flores.map((f, k) => (
+        <G key={`f${k}`}>
+          <Line x1={f.x} y1={f.y} x2={f.x} y2={f.y + 7} stroke="#558B2F" strokeWidth="1.5" />
+          {[0, 72, 144, 216, 288].map((a) => <Circle key={a} cx={f.x + Math.cos((a * Math.PI) / 180) * 3.2} cy={f.y + Math.sin((a * Math.PI) / 180) * 3.2} r="2.8" fill={f.c} />)}
+          <Circle cx={f.x} cy={f.y} r="2" fill="#FFB300" />
+        </G>
+      ))}
     </Svg>
   );
 });
@@ -436,7 +600,7 @@ const Suelo = memo(function Suelo({ escala }: { escala: number }) {
 const estilos = StyleSheet.create({
   fondo: { flex: 1, backgroundColor: "#8BC34A", overflow: "hidden" },
   objeto: { position: "absolute", alignItems: "center" },
-  letrero: { marginTop: -6, backgroundColor: "#8D6E63", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 2, borderColor: "#5D4037" },
+  letrero: { marginTop: -6, backgroundColor: "#8D6E63", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 2, borderColor: "#5D4037", shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 3, shadowOffset: { width: 2, height: 3 } },
   letreroPronto: { backgroundColor: "#9E9E9E", borderColor: "#757575" },
   letreroTexto: { color: "#fff", fontWeight: "800" },
   nombreJugador: { position: "absolute", top: -26, alignSelf: "center", backgroundColor: "rgba(255,255,255,0.9)", color: "#3B2F5C", fontWeight: "900", paddingHorizontal: 8, borderRadius: 10, overflow: "hidden" },

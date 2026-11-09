@@ -23,6 +23,18 @@ import { Platform } from "react-native";
  */
 let pendiente: string | null = null;
 let hablando = false;
+/** Quienes quieren saber cuándo la voz empieza y termina (bocas que se mueven, escenas que esperan). */
+const oyentesVoz = new Set<(sonando: boolean) => void>();
+function marcarHablando(v: boolean) {
+  if (hablando === v) return;
+  hablando = v;
+  oyentesVoz.forEach((f) => f(v));
+}
+export const vozSonando = () => hablando;
+export function alCambiarVoz(f: (sonando: boolean) => void) {
+  oyentesVoz.add(f);
+  return () => { oyentesVoz.delete(f); };
+}
 let turno = 0;
 
 const esWeb = Platform.OS === "web" && typeof window !== "undefined" && "speechSynthesis" in window;
@@ -167,7 +179,7 @@ export async function hablar(texto: string, idioma: Idioma = "es"): Promise<void
   ultima = { texto, idioma };
   const miTurno = ++turno;
   if (!esWeb) Speech.stop();
-  hablando = true;
+  marcarHablando(true);
   let como = await decir(texto, miTurno, idioma);
   // Si terminó de forma natural y hay un anuncio esperando, se dice a continuación.
   while (como === "fin" && pendiente && miTurno === turno) {
@@ -175,7 +187,7 @@ export async function hablar(texto: string, idioma: Idioma = "es"): Promise<void
     pendiente = null;
     como = await decir(anuncio, miTurno);
   }
-  if (miTurno === turno) hablando = false;
+  if (miTurno === turno) marcarHablando(false);
 }
 
 /** Dice una frase después de la actual (o enseguida, si nadie está hablando). */
@@ -202,7 +214,7 @@ export async function hablarYEsperar(texto: string, pausaMs = 400, idioma: Idiom
 export function reactivarVoz(probar = true) {
   turno++;
   pendiente = null;
-  hablando = false;
+  marcarHablando(false);
   const s = sintetizador();
   if (s) {
     s.cancel();
@@ -212,4 +224,28 @@ export function reactivarVoz(probar = true) {
     Speech.stop();
   }
   if (probar) setTimeout(() => void hablar("¡Hola! Ya me escuchas otra vez."), 150);
+}
+
+/**
+ * Hace algo cuando la voz termina la frase actual (por ejemplo, entrar a un
+ * juego), sin cortarla. Espera al menos `minMs` para que se alcance a leer el
+ * globo y nunca más de `maxMs`, por si la voz no avisa.
+ */
+export function despuesDeHablar(accion: () => void, { minMs = 900, maxMs = 9000, pausaMs = 250 } = {}) {
+  const inicio = Date.now();
+  let listo = false;
+  const terminar = () => {
+    if (listo) return;
+    listo = true;
+    clearInterval(revisar);
+    clearTimeout(tope);
+    quitar();
+    setTimeout(accion, pausaMs);
+  };
+  // Sin voz en español (o con la voz bloqueada) no se espera a que "termine": basta con el mínimo.
+  const sinVoz = !hayVoz("es") || bloqueada;
+  const probar = () => { if ((sinVoz || !hablando) && Date.now() - inicio >= minMs) terminar(); };
+  const quitar = alCambiarVoz(() => probar());
+  const revisar = setInterval(probar, 150);
+  const tope = setTimeout(terminar, maxMs);
 }

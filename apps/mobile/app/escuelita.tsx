@@ -5,8 +5,9 @@ import Svg, { Circle, Ellipse, G, Line, Path, Polygon, Rect, Text as SvgText } f
 import { MariposaVolando, Reloj } from "../components/Ambiente";
 import { EscenaRPG, type EscenaRPGRef, type ObjetoEscena } from "../components/EscenaRPG";
 import { Adulto } from "../components/Personas";
-import { hablar } from "../lib/voz";
+import { despuesDeHablar, hablar } from "../lib/voz";
 import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../lib/hora";
+import { useVozActiva } from "../lib/habla";
 
 /** Todos los juegos (también se abren desde el botón «Todos los juegos»). */
 const SALAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; frase: string }> = [
@@ -36,6 +37,7 @@ export default function Escuelita() {
   const [todos, setTodos] = useState(false);
   const silencio = useRef<ReturnType<typeof setTimeout> | null>(null);
   const escena = useRef<EscenaRPGRef>(null);
+  const voz = useVozActiva();
 
   const hablaTia = (ms: number) => {
     setTiaHabla(true);
@@ -46,11 +48,11 @@ export default function Escuelita() {
     void hablar("¡Hola! Bienvenidos a la escuelita. Toca un rincón de la sala para jugar.");
     hablaTia(4500);
   }, []);
-  const decir = (t: string) => { setDicho(t); void hablar(t); hablaTia(Math.max(2200, t.length * 70)); };
+  const decir = (t: string) => { setDicho(t); void hablar(t); hablaTia(Math.max(3000, t.length * 120)); };
   const ir = (nombre: string) => () => {
     const s = SALAS.find((x) => x.nombre === nombre)!;
     decir(s.frase);
-    setTimeout(() => router.push(s.ruta), 1300);
+    despuesDeHablar(() => router.push(s.ruta));
   };
 
   const objetos: ObjetoEscena[] = [
@@ -58,7 +60,7 @@ export default function Escuelita() {
     { id: "letras", x: 110, y: 390, ancho: 150, alto: 210, etiqueta: "Letras", letrero: "Letras", dibujo: (k) => <EstanteLetras k={k} />, alLlegar: ir("Letras") },
     { id: "pizarra", x: 450, y: 380, ancho: 330, alto: 220, etiqueta: "Pizarra", letrero: "Escribir", dibujo: (k) => <Pizarra k={k} />, llegada: { x: 450, y: 430 }, alLlegar: ir("Escribir") },
     { id: "tia", x: 700, y: 410, ancho: 100, alto: 190, etiqueta: "Tía de la escuelita", letrero: "La tía",
-      dibujo: (k) => <Adulto id="tia" alto={180 * k} hablando={tiaHabla} />, llegada: { x: 640, y: 450 },
+      dibujo: (k) => <Adulto id="tia" alto={180 * k} hablando={tiaHabla && voz} />, llegada: { x: 640, y: 450 },
       alLlegar: () => decir("¡Qué bueno que viniste! Aquí aprendemos jugando. Prueba la pizarra, el ábaco o las mesitas.") },
     { id: "abaco", x: 860, y: 400, ancho: 130, alto: 170, etiqueta: "Ábaco", letrero: "Números", dibujo: (k) => <Abaco k={k} />, alLlegar: ir("Números") },
     { id: "radio", x: 1010, y: 400, ancho: 120, alto: 170, etiqueta: "Radio de los sonidos", letrero: "Sonidos", dibujo: (k) => <Radio k={k} />, alLlegar: ir("Sonidos") },
