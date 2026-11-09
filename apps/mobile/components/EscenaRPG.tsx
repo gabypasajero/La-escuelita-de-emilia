@@ -7,6 +7,7 @@ import { BotonCasa } from "./BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo } from "./Personajes";
 import { Monedas } from "../lib/juego";
 import { LuzDelDia, VeloPantalla } from "./LuzDelDia";
+import { AmbienteFondo, SombraContacto, VinetaEscena, type Ventana } from "./AmbienteInterior";
 
 /**
  * Escena para caminar (estilo RPG, como el barrio): el niño toca el suelo y
@@ -29,6 +30,8 @@ export interface ObjetoEscena {
   alLlegar?: () => void;
   /** Letrero bajo el objeto. */
   letrero?: string;
+  /** Sombra de contacto en el suelo (por defecto sí, salvo lo que cuelga de la pared). */
+  sombra?: boolean;
 }
 
 export interface EscenaRPGRef {
@@ -49,7 +52,9 @@ interface Props {
   /** Elementos que viven dentro de la escena (por ejemplo, un cliente que entra). */
   extras?: (k: number) => ReactNode;
   /** Luz según la hora real: interior (velo suave) o exterior (estrellas, luciérnagas). */
-  luz?: { interior?: boolean; cielo?: number; suelo?: { yMin: number; yMax: number }; luces?: Array<{ x: number; y: number; r?: number }> };
+  luz?: { interior?: boolean; cielo?: number; suelo?: { yMin: number; yMax: number }; luces?: Array<{ x: number; y: number; r?: number }>;
+    /** Donde la pared se junta con el piso (interior). */ muro?: number;
+    /** Ventana por donde entra el rayo de luz y hacia dónde cae. */ ventana?: Ventana; dirLuz?: 1 | -1 };
 }
 
 export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
@@ -136,7 +141,10 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
             caminarA((e.nativeEvent.pageX - origen.current.x) / k, (e.nativeEvent.pageY - origen.current.y) / k);
           }}
         >
-          <View pointerEvents="none">{fondo(k)}</View>
+          <View pointerEvents="none">
+            {fondo(k)}
+            {luz.interior && <AmbienteFondo k={k} ancho={diseno.ancho} alto={diseno.alto} muro={luz.muro ?? piso.yMin - 20} ventana={luz.ventana} dir={luz.dirLuz} />}
+          </View>
         </Pressable>
 
         {objetos.map((o) => (
@@ -149,7 +157,10 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
             }}
             style={{ position: "absolute", left: (o.x - o.ancho / 2) * k, top: (o.y - o.alto) * k, width: o.ancho * k, height: o.alto * k, zIndex: Math.round(o.y), alignItems: "center", justifyContent: "flex-end" }}
           >
-            {o.dibujo(k)}
+            <View>
+              {(o.sombra ?? o.y >= piso.yMin - 30) && <SombraContacto ancho={o.ancho * 0.85 * k} />}
+              {o.dibujo(k)}
+            </View>
             {o.letrero && (
               <View style={estilos.letrero}>
                 <Text style={[estilos.letreroTexto, { fontSize: Math.max(12, 17 * k) }]}>{o.letrero}</Text>
@@ -161,16 +172,20 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
         {extras?.(k)}
 
         <Animated.View pointerEvents="none" style={[coloca(tito, tiW, tiH, false), { zIndex: Math.round(profundidad) + 1 }]}>
+          <SombraContacto ancho={tiW * 0.9} />
           <View style={{ transform: [{ scaleX: -mira }] }}><TitoDibujo alto={tiH} caminando={caminando} /></View>
         </Animated.View>
         <Animated.View pointerEvents="none" style={[coloca(emilia, emW, emH, false), { zIndex: Math.round(profundidad) + 1 }]}>
+          <SombraContacto ancho={emW * 0.8} />
           <View style={{ transform: [{ scaleX: mira }] }}><EmiliaDibujo alto={emH} caminando={caminando} /></View>
         </Animated.View>
         <Animated.View pointerEvents="none" style={[coloca(pos, avW, avH, true), { zIndex: Math.round(profundidad) + 2 }]}>
+          <SombraContacto ancho={avW * 0.8} />
           <View style={{ transform: [{ scaleX: mira }] }}>
             <Avatar apariencia={perfil.apariencia} alto={avH} accesorios={{ cabeza: accesorioPuesto("cabeza"), cara: accesorioPuesto("cara"), cuello: accesorioPuesto("cuello"), mano: accesorioPuesto("mano") }} />
           </View>
         </Animated.View>
+        <VinetaEscena k={k} ancho={diseno.ancho} alto={diseno.alto} />
         <LuzDelDia k={k} ancho={diseno.ancho} alto={diseno.alto} interior={luz.interior ?? false} cielo={luz.cielo} suelo={luz.suelo} luces={luz.luces} />
       </View>
 

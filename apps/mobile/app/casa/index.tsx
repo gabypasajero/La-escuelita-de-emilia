@@ -38,7 +38,7 @@ export default function Casa() {
   const objetos: ObjetoEscena[] = [
     { id: "lavamanos", x: 120, y: 360, ancho: 170, alto: 220, etiqueta: "Lavamanos", letrero: "Lavarse las manos", dibujo: (k) => <Lavamanos k={k} />,
       alLlegar: ir("¡Vamos a lavarnos las manos!", "/casa/rutina?r=manos") },
-    { id: "cepillo", x: 280, y: 330, ancho: 100, alto: 140, etiqueta: "Cepillo de dientes", letrero: "Dientes", dibujo: (k) => <Repisa k={k} />,
+    { id: "cepillo", x: 280, y: 330, ancho: 100, alto: 140, etiqueta: "Cepillo de dientes", letrero: "Dientes", sombra: false, dibujo: (k) => <Repisa k={k} />,
       alLlegar: ir("¡A cepillarnos los dientes!", "/casa/rutina?r=dientes") },
     { id: "cama", x: 500, y: 470, ancho: 240, alto: 170, etiqueta: "Cama", letrero: "Hora de dormir", dibujo: (k) => <Cama k={k} />,
       alLlegar: () => {
@@ -66,7 +66,7 @@ export default function Casa() {
       piso={{ xMin: 40, xMax: 1060, yMin: 360, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#FFE0B2"
-      luz={{ interior: true, luces: [{ x: 530, y: 110, r: 90 }, { x: 935, y: 240, r: 70 }] }}
+      luz={{ interior: true, luces: [{ x: 530, y: 110, r: 90 }, { x: 935, y: 240, r: 70 }], muro: 300, ventana: { x: 470, y: 60, w: 120, h: 100 } }}
       extras={(k) => durmiendo ? <Zetas k={k} /> : null}
     />
   );

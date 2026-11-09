@@ -85,7 +85,7 @@ export default function Escuelita() {
       piso={{ xMin: 40, xMax: 1060, yMin: 420, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#FFF8E1"
-      luz={{ interior: true, luces: [{ x: 305, y: 140, r: 80 }] }}
+      luz={{ interior: true, luces: [{ x: 305, y: 140, r: 80 }], muro: 400, ventana: { x: 250, y: 90, w: 110, h: 100 } }}
     >
       <Pressable style={estilos.todos} onPress={() => setTodos(true)} accessibilityLabel="Todos los juegos">
         <Text style={estilos.todosTexto}>📋 Todos los juegos</Text>

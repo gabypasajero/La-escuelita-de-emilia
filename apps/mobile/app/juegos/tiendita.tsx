@@ -118,7 +118,7 @@ export default function Tiendita() {
       piso={{ xMin: 40, xMax: 1060, yMin: 400, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#FFE0B2"
-      luz={{ interior: true, luces: [{ x: 330, y: 170, r: 90 }, { x: 760, y: 170, r: 90 }] }}
+      luz={{ interior: true, luces: [{ x: 330, y: 170, r: 90 }, { x: 760, y: 170, r: 90 }], muro: 380, ventana: { x: 960, y: 120, w: 120, h: 110 }, dirLuz: -1 }}
       extras={(k) => (
         <>
         {/* El gato de Doña Rosa, arriba del primer estante */}

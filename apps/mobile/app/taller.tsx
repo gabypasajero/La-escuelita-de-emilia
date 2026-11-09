@@ -76,7 +76,7 @@ export default function Taller() {
       piso={{ xMin: 40, xMax: 1060, yMin: 440, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#F3E5F5"
-      luz={{ interior: true, luces: [{ x: 860, y: 76, r: 90 }] }}
+      luz={{ interior: true, luces: [{ x: 860, y: 76, r: 90 }], muro: 420, ventana: { x: 440, y: 60, w: 240, h: 150 } }}
     />
   );
 }
