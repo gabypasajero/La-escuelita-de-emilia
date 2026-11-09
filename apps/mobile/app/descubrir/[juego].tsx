@@ -11,7 +11,7 @@ export default function Descubrir() {
   switch (juego) {
     case "colores":
       return (
-        <Pantalla color="#E1F5FE">
+        <Pantalla color="#E1F5FE" fondo="aula">
           <Pregunta
             generar={(n) => rondaColor(n)}
             opcion={(c) => <View style={[estilos.mancha, { backgroundColor: c.hex }]} />}
@@ -21,7 +21,7 @@ export default function Descubrir() {
       );
     case "formas":
       return (
-        <Pantalla color="#F3E5F5">
+        <Pantalla color="#F3E5F5" fondo="aula">
           <Pregunta
             generar={(n) => rondaForma(n)}
             opcion={(f) => <FormaDibujo forma={f} />}
@@ -31,7 +31,7 @@ export default function Descubrir() {
       );
     case "mas-menos":
       return (
-        <Pantalla color="#E8F5E9">
+        <Pantalla color="#E8F5E9" fondo="aula">
           <Pregunta
             generar={(n) => rondaMasMenos(n)}
             opcion={(cantidad) => <Grupo n={cantidad} />}
@@ -41,7 +41,7 @@ export default function Descubrir() {
       );
     case "patrones":
       return (
-        <Pantalla color="#FFFDE7">
+        <Pantalla color="#FFFDE7" fondo="aula">
           <Pregunta
             generar={(n) => rondaPatron(n)}
             estimulo={(r) => (
@@ -57,7 +57,7 @@ export default function Descubrir() {
       );
     default:
       return (
-        <Pantalla color="#DCEDC8">
+        <Pantalla color="#DCEDC8" fondo="huerto">
           <Pregunta
             generar={(n) => rondaVerdura(n)}
             opcion={(v) => <Text style={estilos.verdura}>{v.emoji}</Text>}

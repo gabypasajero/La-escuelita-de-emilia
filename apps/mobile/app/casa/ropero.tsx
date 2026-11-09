@@ -6,7 +6,7 @@ import { Pregunta } from "../../components/Pregunta";
 /** Ropero: "¿Qué me pongo?" según el clima. */
 export default function Ropero() {
   return (
-    <Pantalla color="#E1F5FE">
+    <Pantalla color="#E1F5FE" fondo="pieza">
       <Pregunta
         generar={(n) => rondaRopa(n)}
         estimulo={(r) => <Text style={estilos.clima}>{r.clima.emoji}</Text>}

@@ -5,13 +5,16 @@ import { Redirect } from "expo-router";
 import { Monedas, useJuego } from "../lib/juego";
 import { COLORES } from "../lib/tema";
 import { BotonCasa } from "./BotonCasa";
+import { FondoJuego, type TemaFondo } from "./FondosJuego";
 
-export function Pantalla({ children, color = COLORES.fondo }: { children: ReactNode; color?: string }) {
+/** `fondo`: el lugar donde ocurre el juego, dibujado detrás (sigue la luz de la hora real). */
+export function Pantalla({ children, color = COLORES.fondo, fondo }: { children: ReactNode; color?: string; fondo?: TemaFondo }) {
   // Si se abrió una pantalla sin elegir jugador (por ejemplo, al recargar), primero se pregunta quién juega.
   const { cargado, jugadores, activoId } = useJuego();
   if (cargado && jugadores.length && !activoId) return <Redirect href="/quien-juega" />;
   return (
     <SafeAreaView style={[estilos.fondo, { backgroundColor: color }]}>
+      {fondo && <FondoJuego tema={fondo} />}
       <BotonCasa />
       <Monedas />
       <View style={estilos.contenido}>{children}</View>

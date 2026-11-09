@@ -23,7 +23,7 @@ export default function Letras() {
   }
 
   return (
-    <Pantalla color={COLORES.letras}>
+    <Pantalla color={COLORES.letras} fondo="aula">
       <Pressable style={estilos.modo} onPress={() => { setJugando((j) => !j); setElegida(null); }}>
         <Text style={estilos.modoTexto}>{jugando ? "📖 Conocer" : "🎮 Jugar"}</Text>
       </Pressable>

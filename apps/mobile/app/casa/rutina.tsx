@@ -47,7 +47,7 @@ export default function Rutina() {
   const restante = segundos === null ? total : Math.max(0, total - segundos);
 
   return (
-    <Pantalla color={rutina.id === "manos" ? "#B3E5FC" : "#C8E6C9"}>
+    <Pantalla color={rutina.id === "manos" ? "#B3E5FC" : "#C8E6C9"} fondo="bano">
       <Text style={estilos.titulo}>{rutina.titulo}</Text>
       <View style={estilos.fila}>
         <EmiliaDibujo alto={100} expresion={terminado ? "celebrando" : "feliz"} />

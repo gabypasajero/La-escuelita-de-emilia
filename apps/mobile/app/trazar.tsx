@@ -66,7 +66,7 @@ export default function Trazar() {
 
   if (!serie) {
     return (
-      <Pantalla color="#E3F2FD">
+      <Pantalla color="#E3F2FD" fondo="aula">
         <View style={estilos.fila}>
           <EmiliaDibujo alto={120} />
           <Globo texto="¿Qué quieres aprender a escribir?" alLado="izquierda" />
@@ -85,7 +85,7 @@ export default function Trazar() {
 
   const alto = Math.min(height - 300, 460);
   return (
-    <Pantalla color="#E3F2FD">
+    <Pantalla color="#E3F2FD" fondo="aula">
       <View style={estilos.cuerpo}>
         <View style={estilos.lado}>
           <Pressable onPress={() => void hablar(presentar(c!))} accessibilityLabel="Escuchar">

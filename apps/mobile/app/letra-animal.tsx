@@ -8,7 +8,7 @@ import { hablar } from "../lib/voz";
 /** "¿Qué animal empieza con mmm?": se ve y se escucha la letra, y se elige el animal. */
 export default function LetraAnimal() {
   return (
-    <Pantalla color={COLORES.animales}>
+    <Pantalla color={COLORES.animales} fondo="aula">
       <Pregunta
         generar={(nivel) => rondaAnimalPorLetra(nivel)}
         estimulo={(r) => (

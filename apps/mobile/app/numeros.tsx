@@ -33,7 +33,7 @@ export default function Numeros() {
   }
 
   return (
-    <Pantalla color={COLORES.numeros}>
+    <Pantalla color={COLORES.numeros} fondo="aula">
       <Pressable style={estilos.modo} onPress={() => setJugando((j) => !j)}>
         <Text style={estilos.modoTexto}>{jugando ? "📖 Conocer" : "🎮 Jugar"}</Text>
       </Pressable>

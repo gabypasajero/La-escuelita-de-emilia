@@ -71,7 +71,7 @@ export default function Memoria() {
 
   if (!tema) {
     return (
-      <Pantalla color={COLORES.juegos}>
+      <Pantalla color={COLORES.juegos} fondo="aula">
         <Globo texto={dicho} />
         <View style={estilos.temas}>
           {TEMAS_MEMORIA.map((t) => (
@@ -92,7 +92,7 @@ export default function Memoria() {
   const lado = Math.max(64, Math.min(130, (width - 64) / columnas - 12, (height - 260) / filas - 12));
 
   return (
-    <Pantalla color={COLORES.juegos}>
+    <Pantalla color={COLORES.juegos} fondo="aula">
       <View style={estilos.cabecera}>
         <Pressable style={estilos.cambiar} onPress={() => setTema(null)} accessibilityLabel="Cambiar tema">
           <Text style={estilos.cambiarTexto}>{TEMAS_MEMORIA.find((t) => t.id === tema)!.emoji} Cambiar</Text>

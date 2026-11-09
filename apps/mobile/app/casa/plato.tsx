@@ -8,7 +8,7 @@ import { Pregunta } from "../../components/Pregunta";
 /** Mesa de la abuela Nina: elegir lo que le hace mejor al cuerpo (sin culpas: los dulces son "de vez en cuando"). */
 export default function Plato() {
   return (
-    <Pantalla color="#FFF9C4">
+    <Pantalla color="#FFF9C4" fondo="cocina">
       <Pregunta
         generar={(n) => rondaSaludable(n)}
         estimulo={(r) => (

@@ -7,7 +7,7 @@ import { hablar } from "../lib/voz";
 /** Sumas con objetos: "¿Cuánto es 2 más 1?". Los grupos se ven separados y se pueden juntar contando. */
 export default function Sumas() {
   return (
-    <Pantalla color="#FFCC80">
+    <Pantalla color="#FFCC80" fondo="aula">
       <Pregunta
         generar={(nivel) => rondaSuma(nivel)}
         estimulo={(r) => (

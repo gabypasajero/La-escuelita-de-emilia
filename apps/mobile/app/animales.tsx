@@ -10,7 +10,7 @@ export default function Animales() {
   const [jugando, setJugando] = useState(false);
 
   return (
-    <Pantalla color={COLORES.animales}>
+    <Pantalla color={COLORES.animales} fondo="campo">
       <Pressable style={estilos.modo} onPress={() => setJugando((j) => !j)}>
         <Text style={estilos.modoTexto}>{jugando ? "📖 Conocer" : "🎮 Jugar"}</Text>
       </Pressable>
