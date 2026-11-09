@@ -36,7 +36,7 @@ export default function Numeros() {
   return (
     <Pantalla color={COLORES.numeros} fondo="aula">
       <Pressable style={estilos.modo} onPress={() => setJugando((j) => !j)}>
-        <Text style={estilos.modoTexto}>{jugando ? "📖 Conocer" : "🎮 Jugar"}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Icono e={jugando ? "📖" : "🎮"} tam={30} sinSombra /><Text style={estilos.modoTexto}>{jugando ? "Conocer" : "Jugar"}</Text></View>
       </Pressable>
       {jugando ? (
         <Pregunta

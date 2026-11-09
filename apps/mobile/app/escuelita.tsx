@@ -8,6 +8,7 @@ import { Adulto } from "../components/Personas";
 import { despuesDeHablar, hablar } from "../lib/voz";
 import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../lib/hora";
 import { useVozActiva } from "../lib/habla";
+import { Icono } from "../components/Iconos";
 
 /** Todos los juegos (también se abren desde el botón «Todos los juegos»). */
 const SALAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; frase: string }> = [
@@ -88,7 +89,7 @@ export default function Escuelita() {
       luz={{ interior: true, luces: [{ x: 305, y: 140, r: 80 }], muro: 400, ventana: { x: 250, y: 90, w: 110, h: 100 } }}
     >
       <Pressable style={estilos.todos} onPress={() => setTodos(true)} accessibilityLabel="Todos los juegos">
-        <Text style={estilos.todosTexto}>📋 Todos los juegos</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Icono e="📋" tam={28} sinSombra /><Text style={estilos.todosTexto}>Todos los juegos</Text></View>
       </Pressable>
       <Modal visible={todos} transparent animationType="fade" onRequestClose={() => setTodos(false)}>
         <View style={estilos.velo}>
@@ -97,7 +98,7 @@ export default function Escuelita() {
               {SALAS.map((s) => (
                 <Pressable key={s.nombre} accessibilityLabel={s.nombre} style={[estilos.puerta, { backgroundColor: s.color }]}
                   onPress={() => { setTodos(false); void hablar(s.frase); router.push(s.ruta); }}>
-                  <Text style={estilos.emoji}>{s.emoji}</Text>
+                  <Icono e={s.emoji} tam={70} sinSombra />
                   <Text style={estilos.nombre}>{s.nombre}</Text>
                 </Pressable>
               ))}

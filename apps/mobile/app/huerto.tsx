@@ -249,7 +249,7 @@ export default function Huerto() {
         <View style={[estilos.barra, estilos.barraContenido]}>
           {HERRAMIENTAS.map((h) => (
             <Pressable key={h.id} style={[estilos.herramienta, cerca === null && estilos.apagado]} onPress={() => usar(h.id)} accessibilityLabel={h.nombre}>
-              <Text style={estilos.herramientaEmoji}>{h.emoji}</Text>
+              <Icono e={h.emoji} tam={46} sinSombra />
               <Text style={estilos.semillaNombre}>{h.nombre}</Text>
             </Pressable>
           ))}

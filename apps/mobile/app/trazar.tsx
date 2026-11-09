@@ -75,7 +75,7 @@ export default function Trazar() {
         <View style={estilos.series}>
           {(Object.keys(SERIES) as Serie[]).map((s) => (
             <Pressable key={s} style={estilos.serie} onPress={() => { setSerie(s); setIndice(0); }} accessibilityLabel={SERIES[s].nombre}>
-              <Text style={estilos.serieEmoji}>{SERIES[s].emoji}</Text>
+              <Icono e={SERIES[s].emoji} tam={74} sinSombra />
               <Text style={estilos.serieNombre}>{SERIES[s].nombre}</Text>
             </Pressable>
           ))}

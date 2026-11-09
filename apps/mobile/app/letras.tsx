@@ -26,7 +26,7 @@ export default function Letras() {
   return (
     <Pantalla color={COLORES.letras} fondo="aula">
       <Pressable style={estilos.modo} onPress={() => { setJugando((j) => !j); setElegida(null); }}>
-        <Text style={estilos.modoTexto}>{jugando ? "📖 Conocer" : "🎮 Jugar"}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Icono e={jugando ? "📖" : "🎮"} tam={30} sinSombra /><Text style={estilos.modoTexto}>{jugando ? "Conocer" : "Jugar"}</Text></View>
       </Pressable>
       {jugando ? (
         <Pregunta
@@ -62,7 +62,7 @@ export default function Letras() {
             </Pressable>
           )}
           <Pressable style={[estilos.filtro, soloVocales && estilos.filtroActivo]} onPress={() => { setSoloVocales((v) => !v); void hablar(soloVocales ? "Todo el abecedario" : "Las vocales: a, e, i, o, u"); }} accessibilityLabel="Solo vocales">
-            <Text style={estilos.escribirTexto}>{soloVocales ? "🔤 Ver todas" : "🅰️ Solo vocales"}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Icono e={soloVocales ? "🔤" : "🅰️"} tam={22} sinSombra /><Text style={estilos.escribirTexto}>{soloVocales ? "Ver todas" : "Solo vocales"}</Text></View>
           </Pressable>
           <ScrollView contentContainerStyle={estilos.grilla}>
             {LETRAS.filter((l) => !soloVocales || l.esVocal).map((l) => (

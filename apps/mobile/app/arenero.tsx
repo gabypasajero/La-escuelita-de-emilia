@@ -110,10 +110,10 @@ export default function Arenero() {
 
       <View style={estilos.modos}>
         <Pressable style={[estilos.modo, modo === "tesoros" && estilos.modoActivo]} onPress={() => { setModo("tesoros"); decir("¡A buscar tesoros!"); }} accessibilityLabel="Buscar tesoros">
-          <Text style={estilos.botonTexto}>⛏️ Tesoros</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Icono e="⛏️" tam={26} sinSombra /><Text style={estilos.botonTexto}>Tesoros</Text></View>
         </Pressable>
         <Pressable style={[estilos.modo, modo === "castillo" && estilos.modoActivo]} onPress={() => { setModo("castillo"); decir("¡Hagamos un castillo de arena! Toca el balde para agregar torres."); }} accessibilityLabel="Hacer castillo">
-          <Text style={estilos.botonTexto}>🏰 Castillo</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Icono e="🏰" tam={26} sinSombra /><Text style={estilos.botonTexto}>Castillo</Text></View>
         </Pressable>
       </View>
     </Pantalla>

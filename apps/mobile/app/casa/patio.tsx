@@ -7,6 +7,7 @@ import { Pantalla } from "../../components/Pantalla";
 import { EmiliaDibujo, Globo, TitoDibujo, useSalto } from "../../components/Personajes";
 import { hablar } from "../../lib/voz";
 import { LuzDelDia } from "../../components/LuzDelDia";
+import { Icono } from "../../components/Iconos";
 import { SombraContacto, VinetaEscena } from "../../components/AmbienteInterior";
 
 /** Mundo del patio en unidades de 1100×700 (se recorta para llenar la pantalla, apoyado abajo). */
@@ -118,7 +119,7 @@ export default function Patio() {
 function Accion({ emoji, texto, alTocar }: { emoji: string; texto: string; alTocar: () => void }) {
   return (
     <Pressable style={estilos.accion} onPress={alTocar} accessibilityLabel={texto}>
-      <Text style={estilos.accionEmoji}>{emoji}</Text>
+      <Icono e={emoji} tam={58} sinSombra />
       <Text style={estilos.accionTexto}>{texto}</Text>
     </Pressable>
   );

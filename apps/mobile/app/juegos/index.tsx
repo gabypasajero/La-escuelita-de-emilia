@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../../components/Pantalla";
 import { COLORES } from "../../lib/tema";
 import { hablar } from "../../lib/voz";
+import { Icono } from "../../components/Iconos";
 
 const JUEGOS: Array<{ ruta: Href; nombre: string; emoji: string }> = [
   { ruta: "/juegos/tiendita", nombre: "La Tiendita", emoji: "🛒" },
@@ -23,7 +24,7 @@ export default function MenuJuegos() {
               router.push(j.ruta);
             }}
           >
-            <Text style={estilos.emoji}>{j.emoji}</Text>
+            <Icono e={j.emoji} tam={110} />
             <Text style={estilos.nombre}>{j.nombre}</Text>
           </Pressable>
         ))}

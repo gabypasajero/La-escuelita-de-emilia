@@ -96,7 +96,7 @@ export default function Memoria() {
     <Pantalla color={COLORES.juegos} fondo="aula">
       <View style={estilos.cabecera}>
         <Pressable style={estilos.cambiar} onPress={() => setTema(null)} accessibilityLabel="Cambiar tema">
-          <Text style={estilos.cambiarTexto}>{TEMAS_MEMORIA.find((t) => t.id === tema)!.emoji} Cambiar</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Icono e={TEMAS_MEMORIA.find((t) => t.id === tema)!.emoji} tam={28} sinSombra /><Text style={estilos.cambiarTexto}>Cambiar</Text></View>
         </Pressable>
         <View style={estilos.niveles}>
           {Array.from({ length: NIVELES_MEMORIA }, (_, k) => (

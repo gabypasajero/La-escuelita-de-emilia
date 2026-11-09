@@ -1,6 +1,6 @@
 import { ANIMALES, rondaSonidoAnimal } from "@escuelita/core";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { COLORES } from "../lib/tema";
@@ -13,7 +13,7 @@ export default function Animales() {
   return (
     <Pantalla color={COLORES.animales} fondo="campo">
       <Pressable style={estilos.modo} onPress={() => setJugando((j) => !j)}>
-        <Text style={estilos.modoTexto}>{jugando ? "📖 Conocer" : "🎮 Jugar"}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Icono e={jugando ? "📖" : "🎮"} tam={30} sinSombra /><Text style={estilos.modoTexto}>{jugando ? "Conocer" : "Jugar"}</Text></View>
       </Pressable>
       {jugando ? (
         <Pregunta
