@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../../components/Pantalla";
 import { Adulto } from "../../components/Personas";
 import { Pregunta } from "../../components/Pregunta";
+import { Icono } from "../../components/Iconos";
 
 /** Mesa de la abuela Nina: elegir lo que le hace mejor al cuerpo (sin culpas: los dulces son "de vez en cuando"). */
 export default function Plato() {
@@ -17,7 +18,7 @@ export default function Plato() {
             <Text style={estilos.plato}>🍽️</Text>
           </View>
         )}
-        opcion={(a) => <Text style={estilos.alimento}>{a.emoji}</Text>}
+        opcion={(a) => <Icono e={a.emoji} tam={84} />}
         alAcertar={(r) => `¡Muy bien, mi tesoro! ${r.correcta.nombre[0]!.toUpperCase()}${r.correcta.nombre.slice(1)} le da energía a tu cuerpo. Los dulces son solo de vez en cuando.`}
       />
     </Pantalla>

@@ -1,0 +1,258 @@
+import { memo, useId, type ReactNode } from "react";
+import { Text, View } from "react-native";
+import Svg, { Circle, Defs, Ellipse, G, Line, Mask, Path, Polygon, RadialGradient, Rect, Stop, Text as SvgText } from "react-native-svg";
+import { AnimalVivo, PROPORCION, type AnimalId } from "./AnimalesVivos";
+
+/**
+ * Los emojis del contenido de los juegos, dibujados: frutas, verduras,
+ * comida, animales, ropa, clima, cuidados, rutinas, colores, cuerpo,
+ * accesorios y tesoros. Cada dibujo (lienzo de 100×100) lleva volumen (luz
+ * arriba a la izquierda, sombra abajo a la derecha) y su sombra en el suelo.
+ * Los animales que ya existen articulados se muestran vivos.
+ * Si un emoji no tiene dibujo, se muestra el emoji tal cual.
+ */
+
+export const ANIMAL: Record<string, AnimalId> = {
+  "🐄": "vaca", "🐮": "vaca", "🐶": "perro", "🐱": "gato", "🐓": "gallina", "🐔": "gallina", "🐑": "oveja", "🐷": "cerdo",
+  "🐴": "caballo", "🦆": "pato", "🐰": "conejo", "🐸": "rana", "🦙": "llama", "🐻": "oso", "🦋": "mariposa", "🐦": "pajaro",
+};
+
+const limpio = (e: string) => e.replace(/️/g, "");
+
+/** ¿Hay dibujo para este emoji? */
+export const tieneDibujo = (e: string) => !!ANIMAL[limpio(e)] || !!DIBUJOS[limpio(e)];
+
+export const Icono = memo(function Icono({ e, tam, sinSombra = false, quieto = false }: { e: string; tam: number; sinSombra?: boolean; quieto?: boolean }) {
+  const k = limpio(e);
+  const u = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const animal = ANIMALES[k];
+  if (animal && !quieto) {
+    const p = PROPORCION[animal];
+    const alto = (tam * 0.98) / Math.max(1, p * 0.9);
+    return (
+      <View style={{ width: tam, height: tam, alignItems: "center", justifyContent: "flex-end" }} pointerEvents="none">
+        {!sinSombra && <View style={{ position: "absolute", bottom: tam * 0.04, width: tam * 0.7, height: tam * 0.1, borderRadius: tam, backgroundColor: "rgba(0,0,0,0.14)" }} />}
+        <AnimalVivo id={animal} alto={alto} />
+      </View>
+    );
+  }
+  const dibujo = DIBUJOS[k];
+  if (!dibujo) return <Text style={{ fontSize: tam * 0.82, lineHeight: tam, textAlign: "center", width: tam }}>{e}</Text>;
+  return (
+    <Svg width={tam} height={tam} viewBox="0 0 100 100" pointerEvents="none">
+      <Defs>
+        <RadialGradient id={`v${u}`} gradientUnits="userSpaceOnUse" cx="38" cy="32" r="62">
+          <Stop offset="0" stopColor="#fff" stopOpacity="0.5" />
+          <Stop offset="0.4" stopColor="#fff" stopOpacity="0" />
+          <Stop offset="0.75" stopColor="#000" stopOpacity="0.08" />
+          <Stop offset="1" stopColor="#000" stopOpacity="0.28" />
+        </RadialGradient>
+        <RadialGradient id={`s${u}`} cx="50%" cy="50%" r="50%">
+          <Stop offset="0" stopColor="#000" stopOpacity="0.26" />
+          <Stop offset="1" stopColor="#000" stopOpacity="0" />
+        </RadialGradient>
+        <Mask id={`m${u}`} x="0" y="0" width="100" height="100" maskUnits="userSpaceOnUse">{dibujo}</Mask>
+      </Defs>
+      {!sinSombra && <Ellipse cx="54" cy="92" rx="36" ry="6" fill={`url(#s${u})`} />}
+      {dibujo}
+      <Rect x="0" y="0" width="100" height="100" fill={`url(#v${u})`} mask={`url(#m${u})`} />
+    </Svg>
+  );
+});
+
+/** Un texto con emojis (por ejemplo "🍎🍎🍎" o "🥕2") con los emojis dibujados. */
+export function TextoIconos({ texto, tam, color = "#3B2F5C" }: { texto: string; tam: number; color?: string }) {
+  const partes = Array.from(texto.matchAll(/(\p{Extended_Pictographic}️?(?:‍\p{Extended_Pictographic}️?)*)|([^\p{Extended_Pictographic}]+)/gu));
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+      {partes.map((m, i) => m[1]
+        ? <Icono key={i} e={m[1]} tam={tam} sinSombra />
+        : <Text key={i} style={{ fontSize: tam * 0.7, fontWeight: "900", color }}>{m[2]}</Text>)}
+    </View>
+  );
+}
+
+// ---------- Piezas ----------
+
+const hoja = (x: number, y: number, rot: number, c = "#43A047", l = 16) => (
+  <G key={`h${x}${y}`} transform={`rotate(${rot} ${x} ${y})`}>
+    <Path d={`M${x} ${y} Q${x + l * 0.5} ${y - l * 0.55} ${x + l} ${y} Q${x + l * 0.5} ${y + l * 0.55} ${x} ${y} Z`} fill={c} />
+    <Line x1={x} y1={y} x2={x + l * 0.9} y2={y} stroke="#2E7D32" strokeWidth="1.2" />
+  </G>
+);
+const brillo = (x: number, y: number, rx = 6, ry = 4, rot = -30) => <Ellipse key={`b${x}${y}`} cx={x} cy={y} rx={rx} ry={ry} fill="#fff" opacity="0.55" transform={`rotate(${rot} ${x} ${y})`} />;
+const ojo = (x: number, y: number, r = 3.5) => (
+  <G key={`o${x}${y}`}><Circle cx={x} cy={y} r={r} fill="#2B2118" /><Circle cx={x - r * 0.35} cy={y - r * 0.35} r={r * 0.38} fill="#fff" /></G>
+);
+const estrella = (cx: number, cy: number, r: number, c: string) => {
+  const pts = Array.from({ length: 10 }, (_, i) => {
+    const a = (Math.PI / 5) * i - Math.PI / 2, rr = i % 2 ? r * 0.45 : r;
+    return `${(cx + Math.cos(a) * rr).toFixed(1)},${(cy + Math.sin(a) * rr).toFixed(1)}`;
+  }).join(" ");
+  return <Polygon points={pts} fill={c} strokeLinejoin="round" stroke={c} strokeWidth="3" />;
+};
+const circuloColor = (c: string, borde = "#00000022") => <G><Circle cx="50" cy="50" r="36" fill={c} stroke={borde} strokeWidth="2" />{brillo(38, 36, 10, 6)}</G>;
+const mano = (c = "#F1C7A5", rot = 0, x = 50, y = 54) => (
+  <G transform={`rotate(${rot} ${x} ${y})`}>
+    <Path d={`M${x - 18} ${y + 26} Q${x - 22} ${y} ${x - 20} ${y - 6} L${x - 20} ${y - 28} Q${x - 15} ${y - 33} ${x - 11} ${y - 28} L${x - 11} ${y - 10} L${x - 9} ${y - 36} Q${x - 4} ${y - 41} ${x} ${y - 36} L${x} ${y - 10} L${x + 2} ${y - 34} Q${x + 7} ${y - 39} ${x + 11} ${y - 34} L${x + 10} ${y - 8} L${x + 14} ${y - 26} Q${x + 19} ${y - 29} ${x + 21} ${y - 24} L${x + 18} ${y + 4} Q${x + 30} ${y - 8} ${x + 33} ${y - 2} Q${x + 30} ${y + 8} ${x + 18} ${y + 26} Z`} fill={c} stroke="#00000022" strokeWidth="1.5" />
+    <Path d={`M${x - 8} ${y + 8} Q${x} ${y + 12} ${x + 8} ${y + 8}`} stroke="#C98B6B" strokeWidth="1.5" fill="none" />
+  </G>
+);
+const gota = (x: number, y: number, s = 1, c = "#29B6F6") => (
+  <G key={`g${x}${y}`}>
+    <Path d={`M${x} ${y - 16 * s} Q${x + 12 * s} ${y} ${x + 9 * s} ${y + 6 * s} Q${x} ${y + 16 * s} ${x - 9 * s} ${y + 6 * s} Q${x - 12 * s} ${y} ${x} ${y - 16 * s} Z`} fill={c} />
+    {brillo(x - 3 * s, y + 2 * s, 2.5 * s, 4 * s, 10)}
+  </G>
+);
+const cara = (piel = "#F6D3B3") => <G><Circle cx="50" cy="50" r="36" fill={piel} stroke="#00000022" strokeWidth="1.5" /><Circle cx="32" cy="58" r="6" fill="#F48FB1" opacity="0.5" /><Circle cx="68" cy="58" r="6" fill="#F48FB1" opacity="0.5" /></G>;
+
+// ---------- Dibujos ----------
+
+export const D: Record<string, ReactNode> = {
+  // Frutas
+  "🍎": <G><Path d="M50 30 Q30 18 18 36 Q8 58 26 80 Q38 92 50 84 Q62 92 74 80 Q92 58 82 36 Q70 18 50 30 Z" fill="#E53935" /><Path d="M50 30 Q50 18 56 10" stroke="#6D4C41" strokeWidth="4" fill="none" strokeLinecap="round" />{hoja(55, 16, -20, "#66BB6A", 20)}{brillo(32, 42, 7, 10, 20)}</G>,
+  "🍓": <G><Path d="M50 88 Q20 66 22 40 Q30 26 50 30 Q70 26 78 40 Q80 66 50 88 Z" fill="#E53935" />{[[38, 44], [56, 42], [46, 56], [64, 56], [36, 62], [54, 70], [44, 76]].map(([x, y]) => <Ellipse key={`${x}${y}`} cx={x} cy={y} rx="1.6" ry="2.4" fill="#FFF59D" />)}<Path d="M30 32 L42 26 L50 16 L58 26 L70 32 L58 34 L50 30 L42 34 Z" fill="#43A047" />{brillo(34, 46, 5, 8, 20)}</G>,
+  "🍌": <G><Path d="M18 34 Q24 80 72 84 Q88 82 86 72 Q50 74 34 30 Q28 24 18 34 Z" fill="#FDD835" /><Path d="M34 30 Q50 72 86 72" stroke="#F9A825" strokeWidth="2.5" fill="none" /><Path d="M16 30 L24 24 L28 30" fill="#6D4C41" /><Circle cx="86" cy="76" r="3" fill="#6D4C41" /></G>,
+  "🍇": <G><Path d="M50 22 Q52 12 60 8" stroke="#6D4C41" strokeWidth="3.5" fill="none" />{hoja(52, 18, -30, "#66BB6A", 20)}{[[40, 34], [56, 34], [32, 48], [48, 48], [64, 48], [40, 62], [56, 62], [48, 76]].map(([x, y]) => <G key={`${x}${y}`}><Circle cx={x} cy={y} r="9.5" fill="#7B1FA2" /><Circle cx={x! - 3} cy={y! - 3} r="2.4" fill="#fff" opacity="0.45" /></G>)}</G>,
+  "🍐": <G><Path d="M50 22 Q38 24 38 42 Q22 56 26 74 Q34 92 50 90 Q66 92 74 74 Q78 56 62 42 Q62 24 50 22 Z" fill="#C0CA33" /><Path d="M50 22 Q50 12 55 8" stroke="#6D4C41" strokeWidth="3.5" fill="none" />{hoja(52, 14, -20, "#66BB6A", 16)}{brillo(38, 60, 6, 10, 10)}</G>,
+  "🍊": <G><Circle cx="50" cy="56" r="32" fill="#FB8C00" />{[[40, 46], [58, 50], [46, 66], [64, 64], [34, 60]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="1.3" fill="#E65100" opacity="0.6" />)}<Circle cx="50" cy="25" r="3" fill="#6D4C41" />{hoja(52, 24, -25, "#43A047", 18)}{brillo(38, 44, 7, 10, 20)}</G>,
+  "🍉": <G><Path d="M10 40 Q50 100 90 40 Z" fill="#43A047" /><Path d="M16 40 Q50 90 84 40 Z" fill="#E8F5E9" /><Path d="M20 40 Q50 84 80 40 Z" fill="#EF5350" />{[[38, 52], [50, 60], [62, 52], [44, 66], [56, 66]].map(([x, y]) => <Ellipse key={`${x}${y}`} cx={x} cy={y} rx="1.8" ry="3" fill="#212121" />)}</G>,
+  "🍍": <G>{[-30, -12, 0, 12, 30].map((r) => <Path key={r} d="M50 38 Q46 20 50 6 Q54 20 50 38 Z" fill="#43A047" transform={`rotate(${r} 50 38)`} />)}<Ellipse cx="50" cy="64" rx="24" ry="30" fill="#FBC02D" />{[46, 56, 66, 76].map((y) => <Path key={y} d={`M30 ${y} Q50 ${y + 8} 70 ${y}`} stroke="#E65100" strokeWidth="1.5" fill="none" opacity="0.6" />)}{[[40, 52], [56, 52], [48, 64], [64, 64], [40, 76], [56, 76]].map(([x, y]) => <Path key={`${x}${y}`} d={`M${x} ${y} l3 -3 3 3 -3 3 Z`} fill="#F57F17" />)}</G>,
+  "🥝": <G><Circle cx="50" cy="52" r="34" fill="#8D6E63" /><Circle cx="50" cy="52" r="29" fill="#8BC34A" /><Circle cx="50" cy="52" r="10" fill="#F1F8E9" />{Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2; return <Ellipse key={i} cx={50 + Math.cos(a) * 16} cy={52 + Math.sin(a) * 16} rx="1.4" ry="2.4" fill="#212121" transform={`rotate(${(a * 180) / Math.PI + 90} ${50 + Math.cos(a) * 16} ${52 + Math.sin(a) * 16})`} />; })}</G>,
+  "🍒": <G><Path d="M34 66 Q40 30 56 14 Q60 34 68 62" stroke="#558B2F" strokeWidth="3.5" fill="none" />{hoja(56, 14, -10, "#66BB6A", 22)}<Circle cx="32" cy="70" r="16" fill="#C62828" /><Circle cx="68" cy="68" r="16" fill="#D32F2F" />{brillo(26, 64, 4, 6)}{brillo(62, 62, 4, 6)}</G>,
+  "🍑": <G><Path d="M50 26 Q20 24 20 56 Q22 88 50 88 Q78 88 80 56 Q80 24 50 26 Z" fill="#FFAB91" /><Path d="M50 30 Q42 56 50 86" stroke="#F4511E" strokeWidth="2" fill="none" opacity="0.5" />{hoja(50, 26, -30, "#66BB6A", 20)}{brillo(34, 46, 7, 10, 20)}</G>,
+  "🥑": <G><Path d="M50 10 Q30 12 26 46 Q20 86 50 90 Q80 86 74 46 Q70 12 50 10 Z" fill="#33691E" /><Path d="M50 18 Q35 20 32 48 Q28 80 50 84 Q72 80 68 48 Q65 20 50 18 Z" fill="#C5E1A5" /><Circle cx="50" cy="60" r="14" fill="#8D6E63" />{brillo(45, 55, 4, 5)}</G>,
+  // Verduras
+  "🥕": <G><Path d="M30 30 Q28 26 34 24 Q60 30 72 40 Q78 46 72 50 Q50 70 22 86 Q16 86 18 80 Q24 54 30 30 Z" fill="#FB8C00" />{[[36, 40], [44, 50], [32, 60], [40, 68]].map(([x, y]) => <Path key={`${x}${y}`} d={`M${x} ${y} l8 -2`} stroke="#E65100" strokeWidth="2" strokeLinecap="round" />)}<Path d="M64 34 Q70 14 76 10 M68 38 Q80 24 90 22 M70 42 Q86 40 92 36" stroke="#43A047" strokeWidth="5" fill="none" strokeLinecap="round" /></G>,
+  "🥬": <G>{[[-28, "#558B2F", 0.85], [28, "#558B2F", 0.85], [-12, "#7CB342", 0.92], [12, "#7CB342", 0.92], [0, "#9CCC65", 1]].map(([r, c, f]) => <Path key={r as number} d={`M50 88 Q${50 - 28 * (f as number)} ${88 - 18 * (f as number)} ${50 - 24 * (f as number)} ${88 - 48 * (f as number)} Q${50 - 16 * (f as number)} ${88 - 74 * (f as number)} 50 ${88 - 76 * (f as number)} Q${50 + 16 * (f as number)} ${88 - 74 * (f as number)} ${50 + 24 * (f as number)} ${88 - 48 * (f as number)} Q${50 + 28 * (f as number)} ${88 - 18 * (f as number)} 50 88 Z`} fill={c as string} transform={`rotate(${r} 50 88)`} />)}<Path d="M50 86 V30 M50 60 L38 48 M50 50 L62 40" stroke="#E8F5E9" strokeWidth="2.5" fill="none" /></G>,
+  "🍅": <G><Circle cx="50" cy="56" r="32" fill="#E53935" /><Path d="M34 32 L44 30 L50 20 L56 30 L66 32 L58 36 L50 32 L42 36 Z" fill="#43A047" />{brillo(36, 46, 7, 10, 20)}</G>,
+  "🥔": <G><Path d="M22 52 Q20 28 46 26 Q76 22 82 46 Q88 74 58 80 Q24 86 22 52 Z" fill="#C8A165" />{[[38, 44], [62, 40], [56, 64], [36, 64], [70, 58]].map(([x, y]) => <Ellipse key={`${x}${y}`} cx={x} cy={y} rx="2.6" ry="1.6" fill="#8D6E63" />)}</G>,
+  "🌽": <G><Path d="M50 10 Q34 30 36 62 Q40 82 50 88 Q60 82 64 62 Q66 30 50 10 Z" fill="#FDD835" />{Array.from({ length: 16 }, (_, i) => <Circle key={i} cx={42 + (i % 3) * 8} cy={24 + Math.floor(i / 3) * 11} r="3.4" fill="#FBC02D" stroke="#F9A825" strokeWidth="0.8" />)}<Path d="M50 90 Q22 70 24 36 Q36 58 48 88 Z" fill="#7CB342" /><Path d="M50 90 Q78 70 76 36 Q64 58 52 88 Z" fill="#558B2F" /></G>,
+  "🎃": <G><Path d="M50 30 Q50 18 58 12" stroke="#558B2F" strokeWidth="5" fill="none" strokeLinecap="round" /><Ellipse cx="30" cy="58" rx="18" ry="28" fill="#EF6C00" /><Ellipse cx="70" cy="58" rx="18" ry="28" fill="#EF6C00" /><Ellipse cx="50" cy="58" rx="20" ry="30" fill="#FB8C00" /><Path d="M50 30 V88" stroke="#E65100" strokeWidth="1.5" opacity="0.5" /></G>,
+  "🫑": <G><Path d="M50 26 Q26 22 24 50 Q22 82 40 86 Q50 82 60 86 Q78 82 76 50 Q74 22 50 26 Z" fill="#43A047" /><Path d="M50 30 Q46 58 50 84" stroke="#2E7D32" strokeWidth="2" fill="none" /><Path d="M44 26 Q48 14 56 10 L58 14 Q52 18 54 26 Z" fill="#558B2F" />{brillo(34, 44, 5, 10, 10)}</G>,
+  "🧅": <G><Path d="M50 18 Q46 34 30 46 Q16 62 28 80 Q40 92 50 90 Q60 92 72 80 Q84 62 70 46 Q54 34 50 18 Z" fill="#CE93D8" /><Path d="M50 22 Q40 50 44 88 M50 22 Q60 50 56 88" stroke="#AB47BC" strokeWidth="1.5" fill="none" /><Path d="M50 18 Q48 8 52 4 M50 18 Q54 10 58 8" stroke="#8D6E63" strokeWidth="2" fill="none" /><Path d="M40 90 Q50 96 60 90" stroke="#8D6E63" strokeWidth="2" fill="none" /></G>,
+  "🫘": <G>{[[34, 48, -20], [62, 44, 20], [48, 66, 0], [72, 68, -30], [28, 70, 30]].map(([x, y, r]) => <G key={`${x}${y}`} transform={`rotate(${r} ${x} ${y})`}><Ellipse cx={x} cy={y} rx="14" ry="9" fill="#8D3B2B" /><Path d={`M${x! - 6} ${y! - 3} Q${x} ${y! + 1} ${x! + 6} ${y! - 3}`} stroke="#fff" strokeOpacity="0.4" strokeWidth="1.5" fill="none" /></G>)}</G>,
+  "🥦": <G><Path d="M42 88 L46 56 L54 56 L58 88 Z" fill="#9CCC65" />{[[34, 42, 15], [50, 32, 17], [66, 42, 15], [42, 52, 13], [60, 54, 13]].map(([x, y, r]) => <Circle key={`${x}${y}`} cx={x} cy={y} r={r} fill="#2E7D32" />)}{[[30, 36], [48, 26], [64, 36], [54, 44]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="4" fill="#43A047" />)}</G>,
+  "🥒": <G transform="rotate(-35 50 50)"><Rect x="20" y="36" width="60" height="28" rx="14" fill="#388E3C" />{[30, 42, 54, 66].map((x) => <Circle key={x} cx={x} cy={44 + (x % 3) * 4} r="1.6" fill="#C5E1A5" />)}<Rect x="22" y="38" width="54" height="5" rx="2.5" fill="#fff" opacity="0.3" /></G>,
+  "🌾": <G>{[-14, 0, 14].map((r) => <G key={r} transform={`rotate(${r} 50 90)`}><Line x1="50" y1="90" x2="50" y2="20" stroke="#C9A04A" strokeWidth="3" />{[24, 34, 44, 54].map((y) => <G key={y}><Ellipse cx="44" cy={y} rx="6" ry="3.5" fill="#F9C74F" transform={`rotate(-30 44 ${y})`} /><Ellipse cx="56" cy={y} rx="6" ry="3.5" fill="#F4B942" transform={`rotate(30 56 ${y})`} /></G>)}</G>)}</G>,
+  // Comida
+  "🍞": <G><Path d="M18 48 Q14 26 34 24 Q50 18 66 24 Q86 26 82 48 L80 84 Q50 90 20 84 Z" fill="#D7A86E" /><Path d="M24 50 Q22 34 36 32 Q50 28 64 32 Q78 34 76 50 L74 80 Q50 84 26 80 Z" fill="#FFE0B2" /></G>,
+  "🧀": <G><Path d="M12 70 L76 30 L90 44 L90 76 L12 76 Z" fill="#FFC107" /><Path d="M12 70 L76 30 L90 44 L26 76 Z" fill="#FFD54F" />{[[40, 64, 5], [62, 58, 4], [76, 66, 3.5], [54, 70, 3]].map(([x, y, r]) => <Circle key={`${x}${y}`} cx={x} cy={y} r={r} fill="#FFA000" />)}</G>,
+  "🥚": <G><Path d="M50 14 Q24 16 22 56 Q24 88 50 88 Q76 88 78 56 Q76 16 50 14 Z" fill="#FFF8E1" stroke="#E0D6C2" strokeWidth="2" />{brillo(38, 38, 6, 10, 15)}</G>,
+  "🥛": <G><Path d="M28 22 H72 L66 88 H34 Z" fill="#E3F2FD" stroke="#B0BEC5" strokeWidth="2" /><Path d="M30 36 H70 L66 86 H34 Z" fill="#fff" /><Path d="M34 24 L36 84" stroke="#fff" strokeWidth="3" opacity="0.7" /></G>,
+  "🥗": <G><Path d="M12 50 H88 Q86 84 50 86 Q14 84 12 50 Z" fill="#ECEFF1" stroke="#B0BEC5" strokeWidth="2" />{[[28, 44, "#7CB342"], [42, 38, "#9CCC65"], [58, 40, "#689F38"], [72, 44, "#8BC34A"]].map(([x, y, c]) => <Circle key={x as number} cx={x as number} cy={y as number} r="12" fill={c as string} />)}<Circle cx="40" cy="46" r="6" fill="#E53935" /><Circle cx="64" cy="48" r="5" fill="#FB8C00" /><Ellipse cx="52" cy="50" rx="6" ry="3" fill="#FFF59D" /></G>,
+  "🍭": <G><Rect x="47" y="50" width="6" height="42" rx="3" fill="#ECEFF1" /><Circle cx="50" cy="36" r="26" fill="#F06292" /><Path d="M50 36 m-20 0 a20 20 0 1 1 20 20 a14 14 0 1 1 -14 -14 a8 8 0 1 1 8 8" stroke="#FFF59D" strokeWidth="5" fill="none" /></G>,
+  "🍬": <G><Path d="M12 30 L30 44 L30 56 L12 70 Z" fill="#AB47BC" /><Path d="M88 30 L70 44 L70 56 L88 70 Z" fill="#AB47BC" /><Ellipse cx="50" cy="50" rx="24" ry="18" fill="#BA68C8" /><Path d="M36 40 L44 60 M52 36 L60 62" stroke="#fff" strokeWidth="4" opacity="0.6" /></G>,
+  "🍩": <G><Circle cx="50" cy="54" r="34" fill="#D7A86E" /><Path d="M18 50 Q24 22 50 20 Q78 22 82 50 Q76 58 68 52 Q60 62 50 54 Q40 62 32 52 Q24 58 18 50 Z" fill="#F48FB1" /><Circle cx="50" cy="48" r="11" fill="#fff" />{[[30, 38, "#FDD835"], [42, 28, "#4FC3F7"], [62, 30, "#81C784"], [70, 42, "#fff"], [36, 50, "#E53935"]].map(([x, y, c]) => <Rect key={x as number} x={x as number} y={y as number} width="6" height="2.4" rx="1.2" fill={c as string} transform={`rotate(${(x as number) * 3} ${x} ${y})`} />)}</G>,
+  "🥤": <G><Rect x="58" y="6" width="5" height="30" fill="#E53935" transform="rotate(14 60 20)" /><Path d="M26 28 H74 L68 90 H32 Z" fill="#EF5350" /><Rect x="24" y="24" width="52" height="8" rx="3" fill="#ECEFF1" /><Rect x="30" y="48" width="40" height="16" fill="#fff" opacity="0.85" /></G>,
+  "🍟": <G>{[30, 38, 46, 54, 62, 70].map((x, i) => <Rect key={x} x={x - 3} y={14 + (i % 3) * 6} width="7" height="44" rx="2" fill="#FFCA28" />)}<Path d="M22 40 H78 L70 90 H30 Z" fill="#E53935" /><Path d="M40 60 Q50 70 60 60" stroke="#FDD835" strokeWidth="4" fill="none" /></G>,
+  "🍦": <G><Path d="M32 46 L50 92 L68 46 Z" fill="#D7A86E" /><Path d="M36 52 L64 52 M40 62 L60 62 M44 72 L56 72" stroke="#A1887F" strokeWidth="1.5" /><Circle cx="50" cy="38" r="20" fill="#F8BBD0" /><Circle cx="38" cy="46" r="10" fill="#F8BBD0" /><Circle cx="62" cy="46" r="10" fill="#F8BBD0" /><Circle cx="50" cy="18" r="5" fill="#E53935" /></G>,
+  "🍪": <G><Circle cx="50" cy="52" r="34" fill="#C68B59" />{[[38, 40], [60, 38], [50, 56], [34, 62], [66, 62], [52, 74]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="4.5" fill="#4E342E" />)}</G>,
+  "🧇": <G><Rect x="16" y="20" width="68" height="64" rx="14" fill="#E0A64F" />{[30, 44, 58, 72].map((v) => <G key={v}><Line x1={v - 2} y1="24" x2={v - 2} y2="80" stroke="#B87A2A" strokeWidth="3" /><Line x1="20" y1={v - 6} x2="80" y2={v - 6} stroke="#B87A2A" strokeWidth="3" /></G>)}</G>,
+  "🎂": <G><Rect x="18" y="50" width="64" height="38" rx="6" fill="#F8BBD0" /><Path d="M18 56 Q26 64 34 56 Q42 64 50 56 Q58 64 66 56 Q74 64 82 56 V50 H18 Z" fill="#fff" />{[34, 50, 66].map((x) => <G key={x}><Rect x={x - 3} y="30" width="6" height="20" fill="#4FC3F7" /><Path d={`M${x} 18 Q${x + 5} 24 ${x} 28 Q${x - 5} 24 ${x} 18 Z`} fill="#FFB300" /></G>)}</G>,
+  "🍽️": <G><Circle cx="50" cy="52" r="30" fill="#fff" stroke="#CFD8DC" strokeWidth="3" /><Circle cx="50" cy="52" r="20" fill="none" stroke="#ECEFF1" strokeWidth="3" /><Path d="M12 26 V48 M8 26 V40 M16 26 V40 M12 48 V84" stroke="#90A4AE" strokeWidth="3" strokeLinecap="round" /><Path d="M88 26 Q80 40 88 52 V84" stroke="#90A4AE" strokeWidth="4" fill="none" strokeLinecap="round" /></G>,
+  // Animales nuevos
+  "🦁": <G>{Array.from({ length: 14 }, (_, i) => { const a = (i / 14) * Math.PI * 2; return <Circle key={i} cx={50 + Math.cos(a) * 30} cy={52 + Math.sin(a) * 30} r="12" fill="#E65100" />; })}<Circle cx="50" cy="52" r="26" fill="#FFB74D" />{ojo(40, 46)}{ojo(60, 46)}<Path d="M44 58 L56 58 L50 64 Z" fill="#5D4037" /><Path d="M50 64 Q44 70 40 66 M50 64 Q56 70 60 66" stroke="#5D4037" strokeWidth="2" fill="none" /></G>,
+  "🐘": <G><Ellipse cx="22" cy="46" rx="18" ry="22" fill="#90A4AE" /><Ellipse cx="78" cy="46" rx="18" ry="22" fill="#90A4AE" /><Circle cx="50" cy="44" r="26" fill="#B0BEC5" /><Path d="M44 56 Q42 76 50 86 Q56 90 60 84 Q52 76 56 56 Z" fill="#B0BEC5" />{ojo(40, 40)}{ojo(60, 40)}<Path d="M36 60 L30 70 M64 60 L70 70" stroke="#fff" strokeWidth="4" strokeLinecap="round" /></G>,
+  "🐒": <G><Circle cx="22" cy="44" r="10" fill="#8D6E63" /><Circle cx="78" cy="44" r="10" fill="#8D6E63" /><Circle cx="22" cy="44" r="5" fill="#FFCCBC" /><Circle cx="78" cy="44" r="5" fill="#FFCCBC" /><Circle cx="50" cy="48" r="30" fill="#8D6E63" /><Path d="M30 50 Q30 30 50 32 Q70 30 70 50 Q74 74 50 76 Q26 74 30 50 Z" fill="#FFCCBC" />{ojo(42, 46)}{ojo(58, 46)}<Path d="M42 64 Q50 70 58 64" stroke="#5D4037" strokeWidth="2.5" fill="none" strokeLinecap="round" /></G>,
+  "🐋": <G><Path d="M10 56 Q14 30 50 30 Q84 30 80 56 Q76 78 44 78 Q14 78 10 56 Z" fill="#42A5F5" /><Path d="M14 60 Q30 76 60 74 Q76 72 78 60 Q60 68 40 66 Q24 64 14 60 Z" fill="#E3F2FD" /><Path d="M78 52 Q90 40 96 44 Q92 54 96 64 Q88 66 78 58 Z" fill="#1E88E5" />{ojo(28, 50, 3)}<Path d="M44 30 Q40 18 46 12 M44 30 Q50 18 56 14" stroke="#81D4FA" strokeWidth="3" fill="none" strokeLinecap="round" /></G>,
+  "🦉": <G><Path d="M50 14 Q20 18 20 50 Q20 86 50 88 Q80 86 80 50 Q80 18 50 14 Z" fill="#8D6E63" /><Path d="M26 22 L34 32 L22 34 Z M74 22 L66 32 L78 34 Z" fill="#6D4C41" /><Ellipse cx="50" cy="66" rx="20" ry="18" fill="#D7CCC8" /><Circle cx="38" cy="42" r="12" fill="#fff" /><Circle cx="62" cy="42" r="12" fill="#fff" />{ojo(38, 42, 6)}{ojo(62, 42, 6)}<Path d="M46 52 L54 52 L50 60 Z" fill="#FFB300" /></G>,
+  "🐆": <G><Circle cx="26" cy="28" r="9" fill="#F9A825" /><Circle cx="74" cy="28" r="9" fill="#F9A825" /><Circle cx="50" cy="52" r="32" fill="#FBC02D" />{[[30, 40], [70, 40], [36, 66], [64, 66], [50, 30], [26, 56], [74, 56]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="4" fill="none" stroke="#5D4037" strokeWidth="2.4" />)}<Ellipse cx="50" cy="64" rx="14" ry="10" fill="#FFF8E1" />{ojo(40, 48)}{ojo(60, 48)}<Path d="M45 60 L55 60 L50 65 Z" fill="#5D4037" /></G>,
+  "🦜": <G><Path d="M60 60 Q70 86 56 94 Q54 76 48 64 Z" fill="#1E88E5" /><Ellipse cx="50" cy="52" rx="22" ry="30" fill="#E53935" /><Path d="M34 56 Q30 78 48 80 Q44 66 50 52 Z" fill="#FDD835" /><Path d="M38 62 Q34 82 52 84 Q48 70 52 58 Z" fill="#43A047" /><Circle cx="56" cy="34" r="8" fill="#fff" />{ojo(57, 34, 3)}<Path d="M64 38 Q78 40 74 54 Q70 46 62 46 Z" fill="#FFB300" /></G>,
+  "🦅": <G><Path d="M50 46 Q20 30 6 44 Q24 46 30 56 Q40 54 50 60 Q60 54 70 56 Q76 46 94 44 Q80 30 50 46 Z" fill="#4E342E" /><Ellipse cx="50" cy="62" rx="14" ry="20" fill="#3E2723" /><Circle cx="50" cy="36" r="12" fill="#fff" />{ojo(54, 34, 2.6)}<Path d="M58 38 Q68 40 62 48 Q60 42 56 42 Z" fill="#FFB300" /></G>,
+  "🦫": <G><Ellipse cx="50" cy="58" rx="32" ry="26" fill="#8D6E63" /><Circle cx="30" cy="36" r="7" fill="#6D4C41" /><Circle cx="70" cy="36" r="7" fill="#6D4C41" /><Ellipse cx="50" cy="66" rx="18" ry="12" fill="#A1887F" />{ojo(38, 50)}{ojo(62, 50)}<Ellipse cx="50" cy="60" rx="7" ry="5" fill="#3E2723" /></G>,
+  "🐧": <G><Ellipse cx="50" cy="54" rx="28" ry="36" fill="#263238" /><Ellipse cx="50" cy="60" rx="18" ry="28" fill="#fff" />{ojo(42, 38, 3)}{ojo(58, 38, 3)}<Path d="M44 46 L56 46 L50 54 Z" fill="#FFB300" /><Ellipse cx="38" cy="90" rx="9" ry="4" fill="#FFB300" /><Ellipse cx="62" cy="90" rx="9" ry="4" fill="#FFB300" /></G>,
+  "🐟": <G><Path d="M14 50 Q30 24 60 30 Q80 36 84 50 Q80 64 60 70 Q30 76 14 50 Z" fill="#29B6F6" /><Path d="M80 50 L96 34 L94 66 Z" fill="#0288D1" /><Path d="M40 30 Q50 20 60 30" fill="#0288D1" />{[44, 54, 64].map((x) => <Path key={x} d={`M${x} 40 Q${x + 4} 50 ${x} 60`} stroke="#0288D1" strokeWidth="1.5" fill="none" opacity="0.6" />)}{ojo(28, 46, 3.5)}</G>,
+  "🐝": <G><Ellipse cx="34" cy="34" rx="14" ry="10" fill="#E3F2FD" opacity="0.9" transform="rotate(-30 34 34)" /><Ellipse cx="62" cy="30" rx="14" ry="10" fill="#E3F2FD" opacity="0.9" transform="rotate(20 62 30)" /><Ellipse cx="50" cy="58" rx="28" ry="20" fill="#FDD835" />{[42, 54, 66].map((x) => <Rect key={x} x={x - 3} y="40" width="6" height="36" rx="3" fill="#3E2723" />)}<Circle cx="26" cy="56" r="10" fill="#3E2723" />{ojo(24, 54, 2.4)}</G>,
+  "🦒": <G><Path d="M42 90 L44 40 L56 40 L58 90 Z" fill="#FBC02D" /><Ellipse cx="50" cy="26" rx="18" ry="13" fill="#FBC02D" /><Line x1="44" y1="14" x2="42" y2="4" stroke="#8D6E63" strokeWidth="3" /><Line x1="56" y1="14" x2="58" y2="4" stroke="#8D6E63" strokeWidth="3" />{[[46, 52], [54, 62], [47, 74], [53, 84]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="3.6" fill="#A1673F" />)}{ojo(44, 24, 2.6)}{ojo(56, 24, 2.6)}<Ellipse cx="50" cy="34" rx="9" ry="5" fill="#FFE082" /></G>,
+  "🐨": <G><Circle cx="22" cy="38" r="16" fill="#90A4AE" /><Circle cx="78" cy="38" r="16" fill="#90A4AE" /><Circle cx="22" cy="38" r="8" fill="#ECEFF1" /><Circle cx="78" cy="38" r="8" fill="#ECEFF1" /><Circle cx="50" cy="54" r="28" fill="#B0BEC5" />{ojo(40, 50)}{ojo(60, 50)}<Ellipse cx="50" cy="62" rx="7" ry="9" fill="#37474F" /></G>,
+  "🐭": <G><Circle cx="26" cy="32" r="14" fill="#BDBDBD" /><Circle cx="74" cy="32" r="14" fill="#BDBDBD" /><Circle cx="26" cy="32" r="7" fill="#F8BBD0" /><Circle cx="74" cy="32" r="7" fill="#F8BBD0" /><Path d="M50 30 Q26 32 28 56 Q34 78 50 80 Q66 78 72 56 Q74 32 50 30 Z" fill="#E0E0E0" />{ojo(40, 52)}{ojo(60, 52)}<Circle cx="50" cy="68" r="4" fill="#F06292" /><Path d="M38 68 L22 64 M38 72 L22 74 M62 68 L78 64 M62 72 L78 74" stroke="#9E9E9E" strokeWidth="1.2" /></G>,
+  "🐢": <G><Ellipse cx="50" cy="56" rx="32" ry="22" fill="#558B2F" /><Path d="M28 56 L40 44 L60 44 L72 56 L60 68 L40 68 Z" fill="#7CB342" stroke="#33691E" strokeWidth="2" /><Circle cx="86" cy="54" r="10" fill="#9CCC65" />{ojo(89, 51, 2.2)}{[[28, 76], [66, 76], [26, 38], [66, 36]].map(([x, y]) => <Ellipse key={`${x}${y}`} cx={x} cy={y} rx="7" ry="5" fill="#9CCC65" />)}</G>,
+  "🦘": <G><Path d="M70 86 Q92 82 94 70" stroke="#A1673F" strokeWidth="8" fill="none" strokeLinecap="round" /><Ellipse cx="54" cy="62" rx="20" ry="26" fill="#A1673F" /><Ellipse cx="50" cy="70" rx="10" ry="12" fill="#D7A27A" /><Ellipse cx="46" cy="28" rx="13" ry="12" fill="#A1673F" /><Ellipse cx="40" cy="12" rx="4" ry="9" fill="#8D5524" /><Ellipse cx="52" cy="12" rx="4" ry="9" fill="#8D5524" />{ojo(42, 26, 2.6)}<Ellipse cx="44" cy="90" rx="14" ry="4" fill="#8D5524" /></G>,
+  "🐞": <G><Circle cx="50" cy="32" r="12" fill="#212121" /><Path d="M50 30 Q20 30 20 58 Q22 84 50 86 Q78 84 80 58 Q80 30 50 30 Z" fill="#E53935" /><Line x1="50" y1="32" x2="50" y2="86" stroke="#212121" strokeWidth="2.5" />{[[36, 50], [64, 50], [34, 68], [66, 68], [50, 44]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="5.5" fill="#212121" />)}<Path d="M44 22 Q40 12 34 12 M56 22 Q60 12 66 12" stroke="#212121" strokeWidth="2" fill="none" /></G>,
+  "🦀": <G><Path d="M14 40 Q8 26 20 22 L26 30 L18 34 Z" fill="#E53935" /><Path d="M86 40 Q92 26 80 22 L74 30 L82 34 Z" fill="#E53935" /><Path d="M22 36 L32 50 M78 36 L68 50" stroke="#E53935" strokeWidth="5" /><Ellipse cx="50" cy="60" rx="30" ry="20" fill="#EF5350" />{[30, 40, 60, 70].map((x) => <Path key={x} d={`M${x} 72 L${x + (x < 50 ? -8 : 8)} 84`} stroke="#E53935" strokeWidth="4" strokeLinecap="round" />)}<Line x1="42" y1="44" x2="40" y2="34" stroke="#E53935" strokeWidth="3" /><Line x1="58" y1="44" x2="60" y2="34" stroke="#E53935" strokeWidth="3" />{ojo(40, 32, 3.4)}{ojo(60, 32, 3.4)}</G>,
+  "🐚": <G><Path d="M50 86 Q16 80 14 50 Q14 26 50 18 Q86 26 86 50 Q84 80 50 86 Z" fill="#FFCCBC" />{[-36, -18, 0, 18, 36].map((r) => <Path key={r} d="M50 84 Q50 50 50 20" stroke="#FF8A65" strokeWidth="2" fill="none" transform={`rotate(${r} 50 84)`} />)}<Path d="M38 86 H62 L56 92 H44 Z" fill="#FFAB91" /></G>,
+  // Cosas
+  "⭐": estrella(50, 52, 38, "#FDD835"),
+  "🎈": <G><Path d="M50 74 Q46 84 52 90 Q56 96 50 100" stroke="#78909C" strokeWidth="1.5" fill="none" /><Ellipse cx="50" cy="40" rx="26" ry="32" fill="#E53935" /><Path d="M46 72 L54 72 L50 78 Z" fill="#C62828" />{brillo(38, 28, 6, 11, 20)}</G>,
+  "🌼": <G><Line x1="50" y1="60" x2="50" y2="96" stroke="#558B2F" strokeWidth="4" />{hoja(50, 80, -20, "#66BB6A", 18)}{Array.from({ length: 10 }, (_, i) => <Ellipse key={i} cx="50" cy="26" rx="7" ry="14" fill="#FFF176" transform={`rotate(${i * 36} 50 42)`} />)}<Circle cx="50" cy="42" r="10" fill="#FB8C00" /></G>,
+  "🌸": <G>{Array.from({ length: 5 }, (_, i) => <Ellipse key={i} cx="50" cy="28" rx="14" ry="18" fill="#F8BBD0" transform={`rotate(${i * 72} 50 50)`} />)}<Circle cx="50" cy="50" r="9" fill="#F06292" />{Array.from({ length: 5 }, (_, i) => <Circle key={`p${i}`} cx={50 + Math.cos((i * 72 * Math.PI) / 180) * 5} cy={50 + Math.sin((i * 72 * Math.PI) / 180) * 5} r="1.8" fill="#FFF59D" />)}</G>,
+  "🚗": <G><Path d="M10 62 Q10 50 22 48 L32 30 Q36 26 44 26 H62 Q68 26 72 32 L80 48 Q92 50 92 62 V70 H10 Z" fill="#E53935" /><Path d="M36 32 H48 V48 H28 Z M54 32 H64 L74 48 H54 Z" fill="#B3E5FC" /><Circle cx="28" cy="72" r="10" fill="#37474F" /><Circle cx="74" cy="72" r="10" fill="#37474F" /><Circle cx="28" cy="72" r="4" fill="#B0BEC5" /><Circle cx="74" cy="72" r="4" fill="#B0BEC5" /><Rect x="86" y="54" width="6" height="5" rx="2" fill="#FFF59D" /></G>,
+  "🏠": <G><Rect x="22" y="46" width="56" height="44" fill="#FDD835" /><Path d="M14 50 L50 18 L86 50 Z" fill="#E57373" /><Rect x="44" y="62" width="14" height="28" rx="6" fill="#8D6E63" /><Rect x="28" y="56" width="12" height="12" fill="#B3E5FC" stroke="#fff" strokeWidth="2" /><Rect x="62" y="56" width="12" height="12" fill="#B3E5FC" stroke="#fff" strokeWidth="2" /></G>,
+  "🛖": <G><Path d="M10 66 Q50 4 90 66 Z" fill="#C9A04A" />{[24, 36, 50].map((y) => <Path key={y} d={`M${30 - (y - 24) * 0.6} ${y + 12} Q50 ${y} ${70 + (y - 24) * 0.6} ${y + 12}`} stroke="#A07A2A" strokeWidth="2" fill="none" />)}<Rect x="18" y="64" width="64" height="26" fill="#A1887F" /><Path d="M42 90 V74 Q50 66 58 74 V90 Z" fill="#5D4037" /></G>,
+  "🎲": <G><Rect x="18" y="18" width="64" height="64" rx="14" fill="#fff" stroke="#CFD8DC" strokeWidth="2" />{[[34, 34], [66, 34], [50, 50], [34, 66], [66, 66]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="6" fill="#E53935" />)}</G>,
+  "☁️": <G><Path d="M22 74 Q6 74 10 58 Q14 44 30 48 Q32 26 52 28 Q68 20 78 38 Q94 40 92 56 Q92 74 76 74 Z" fill="#fff" stroke="#CFD8DC" strokeWidth="2" /></G>,
+  "☀️": <G>{Array.from({ length: 12 }, (_, i) => <Line key={i} x1={50 + Math.cos((i * Math.PI) / 6) * 32} y1={50 + Math.sin((i * Math.PI) / 6) * 32} x2={50 + Math.cos((i * Math.PI) / 6) * 44} y2={50 + Math.sin((i * Math.PI) / 6) * 44} stroke="#FFB300" strokeWidth="6" strokeLinecap="round" />)}<Circle cx="50" cy="50" r="24" fill="#FDD835" /></G>,
+  "🎶": <G><Path d="M34 74 V26 L76 16 V64" stroke="#5E35B1" strokeWidth="6" fill="none" strokeLinejoin="round" /><Ellipse cx="26" cy="76" rx="11" ry="8" fill="#5E35B1" transform="rotate(-20 26 76)" /><Ellipse cx="68" cy="66" rx="11" ry="8" fill="#5E35B1" transform="rotate(-20 68 66)" /><Path d="M34 36 L76 26" stroke="#5E35B1" strokeWidth="6" /></G>,
+  "🪀": <G><Path d="M50 8 V40" stroke="#8D6E63" strokeWidth="2" /><Circle cx="50" cy="58" r="30" fill="#1E88E5" /><Circle cx="50" cy="58" r="22" fill="#42A5F5" /><Circle cx="50" cy="58" r="6" fill="#0D47A1" /></G>,
+  "👟": <G><Path d="M10 62 Q12 44 26 42 L44 46 Q56 32 70 42 Q90 52 92 66 V74 H10 Z" fill="#1E88E5" /><Rect x="8" y="72" width="86" height="10" rx="5" fill="#fff" stroke="#CFD8DC" strokeWidth="2" />{[50, 58, 66].map((x) => <Line key={x} x1={x - 4} y1={46 + (x - 50) * 0.3} x2={x + 6} y2={42 + (x - 50) * 0.3} stroke="#fff" strokeWidth="2.5" />)}</G>,
+  "🎁": <G><Rect x="16" y="40" width="68" height="50" rx="4" fill="#E53935" /><Rect x="12" y="30" width="76" height="16" rx="4" fill="#EF5350" /><Rect x="44" y="30" width="12" height="60" fill="#FDD835" /><Path d="M50 30 Q34 10 28 22 Q30 32 50 30 Q70 32 72 22 Q66 10 50 30 Z" fill="#FDD835" /></G>,
+  "❤️": <Path d="M50 86 L16 50 A18 18 0 0 1 50 24 A18 18 0 0 1 84 50 Z" fill="#E53935" />,
+  "🌅": <G><Rect x="8" y="14" width="84" height="56" rx="8" fill="#FFCC80" /><Circle cx="50" cy="66" r="22" fill="#FB8C00" /><Path d="M8 66 H92 V86 Q92 90 88 90 H12 Q8 90 8 86 Z" fill="#4FC3F7" /><Path d="M20 76 H40 M56 80 H80" stroke="#fff" strokeWidth="2.5" /></G>,
+  "🌙": <Path d="M60 12 A38 38 0 1 0 88 66 A30 30 0 1 1 60 12 Z" fill="#FFF176" />,
+  "🦴": <G transform="rotate(-30 50 50)"><Rect x="26" y="42" width="48" height="16" rx="6" fill="#FFF8E1" />{[[24, 40], [24, 60], [76, 40], [76, 60]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="11" fill="#FFF8E1" />)}<Rect x="26" y="44" width="48" height="12" fill="#FFF8E1" /></G>,
+  "💎": <G><Path d="M22 36 L36 18 H64 L78 36 L50 86 Z" fill="#4FC3F7" /><Path d="M22 36 H78 L50 86 Z" fill="#29B6F6" /><Path d="M36 18 L44 36 L50 18 L56 36 L64 18" stroke="#E1F5FE" strokeWidth="2" fill="none" /><Path d="M44 36 L50 86 L56 36" stroke="#0288D1" strokeWidth="1.5" fill="none" /></G>,
+  "🪙": <G><Circle cx="50" cy="52" r="34" fill="#FBC02D" stroke="#F9A825" strokeWidth="4" /><Circle cx="50" cy="52" r="24" fill="none" stroke="#F57F17" strokeWidth="2" opacity="0.6" />{estrella(50, 52, 14, "#FFE082")}</G>,
+  "🔑": <G transform="rotate(-35 50 50)"><Circle cx="28" cy="50" r="16" fill="#FBC02D" /><Circle cx="28" cy="50" r="6" fill="#FFF8E1" /><Rect x="40" y="46" width="46" height="8" fill="#FBC02D" /><Rect x="72" y="54" width="6" height="10" fill="#FBC02D" /><Rect x="82" y="54" width="6" height="14" fill="#FBC02D" /></G>,
+  "⛰️": <G><Path d="M6 88 Q20 50 40 40 Q56 30 70 46 Q86 62 94 88 Z" fill="#D7B07A" /><Path d="M30 50 Q40 44 48 46" stroke="#fff" strokeWidth="3" opacity="0.5" fill="none" />{[[30, 72], [54, 64], [72, 76], [44, 82]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="2" fill="#A1887F" />)}</G>,
+  "🚩": <G><Rect x="26" y="10" width="6" height="84" rx="3" fill="#8D6E63" /><Path d="M32 14 Q50 8 60 16 Q72 24 86 18 V50 Q72 56 60 48 Q50 40 32 46 Z" fill="#E53935" /></G>,
+  "🪣": <G><Path d="M26 20 Q50 0 74 20" stroke="#90A4AE" strokeWidth="3" fill="none" /><Path d="M20 28 H80 L72 90 H28 Z" fill="#E53935" /><Ellipse cx="50" cy="28" rx="30" ry="6" fill="#B71C1C" /><Path d="M24 40 H76" stroke="#fff" strokeWidth="3" opacity="0.5" /></G>,
+  // Ropa y clima
+  "☂️": <G><Path d="M8 52 Q10 14 50 12 Q90 14 92 52 Q84 46 78 52 Q70 46 64 52 Q57 46 50 52 Q43 46 36 52 Q30 46 22 52 Q16 46 8 52 Z" fill="#8E24AA" /><Path d="M50 12 Q36 30 36 52 M50 12 Q64 30 64 52" stroke="#6A1B9A" strokeWidth="2" fill="none" /><Path d="M50 52 V84 Q50 92 42 90" stroke="#5D4037" strokeWidth="4" fill="none" strokeLinecap="round" /></G>,
+  "🧢": <G><Path d="M18 64 Q16 26 50 24 Q84 26 82 64 Z" fill="#1E88E5" /><Path d="M50 24 V64 M34 30 Q30 46 32 64 M66 30 Q70 46 68 64" stroke="#1565C0" strokeWidth="1.5" fill="none" /><Path d="M14 64 H92 Q96 74 82 76 H14 Q8 70 14 64 Z" fill="#1565C0" /><Circle cx="50" cy="24" r="4" fill="#1565C0" /></G>,
+  "🧣": <G><Path d="M16 30 Q50 44 84 30 L84 46 Q50 60 16 46 Z" fill="#E53935" /><Path d="M58 50 L70 90 L54 92 L46 54 Z" fill="#E53935" />{[22, 34, 46, 58, 70, 80].map((x) => <Line key={x} x1={x} y1="32" x2={x} y2="50" stroke="#FDD835" strokeWidth="3" opacity="0.8" />)}<Path d="M54 92 V98 M60 91 V97 M66 90 V96" stroke="#E53935" strokeWidth="2" /></G>,
+  "🧤": <G><Path d="M30 86 L28 50 Q26 34 36 30 L38 52 L40 22 Q46 16 50 22 L50 50 L54 24 Q60 18 64 24 L62 52 L70 40 Q80 38 78 50 L70 72 L70 86 Z" fill="#FB8C00" /><Rect x="26" y="78" width="46" height="14" rx="4" fill="#FFCC80" /></G>,
+  "🩱": <G><Path d="M34 10 L40 10 Q50 30 60 10 L66 10 L70 40 Q78 70 70 90 Q60 82 50 84 Q40 82 30 90 Q22 70 30 40 Z" fill="#00ACC1" />{[30, 50, 70].map((y) => <Path key={y} d={`M30 ${y} Q50 ${y + 8} 70 ${y}`} stroke="#E0F7FA" strokeWidth="3" fill="none" opacity="0.7" />)}</G>,
+  "🌧️": <G><Path d="M22 56 Q6 56 10 42 Q14 30 28 34 Q30 14 50 16 Q66 10 76 26 Q92 28 90 42 Q90 56 74 56 Z" fill="#90A4AE" />{[[30, 70], [50, 78], [70, 70], [40, 90], [62, 92]].map(([x, y]) => gota(x!, y!, 0.45))}</G>,
+  "🌬️": <G><Path d="M10 36 H60 Q74 36 74 24 Q74 14 64 14 Q56 14 56 22" stroke="#4FC3F7" strokeWidth="6" fill="none" strokeLinecap="round" /><Path d="M10 54 H80 Q92 54 92 66 Q92 76 82 76 Q74 76 74 68" stroke="#81D4FA" strokeWidth="6" fill="none" strokeLinecap="round" /><Path d="M16 72 H50" stroke="#B3E5FC" strokeWidth="6" strokeLinecap="round" /></G>,
+  "❄️": <G>{[0, 60, 120].map((r) => <G key={r} transform={`rotate(${r} 50 50)`}><Line x1="50" y1="10" x2="50" y2="90" stroke="#4FC3F7" strokeWidth="6" strokeLinecap="round" /><Path d="M40 18 L50 28 L60 18 M40 82 L50 72 L60 82" stroke="#4FC3F7" strokeWidth="5" fill="none" strokeLinecap="round" /></G>)}</G>,
+  "🏖️": <G><Path d="M6 76 Q50 64 94 76 V92 H6 Z" fill="#FFE0B2" /><Path d="M6 70 Q50 60 94 70 V78 Q50 66 6 78 Z" fill="#4FC3F7" /><Line x1="48" y1="20" x2="56" y2="84" stroke="#8D6E63" strokeWidth="3" /><Path d="M14 34 Q50 4 86 34 Z" fill="#E53935" /><Path d="M38 26 Q50 14 62 26 L50 34 Z" fill="#fff" /><Circle cx="80" cy="16" r="8" fill="#FDD835" /></G>,
+  // Veterinaria y rutinas
+  "🩹": <G transform="rotate(-35 50 50)"><Rect x="10" y="36" width="80" height="28" rx="14" fill="#FFCC80" /><Rect x="36" y="38" width="28" height="24" rx="4" fill="#FFE0B2" />{[[42, 44], [50, 44], [58, 44], [42, 56], [50, 56], [58, 56]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="1.4" fill="#E0A060" />)}</G>,
+  "🛁": <G><Path d="M10 46 H90 V58 Q88 82 60 84 H40 Q12 82 10 58 Z" fill="#fff" stroke="#B0BEC5" strokeWidth="2.5" /><Path d="M22 40 Q22 18 40 18 Q48 18 50 26" stroke="#90A4AE" strokeWidth="4" fill="none" />{[[30, 40], [44, 36], [58, 40], [72, 38], [38, 30], [64, 30]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="7" fill="#E1F5FE" stroke="#B3E5FC" strokeWidth="1.5" />)}<Path d="M28 84 L24 92 M72 84 L76 92" stroke="#B0BEC5" strokeWidth="4" strokeLinecap="round" /></G>,
+  "💧": gota(50, 52, 2.2),
+  "🩺": <G><Path d="M30 14 V40 Q30 62 50 62 Q70 62 70 40 V14" stroke="#455A64" strokeWidth="5" fill="none" strokeLinecap="round" /><Path d="M50 62 V74 Q50 88 66 88 Q78 88 78 76" stroke="#455A64" strokeWidth="5" fill="none" /><Circle cx="78" cy="70" r="11" fill="#90A4AE" /><Circle cx="78" cy="70" r="5" fill="#ECEFF1" /><Circle cx="30" cy="12" r="4" fill="#263238" /><Circle cx="70" cy="12" r="4" fill="#263238" /></G>,
+  "💉": <G transform="rotate(-40 50 50)"><Rect x="28" y="40" width="44" height="20" rx="3" fill="#E3F2FD" stroke="#90A4AE" strokeWidth="2" /><Rect x="30" y="42" width="24" height="16" fill="#4FC3F7" opacity="0.7" /><Rect x="72" y="46" width="10" height="8" fill="#90A4AE" /><Line x1="82" y1="50" x2="96" y2="50" stroke="#78909C" strokeWidth="2" /><Rect x="16" y="46" width="12" height="8" fill="#90A4AE" /><Rect x="10" y="38" width="6" height="24" rx="2" fill="#78909C" /></G>,
+  "🛏️": <G><Rect x="8" y="30" width="10" height="56" rx="3" fill="#8D6E63" /><Rect x="82" y="50" width="10" height="36" rx="3" fill="#8D6E63" /><Rect x="14" y="56" width="74" height="22" rx="4" fill="#fff" /><Ellipse cx="30" cy="54" rx="13" ry="8" fill="#FFF9C4" /><Rect x="42" y="50" width="46" height="24" rx="6" fill="#7E57C2" /></G>,
+  "🧼": <G><Rect x="16" y="40" width="68" height="42" rx="18" fill="#F48FB1" /><Rect x="26" y="50" width="48" height="8" rx="4" fill="#fff" opacity="0.5" />{[[30, 30, 8], [48, 22, 10], [66, 30, 7], [78, 18, 5]].map(([x, y, r]) => <Circle key={`${x}${y}`} cx={x} cy={y} r={r} fill="#E1F5FE" stroke="#81D4FA" strokeWidth="1.5" />)}</G>,
+  "🧽": <G><Rect x="14" y="30" width="72" height="44" rx="8" fill="#FDD835" /><Rect x="14" y="58" width="72" height="16" rx="6" fill="#43A047" />{[[28, 42], [46, 38], [64, 44], [38, 50], [74, 38]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="3" fill="#F9A825" />)}</G>,
+  "👐": <G>{mano("#F1C7A5", -18, 32, 56)}{mano("#F1C7A5", 18, 68, 56)}</G>,
+  "🤚": mano("#F1C7A5", 0),
+  "🖐️": mano("#F1C7A5", 10),
+  "💅": <G>{mano("#F1C7A5", 0)}{[[31, 26], [41, 18], [52, 20], [64, 30]].map(([x, y]) => <Ellipse key={`${x}${y}`} cx={x} cy={y} rx="3.4" ry="4.4" fill="#EC407A" />)}</G>,
+  "🚿": <G><Path d="M80 10 V30 Q80 36 74 36 H52" stroke="#90A4AE" strokeWidth="6" fill="none" /><Path d="M30 40 Q30 28 52 28 Q74 28 74 40 Z" fill="#B0BEC5" />{[[36, 54], [46, 60], [56, 56], [66, 62], [42, 74], [58, 78], [50, 90]].map(([x, y]) => gota(x!, y!, 0.38))}</G>,
+  "🧻": <G><Path d="M20 30 Q20 18 40 18 H70 Q86 18 86 34 V70 Q86 86 70 86 H40" fill="#fff" stroke="#CFD8DC" strokeWidth="2" /><Ellipse cx="34" cy="52" rx="18" ry="34" fill="#F5F5F5" stroke="#CFD8DC" strokeWidth="2" /><Ellipse cx="34" cy="52" rx="7" ry="13" fill="#BCAAA4" /><Path d="M40 86 H34 V96 H56 V86" fill="#fff" stroke="#CFD8DC" strokeWidth="2" /></G>,
+  "⬆️": <G><Rect x="10" y="10" width="80" height="80" rx="16" fill="#26A69A" /><Path d="M50 22 L76 50 H60 V78 H40 V50 H24 Z" fill="#fff" /></G>,
+  "⬇️": <G><Rect x="10" y="10" width="80" height="80" rx="16" fill="#26A69A" /><Path d="M50 78 L76 50 H60 V22 H40 V50 H24 Z" fill="#fff" /></G>,
+  "😁": <G>{cara("#FDD835")}<Path d="M30 40 Q36 34 42 40 M58 40 Q64 34 70 40" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" /><Path d="M26 54 Q50 84 74 54 Z" fill="#fff" stroke="#5D4037" strokeWidth="2.5" /><Path d="M30 58 H70" stroke="#CFD8DC" strokeWidth="1.5" /></G>,
+  "🦷": <G><Path d="M22 30 Q20 12 36 14 Q44 16 50 20 Q56 16 64 14 Q80 12 78 30 Q76 48 70 60 Q66 88 58 86 Q54 70 50 66 Q46 70 42 86 Q34 88 30 60 Q24 48 22 30 Z" fill="#fff" stroke="#CFD8DC" strokeWidth="2.5" />{brillo(34, 28, 5, 8, 10)}</G>,
+  "👅": <G><Path d="M18 34 Q50 46 82 34 Q84 56 74 74 Q62 92 50 90 Q38 92 26 74 Q16 56 18 34 Z" fill="#F06292" /><Path d="M50 44 V78" stroke="#D81B60" strokeWidth="2" /></G>,
+  // Colores
+  "🔴": circuloColor("#E53935"), "🔵": circuloColor("#1E88E5"), "🟡": circuloColor("#FDD835"), "🟢": circuloColor("#43A047"),
+  "🟠": circuloColor("#FB8C00"), "🟣": circuloColor("#8E24AA"), "⚫": circuloColor("#263238"), "⚪": circuloColor("#FAFAFA", "#CFD8DC"),
+  // Cuerpo, saludos y acciones (inglés)
+  "👃": <G><Path d="M50 10 Q40 40 30 64 Q26 78 40 80 Q46 84 50 80 Q54 84 60 80 Q74 78 70 64 Q60 40 50 10 Z" fill="#F1C7A5" stroke="#00000022" strokeWidth="1.5" /><Ellipse cx="42" cy="74" rx="4" ry="3" fill="#C98B6B" /><Ellipse cx="58" cy="74" rx="4" ry="3" fill="#C98B6B" /></G>,
+  "👀": <G>{[30, 70].map((x) => <G key={x}><Ellipse cx={x} cy="50" rx="18" ry="24" fill="#fff" stroke="#90A4AE" strokeWidth="2" /><Circle cx={x + 4} cy="54" r="10" fill="#5D4037" /><Circle cx={x + 4} cy="54" r="5" fill="#212121" /><Circle cx={x + 1} cy="50" r="3" fill="#fff" /></G>)}</G>,
+  "👂": <G><Path d="M58 14 Q84 16 84 44 Q84 62 70 70 Q62 76 62 86 Q60 96 48 94 Q36 92 38 78" stroke="#00000022" strokeWidth="1.5" fill="#F1C7A5" /><Path d="M58 14 Q32 16 32 46 Q32 60 40 66" fill="#F1C7A5" /><Path d="M58 30 Q72 32 70 48 Q66 58 56 56" stroke="#C98B6B" strokeWidth="4" fill="none" strokeLinecap="round" /></G>,
+  "👄": <G><Path d="M12 50 Q30 28 50 38 Q70 28 88 50 Q70 78 50 78 Q30 78 12 50 Z" fill="#E53935" /><Path d="M14 50 Q50 58 86 50" stroke="#B71C1C" strokeWidth="3" fill="none" />{brillo(36, 64, 8, 3, 0)}</G>,
+  "🙌": <G>{mano("#F1C7A5", -12, 30, 52)}{mano("#F1C7A5", 12, 70, 52)}<Path d="M12 18 L18 26 M50 8 V18 M88 18 L82 26" stroke="#FDD835" strokeWidth="3" strokeLinecap="round" /></G>,
+  "🦶": <G><Path d="M34 22 Q30 50 26 66 Q22 88 46 90 Q70 92 72 72 Q74 54 62 40 Q56 24 46 20 Q38 18 34 22 Z" fill="#F1C7A5" stroke="#00000022" strokeWidth="1.5" />{[[34, 14, 7], [46, 10, 6], [56, 12, 5], [64, 18, 4.5], [70, 26, 4]].map(([x, y, r]) => <Circle key={`${x}${y}`} cx={x} cy={y} r={r} fill="#F1C7A5" stroke="#00000022" strokeWidth="1.2" />)}</G>,
+  "👏": <G>{mano("#F1C7A5", -28, 40, 56)}{mano("#E8B996", 22, 60, 52)}<Path d="M18 20 L24 28 M50 6 V16 M82 20 L76 28" stroke="#FDD835" strokeWidth="3" strokeLinecap="round" /></G>,
+  "👋": <G>{mano("#F1C7A5", -20)}<Path d="M82 26 Q88 34 84 44 M88 18 Q98 32 92 48" stroke="#90A4AE" strokeWidth="3" fill="none" strokeLinecap="round" /></G>,
+  "💃": <G><Circle cx="50" cy="20" r="10" fill="#F1C7A5" /><Path d="M42 16 Q50 4 60 14 L62 26 Q56 18 46 22 Z" fill="#3E2723" /><Path d="M40 34 Q50 30 60 34 L66 50 Q50 46 34 50 Z" fill="#E53935" /><Path d="M34 50 Q50 46 66 50 L84 82 Q50 92 16 82 Z" fill="#E53935" /><Path d="M60 36 L82 22 M40 36 L22 50" stroke="#F1C7A5" strokeWidth="5" strokeLinecap="round" /></G>,
+  "😴": <G>{cara("#FDD835")}<Path d="M30 46 Q36 50 42 46 M58 46 Q64 50 70 46" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" /><Ellipse cx="50" cy="66" rx="6" ry="4" fill="#5D4037" /><SvgText x="72" y="26" fontSize="18" fontWeight="bold" fill="#3949AB">Z</SvgText><SvgText x="84" y="12" fontSize="12" fontWeight="bold" fill="#3949AB">z</SvgText></G>,
+  "🏃": <G><Circle cx="58" cy="16" r="10" fill="#F1C7A5" /><Path d="M54 28 L44 56" stroke="#1E88E5" strokeWidth="12" strokeLinecap="round" /><Path d="M44 56 L30 72 L18 70 M44 56 L60 70 L60 88" stroke="#3949AB" strokeWidth="8" fill="none" strokeLinecap="round" strokeLinejoin="round" /><Path d="M52 34 L70 44 L80 36 M50 36 L34 40 L26 52" stroke="#F1C7A5" strokeWidth="6" fill="none" strokeLinecap="round" /></G>,
+  // Accesorios de la tienda
+  "🎀": <G><Path d="M50 50 L14 26 Q8 50 14 74 Z" fill="#EC407A" /><Path d="M50 50 L86 26 Q92 50 86 74 Z" fill="#EC407A" /><Path d="M46 54 L36 92 L46 86 Z M54 54 L64 92 L54 86 Z" fill="#D81B60" /><Circle cx="50" cy="50" r="10" fill="#F06292" /></G>,
+  "🎩": <G><Ellipse cx="50" cy="76" rx="42" ry="10" fill="#263238" /><Rect x="26" y="20" width="48" height="56" rx="4" fill="#37474F" /><Ellipse cx="50" cy="20" rx="24" ry="5" fill="#455A64" /><Rect x="26" y="58" width="48" height="10" fill="#E53935" /></G>,
+  "👑": <G><Path d="M14 76 L10 30 L32 50 L50 20 L68 50 L90 30 L86 76 Z" fill="#FDD835" stroke="#F9A825" strokeWidth="3" strokeLinejoin="round" /><Rect x="14" y="72" width="72" height="12" rx="3" fill="#FBC02D" />{[[30, 78, "#E53935"], [50, 78, "#1E88E5"], [70, 78, "#43A047"]].map(([x, y, c]) => <Circle key={x as number} cx={x as number} cy={y as number} r="4" fill={c as string} />)}<Circle cx="10" cy="28" r="4" fill="#FFF59D" /><Circle cx="50" cy="18" r="4" fill="#FFF59D" /><Circle cx="90" cy="28" r="4" fill="#FFF59D" /></G>,
+  "👓": <G>{[28, 72].map((x) => <Circle key={x} cx={x} cy="54" r="18" fill="#E1F5FE" fillOpacity="0.6" stroke="#5D4037" strokeWidth="5" />)}<Path d="M46 52 Q50 46 54 52" stroke="#5D4037" strokeWidth="4" fill="none" /><Path d="M10 50 L4 40 M90 50 L96 40" stroke="#5D4037" strokeWidth="4" strokeLinecap="round" /></G>,
+  "🕶️": <G>{[28, 72].map((x) => <Path key={x} d={`M${x - 20} 42 H${x + 20} Q${x + 20} 70 ${x} 70 Q${x - 20} 70 ${x - 20} 42 Z`} fill="#263238" />)}<Path d="M48 44 H52" stroke="#263238" strokeWidth="4" /><Path d="M8 42 L2 34 M92 42 L98 34" stroke="#263238" strokeWidth="4" strokeLinecap="round" />{brillo(20, 52, 6, 3, -20)}{brillo(64, 52, 6, 3, -20)}</G>,
+  "🏅": <G><Path d="M30 8 L44 44 L56 44 L70 8 L58 8 L50 30 L42 8 Z" fill="#1E88E5" /><Circle cx="50" cy="64" r="24" fill="#FBC02D" stroke="#F9A825" strokeWidth="4" />{estrella(50, 64, 12, "#FFE082")}</G>,
+  "🧸": <G><Circle cx="28" cy="24" r="10" fill="#A1673F" /><Circle cx="72" cy="24" r="10" fill="#A1673F" /><Circle cx="50" cy="36" r="22" fill="#A1673F" /><Ellipse cx="50" cy="74" rx="26" ry="22" fill="#A1673F" /><Ellipse cx="50" cy="44" rx="10" ry="7" fill="#D7A27A" /><Ellipse cx="50" cy="78" rx="14" ry="12" fill="#D7A27A" />{ojo(42, 32, 3)}{ojo(58, 32, 3)}<Circle cx="50" cy="41" r="3" fill="#3E2723" /><Circle cx="26" cy="64" r="9" fill="#A1673F" /><Circle cx="74" cy="64" r="9" fill="#A1673F" /></G>,
+  "🪄": <G><Rect x="20" y="46" width="66" height="9" rx="4" fill="#263238" transform="rotate(-40 50 50)" /><Rect x="68" y="18" width="14" height="9" rx="3" fill="#fff" transform="rotate(-40 75 22)" />{estrella(76, 20, 12, "#FDD835")}<Circle cx="56" cy="14" r="3" fill="#FFF59D" /><Circle cx="90" cy="40" r="3" fill="#FFF59D" /></G>,
+};
+
+/** Las claves sin el selector de emoji (U+FE0F), para encontrar "☀️" igual que "☀". */
+const DIBUJOS: Record<string, ReactNode> = Object.fromEntries(Object.entries(D).map(([k, v]) => [limpio(k), v]));
+const ANIMALES: Record<string, AnimalId> = Object.fromEntries(Object.entries(ANIMAL).map(([k, v]) => [limpio(k), v]));

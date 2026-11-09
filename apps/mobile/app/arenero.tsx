@@ -6,6 +6,7 @@ import { Pantalla } from "../components/Pantalla";
 import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
 import { DESBLOQUEOS, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 const TESOROS = [
   { emoji: "🐚", nombre: "una concha" },
@@ -80,11 +81,11 @@ export default function Arenero() {
 
       {modo === "tesoros" ? (
         <>
-          <Text style={estilos.contador}>{"💎".repeat(encontrados)}{"▫️".repeat(total - encontrados)}</Text>
+          <View style={{ flexDirection: "row", marginVertical: 6 }}>{Array.from({ length: total }, (_, i) => <View key={i} style={i < encontrados ? undefined : { opacity: 0.25 }}><Icono e="💎" tam={34} sinSombra /></View>)}</View>
           <View style={estilos.grilla}>
             {montones.map((m, i) => (
               <Pressable key={i} onPress={() => escarbar(i)} style={[estilos.monton, m.abierto && estilos.hoyo]} accessibilityLabel={`Montón ${i + 1}`}>
-                <Text style={estilos.montonEmoji}>{m.abierto ? (m.tesoro ? m.tesoro.emoji : "·") : "⛰️"}</Text>
+                {m.abierto && !m.tesoro ? <Text style={estilos.montonEmoji}>·</Text> : <Icono e={m.abierto ? m.tesoro!.emoji : "⛰️"} tam={62} sinSombra />}
               </Pressable>
             ))}
           </View>

@@ -6,6 +6,7 @@ import { Pantalla } from "../../../components/Pantalla";
 import { Globo } from "../../../components/Personajes";
 import { amigoPorId, explicacion, TEMAS_AMIGO } from "../../../lib/amigos";
 import { hablar, hablarYEsperar } from "../../../lib/voz";
+import { Icono } from "../../../components/Iconos";
 
 /** Cada juego se explica en español solo la primera vez (por amigo). */
 const explicados = new Set<string>();
@@ -49,7 +50,7 @@ export default function CasaDeAmigo() {
             style={[estilos.puerta, { backgroundColor: t.color }, entrando === t.tema && estilos.apretada]}
             onPress={() => void entrar(t.tema)}
           >
-            <Text style={estilos.emoji}>{t.emoji}</Text>
+            <Icono e={t.emoji} tam={70} sinSombra />
             <Text style={estilos.nombre}>{amigo.juegos[t.tema].nombre}</Text>
           </Pressable>
         ))}

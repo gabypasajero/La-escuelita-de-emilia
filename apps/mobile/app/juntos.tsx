@@ -8,6 +8,7 @@ import { BotonCasa } from "../components/BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Personajes";
 import { ACCESORIOS, useJuego, type Jugador } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 const META = 10;
 
@@ -190,7 +191,7 @@ function Partida({ equipo, alSalir }: { equipo: Jugador[]; alSalir: () => void }
         {ronda.opciones.map((a) => (
           <Pressable key={a.id} accessibilityLabel={a.nombre} onPress={() => void responder(a)}
             style={[estilos.opcion, errores >= 2 && a === ronda.correcta && estilos.pista]}>
-            <Text style={estilos.opcionEmoji}>{a.emoji}</Text>
+            <Icono e={a.emoji} tam={84} />
           </Pressable>
         ))}
       </View>

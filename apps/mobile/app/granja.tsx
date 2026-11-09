@@ -8,6 +8,7 @@ import { EscenaRPG, type ObjetoEscena } from "../components/EscenaRPG";
 import { useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 import { useVozActiva } from "../lib/habla";
+import { Icono } from "../components/Iconos";
 
 /**
  * Granja de Don Pedro para recorrer: los animales pasean por su corral; al
@@ -87,10 +88,10 @@ export default function Granja() {
     >
       {cerca && (
         <View style={estilos.barra}>
-          <Text style={estilos.pregunta}>{cerca.emoji} ¿Qué come?</Text>
+          <View style={[estilos.pregunta, { flexDirection: "row", alignItems: "center", gap: 6 }]}><Icono e={cerca.emoji} tam={44} sinSombra /><Text style={{ fontSize: 24, fontWeight: "900", color: "#3B2F5C" }}>¿Qué come?</Text></View>
           {COMIDAS.map((c) => (
             <Pressable key={c.id} style={estilos.comida} onPress={() => dar(c)} accessibilityLabel={`Darle ${c.nombre}`}>
-              <Text style={estilos.comidaEmoji}>{c.emoji}</Text>
+              <Icono e={c.emoji} tam={52} />
               <Text style={estilos.comidaNombre}>{c.nombre}</Text>
             </Pressable>
           ))}

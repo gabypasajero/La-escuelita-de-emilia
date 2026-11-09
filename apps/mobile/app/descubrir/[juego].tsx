@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Path, Polygon, Rect } from "react-native-svg";
 import { Pantalla } from "../../components/Pantalla";
 import { Pregunta } from "../../components/Pregunta";
+import { Icono } from "../../components/Iconos";
 
 /** Juegos de descubrir de la Escuelita: colores, formas, más y menos, patrones y verduras. */
 export default function Descubrir() {
@@ -46,11 +47,11 @@ export default function Descubrir() {
             generar={(n) => rondaPatron(n)}
             estimulo={(r) => (
               <View style={estilos.secuencia}>
-                {r.secuencia.map((f, i) => <Text key={i} style={estilos.ficha}>{f}</Text>)}
+                {r.secuencia.map((f, i) => <Icono key={i} e={f} tam={58} sinSombra />)}
                 <Text style={[estilos.ficha, estilos.hueco]}>❔</Text>
               </View>
             )}
-            opcion={(f) => <Text style={estilos.ficha}>{f}</Text>}
+            opcion={(f) => <Icono e={f} tam={64} sinSombra />}
             alAcertar={() => "¡Sí! Descubriste el patrón."}
           />
         </Pantalla>
@@ -60,7 +61,7 @@ export default function Descubrir() {
         <Pantalla color="#DCEDC8" fondo="huerto">
           <Pregunta
             generar={(n) => rondaVerdura(n)}
-            opcion={(v) => <Text style={estilos.verdura}>{v.emoji}</Text>}
+            opcion={(v) => <Icono e={v.emoji} tam={86} />}
             alAcertar={(r) => `¡Sí! ${r.correcta.dato}`}
           />
         </Pantalla>
@@ -69,7 +70,7 @@ export default function Descubrir() {
 }
 
 function Grupo({ n }: { n: number }) {
-  return <View style={estilos.grupo}>{Array.from({ length: n }, (_, k) => <Text key={k} style={estilos.objeto}>🍎</Text>)}</View>;
+  return <View style={estilos.grupo}>{Array.from({ length: n }, (_, k) => <Icono key={k} e="🍎" tam={40} sinSombra />)}</View>;
 }
 
 const COLOR_FORMA = { circulo: "#E53935", cuadrado: "#1E88E5", triangulo: "#43A047", estrella: "#FDD835", corazon: "#F06292", rectangulo: "#FB8C00" };

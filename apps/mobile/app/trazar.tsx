@@ -7,6 +7,7 @@ import { EmiliaDibujo, Globo } from "../components/Personajes";
 import { Trazado } from "../components/Trazado";
 import { useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 type Serie = "vocales" | "abecedario" | "numeros";
 const SERIES: Record<Serie, { nombre: string; emoji: string; caracteres: string[] }> = {
@@ -92,7 +93,7 @@ export default function Trazar() {
             <Text style={estilos.modelo}>{c}</Text>
             <Text style={estilos.escuchar}>🔊 Escuchar</Text>
           </Pressable>
-          {!/\d/.test(c!) && <Text style={estilos.ejemplo}>{LETRAS.find((l) => l.letra === c!.toUpperCase())!.emoji}</Text>}
+          {!/\d/.test(c!) && <Icono e={LETRAS.find((l) => l.letra === c!.toUpperCase())!.emoji} tam={84} />}
           {/\d/.test(c!) && <Text style={estilos.cantidad}>{"⭐".repeat(Number(c))}</Text>}
         </View>
         <Trazado key={`${c}-${intento}`} caracter={c!} alto={alto} alCompletar={() => void completado()} />

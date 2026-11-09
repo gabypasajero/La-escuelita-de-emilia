@@ -6,6 +6,7 @@ import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 const OBJETO_POR_NUMERO = ["", "⭐", "🍎", "🎈", "🐟", "🌼", "🐞", "🍓", "🚗", "🦋", "🍪"];
 const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -58,9 +59,9 @@ export default function Numeros() {
                 <Text style={estilos.numeroGrande}>{n.valor}</Text>
                 <View style={estilos.objetos}>
                   {Array.from({ length: n.valor }, (_, k) => (
-                    <Text key={k} style={[estilos.objeto, activo && k >= contando!.hasta && estilos.apagado]}>
-                      {OBJETO_POR_NUMERO[n.valor]}
-                    </Text>
+                    <View key={k} style={activo && k >= contando!.hasta ? estilos.apagado : undefined}>
+                      <Icono e={OBJETO_POR_NUMERO[n.valor]!} tam={26} sinSombra quieto />
+                    </View>
                   ))}
                 </View>
                 {n.valor < 10 && (
@@ -95,7 +96,7 @@ function ObjetosContables({ objeto, cantidad }: { objeto: string; cantidad: numb
               void hablar(NUMEROS[nuevos.length]!.palabra);
             }}
           >
-            <Text style={[estilos.contable, orden >= 0 && estilos.contado]}>{objeto}</Text>
+            <View style={orden >= 0 ? estilos.contado : undefined}><Icono e={objeto} tam={74} /></View>
             {orden >= 0 && <Text style={estilos.marca}>{orden + 1}</Text>}
           </Pressable>
         );

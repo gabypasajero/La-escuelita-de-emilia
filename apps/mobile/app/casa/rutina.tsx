@@ -7,6 +7,7 @@ import { Pantalla } from "../../components/Pantalla";
 import { EmiliaDibujo, Globo } from "../../components/Personajes";
 import { useJuego } from "../../lib/juego";
 import { hablar } from "../../lib/voz";
+import { Icono } from "../../components/Iconos";
 
 /**
  * Modo acompañante: Emilia guía la rutina real (manos o dientes) paso a paso,
@@ -75,7 +76,7 @@ export default function Rutina() {
       <View style={estilos.pasos}>
         {rutina.pasos.map((p, i) => (
           <View key={i} style={[estilos.burbuja, (paso !== null && i < paso) || terminado ? estilos.hecha : null, i === paso && estilos.ahora]}>
-            <Text style={estilos.burbujaEmoji}>{p.emoji}</Text>
+            <Icono e={p.emoji} tam={34} sinSombra />
           </View>
         ))}
       </View>

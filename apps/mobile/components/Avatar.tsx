@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
 import { CONTORNO, Sombreado, useSombreado } from "./Articulados";
+import { Icono } from "./Iconos";
 import type { Accesorio, Apariencia } from "../lib/juego";
 import { TitoDibujo } from "./Personajes";
 
@@ -108,10 +109,10 @@ export function Avatar({ apariencia: a, alto = 160, accesorios = {} }: Props) {
         <Path d="M42 58 Q50 65 58 58" stroke="#3B2F5C" strokeWidth="2.5" strokeLinecap="round" fill="#fff" />
       </Svg>
       {/* Accesorios (emoji) sobre el dibujo */}
-      {accesorios.cabeza && <Text style={[estilos.acc, { fontSize: 38 * k, top: -14 * k, left: 28 * k }]}>{accesorios.cabeza.emoji}</Text>}
-      {accesorios.cara && <Text style={[estilos.acc, { fontSize: 30 * k, top: 30 * k, left: 33 * k }]}>{accesorios.cara.emoji}</Text>}
-      {accesorios.cuello && <Text style={[estilos.acc, { fontSize: 24 * k, top: 68 * k, left: 38 * k }]}>{accesorios.cuello.emoji}</Text>}
-      {accesorios.mano && <Text style={[estilos.acc, { fontSize: 30 * k, top: 86 * k, left: 70 * k }]}>{accesorios.mano.emoji}</Text>}
+      {accesorios.cabeza && <View style={[estilos.acc, { top: -18 * k, left: 22 * k }]}><Icono e={accesorios.cabeza.emoji} tam={56 * k} sinSombra quieto /></View>}
+      {accesorios.cara && <View style={[estilos.acc, { top: 26 * k, left: 26 * k }]}><Icono e={accesorios.cara.emoji} tam={48 * k} sinSombra quieto /></View>}
+      {accesorios.cuello && <View style={[estilos.acc, { top: 62 * k, left: 32 * k }]}><Icono e={accesorios.cuello.emoji} tam={36 * k} sinSombra quieto /></View>}
+      {accesorios.mano && <View style={[estilos.acc, { top: 78 * k, left: 66 * k }]}><Icono e={accesorios.mano.emoji} tam={44 * k} sinSombra quieto /></View>}
     </View>
   );
 }
@@ -122,7 +123,7 @@ export function TitoVestido({ alto = 70, accesorio, caminando = false }: { alto?
   return (
     <View>
       <TitoDibujo alto={alto} caminando={caminando} />
-      {accesorio && <Text style={[estilos.acc, { fontSize: 22 * k, top: -8 * k, left: 12 * k }]}>{accesorio.emoji}</Text>}
+      {accesorio && <View style={[estilos.acc, { top: -12 * k, left: 8 * k }]}><Icono e={accesorio.emoji} tam={34 * k} sinSombra quieto /></View>}
     </View>
   );
 }

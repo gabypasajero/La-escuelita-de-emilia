@@ -12,6 +12,7 @@ import { DESBLOQUEOS, useJuego } from "../lib/juego";
 import { LuzDelDia } from "../components/LuzDelDia";
 import { CIELO_VENTANA, useMomento } from "../lib/hora";
 import { AmbienteFondo, SombraContacto, VinetaEscena } from "../components/AmbienteInterior";
+import { Icono } from "../components/Iconos";
 
 /** Cada paciente (por su emoji en los datos) como animal vivo. */
 const PACIENTE: Record<string, AnimalId> = { "🐶": "perro", "🐱": "gato", "🐰": "conejo", "🐦": "pajaro", "🐄": "vaca", "🐷": "cerdo", "🐻": "oso" };
@@ -45,7 +46,7 @@ export default function Veterinaria() {
             </View>
           </View>
         )}
-        opcion={(c) => <Text style={estilos.cuidado}>{c.emoji}</Text>}
+        opcion={(c) => <Icono e={c.emoji} tam={74} />}
         alAcertar={(r) => `¡Muy bien! ${r.paciente.gracias}`}
       />
     </Pantalla>

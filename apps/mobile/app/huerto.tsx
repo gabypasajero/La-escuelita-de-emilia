@@ -12,6 +12,7 @@ import { hablar } from "../lib/voz";
 import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
 import { SombraContacto, VinetaPantalla } from "../components/AmbienteInterior";
 import { useVozActiva } from "../lib/habla";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 /**
  * Huerto de Don Pedro como escena para caminar (igual que el barrio): el niño
@@ -232,14 +233,14 @@ export default function Huerto() {
       <Monedas />
       {/* Canasta de la cosecha */}
       <View style={estilos.canasta} pointerEvents="none">
-        <Text style={estilos.canastaTexto}>🧺 {Object.entries(canasta).map(([id, n]) => `${VERDURAS.find((v) => v.id === id)!.emoji}${n}`).join(" ") || "vacía"}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}><Text style={estilos.canastaTexto}>🧺 </Text>{Object.keys(canasta).length ? <TextoIconos texto={Object.entries(canasta).map(([id, n]) => `${VERDURAS.find((v) => v.id === id)!.emoji}${n} `).join("")} tam={30} /> : <Text style={estilos.canastaTexto}>vacía</Text>}</View>
       </View>
 
       {eligiendoSemilla ? (
         <ScrollView horizontal style={estilos.barra} contentContainerStyle={estilos.barraContenido}>
           {VERDURAS.map((v) => (
             <Pressable key={v.id} style={estilos.semilla} onPress={() => sembrar(v)} accessibilityLabel={`Semilla de ${v.nombre}`}>
-              <Text style={estilos.semillaEmoji}>{v.emoji}</Text>
+              <Icono e={v.emoji} tam={46} sinSombra />
               <Text style={estilos.semillaNombre}>{v.nombre}</Text>
             </Pressable>
           ))}
@@ -267,7 +268,7 @@ function PlantaDe({ parcela: p, k }: { parcela: Parcela; k: number }) {
       <View style={estilos.planta}>
         {p.etapa === "hoyo" && <View style={{ width: 50 * k, height: 20 * k, borderRadius: 25 * k, backgroundColor: "#3E2723" }} />}
         {p.etapa !== "hoyo" && p.etapa !== "lista" && <Etapa etapa={p.etapa} k={k} />}
-        {p.etapa === "lista" && p.verdura && <Text style={{ ...centro, fontSize: 62 * k }}>✨{p.verdura.emoji}✨</Text>}
+        {p.etapa === "lista" && p.verdura && <Icono e={p.verdura.emoji} tam={80 * k} />}
       </View>
     </View>
   );

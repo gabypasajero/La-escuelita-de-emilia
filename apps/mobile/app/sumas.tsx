@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { hablar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 /** Sumas con objetos: "¿Cuánto es 2 más 1?". Los grupos se ven separados y se pueden juntar contando. */
 export default function Sumas() {
@@ -34,7 +35,7 @@ export default function Sumas() {
 function Grupo({ objeto, n }: { objeto: string; n: number }) {
   return (
     <View style={estilos.grupo}>
-      <View style={estilos.objetos}>{Array.from({ length: n }, (_, k) => <Text key={k} style={estilos.objeto}>{objeto}</Text>)}</View>
+      <View style={estilos.objetos}>{Array.from({ length: n }, (_, k) => <Icono key={k} e={objeto} tam={50} sinSombra />)}</View>
       <Text style={estilos.cuenta}>{n}</Text>
     </View>
   );

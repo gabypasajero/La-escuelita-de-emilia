@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../../../components/Pantalla";
 import { Pregunta } from "../../../components/Pregunta";
 import { amigoPorId, TEMAS_AMIGO } from "../../../lib/amigos";
+import { Icono } from "../../../components/Iconos";
 
 /** Juegos de "escucha y toca" con un amigo: habla solo su idioma; Emilia ayuda en español si se lo piden. */
 export default function JuegoDeAmigo() {
@@ -36,10 +37,10 @@ function Opcion({ palabra }: { palabra: PalabraIngles }) {
   if (palabra.tema === "numeros")
     return (
       <View style={estilos.grupo}>
-        {Array.from({ length: palabra.valor ?? 1 }, (_, i) => <Text key={i} style={estilos.estrella}>⭐</Text>)}
+        {Array.from({ length: palabra.valor ?? 1 }, (_, i) => <Icono key={i} e="⭐" tam={36} sinSombra />)}
       </View>
     );
-  return <Text style={estilos.emoji}>{palabra.emoji}</Text>;
+  return <Icono e={palabra.emoji} tam={90} />;
 }
 
 const estilos = StyleSheet.create({

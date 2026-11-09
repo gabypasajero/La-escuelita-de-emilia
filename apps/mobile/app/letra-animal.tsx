@@ -4,6 +4,7 @@ import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 /** "¿Qué animal empieza con mmm?": se ve y se escucha la letra, y se elige el animal. */
 export default function LetraAnimal() {
@@ -17,7 +18,7 @@ export default function LetraAnimal() {
             <Text style={estilos.sonido}>👂 {r.letra.sonido}</Text>
           </Pressable>
         )}
-        opcion={(a) => <Text style={estilos.animal}>{a.emoji}</Text>}
+        opcion={(a) => <Icono e={a.emoji} tam={86} />}
         alAcertar={(r) => `¡Sí! ${r.correcta.nombre} empieza con ${r.letra.sonido}. ${r.correcta.sonido}`}
       />
     </Pantalla>

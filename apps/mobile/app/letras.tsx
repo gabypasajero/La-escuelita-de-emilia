@@ -6,6 +6,7 @@ import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 /**
  * Letras por sus sonidos, para quien todavía no lee. Conocer: Emilia dice el
@@ -35,7 +36,7 @@ export default function Letras() {
               <Text style={estilos.orejaTexto}>👂 {r.correcta.sonido}</Text>
             </Pressable>
           )}
-          opcion={(l) => <Text style={estilos.dibujoOpcion}>{l.emoji}</Text>}
+          opcion={(l) => <Icono e={l.emoji} tam={86} />}
           alAcertar={(r) => `¡Sí! ${r.correcta.palabra} empieza con ${r.correcta.sonido}.`}
         />
       ) : (
@@ -45,7 +46,7 @@ export default function Letras() {
               <Text style={[estilos.letraGrande, elegida.esVocal && estilos.vocal]}>
                 {elegida.letra} {elegida.letra.toLowerCase()}
               </Text>
-              <Text style={estilos.dibujoGrande}>{elegida.emoji}</Text>
+              <Icono e={elegida.emoji} tam={80} />
               <Text style={estilos.palabra}>
                 <Text style={estilos.inicial}>{elegida.palabra[0]}</Text>
                 {elegida.palabra.slice(1)}
@@ -72,7 +73,7 @@ export default function Letras() {
                 accessibilityLabel={`Letra ${l.nombre}`}
               >
                 <Text style={[estilos.letra, l.esVocal && estilos.vocal]}>{l.letra}</Text>
-                <Text style={estilos.emoji}>{l.emoji}</Text>
+                <Icono e={l.emoji} tam={40} sinSombra />
               </Pressable>
             ))}
           </ScrollView>

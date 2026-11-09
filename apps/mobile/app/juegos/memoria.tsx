@@ -6,6 +6,7 @@ import { Globo } from "../../components/Personajes";
 import { useJuego } from "../../lib/juego";
 import { COLORES } from "../../lib/tema";
 import { hablar, hablarYEsperar } from "../../lib/voz";
+import { Icono, tieneDibujo } from "../../components/Iconos";
 
 /**
  * Memoria con 5 temas (frutas, animales, letras, números y mezcla) y 6 niveles.
@@ -76,7 +77,7 @@ export default function Memoria() {
         <View style={estilos.temas}>
           {TEMAS_MEMORIA.map((t) => (
             <Pressable key={t.id} style={estilos.tema} onPress={() => empezar(t.id)} accessibilityLabel={t.nombre}>
-              <Text style={estilos.temaEmoji}>{t.emoji}</Text>
+              <Icono e={t.emoji} tam={78} sinSombra />
               <Text style={estilos.temaNombre}>{t.nombre}</Text>
             </Pressable>
           ))}
@@ -118,10 +119,12 @@ export default function Memoria() {
               {visible && larga ? (
                 // Carta de cantidad: los objetos se ordenan en filas para que siempre quepan.
                 <View style={estilos.cantidad}>
-                  {Array.from(c.cara).map((e, k) => (
-                    <Text key={k} style={{ fontSize: lado / (Array.from(c.cara).length > 4 ? 5.2 : 3.4) }}>{e}</Text>
+                  {Array.from(c.cara.replace(/\uFE0F/g, "")).map((e, k) => (
+                    <Icono key={k} e={e} tam={lado / (Array.from(c.cara.replace(/\uFE0F/g, "")).length > 4 ? 4.4 : 2.9)} sinSombra />
                   ))}
                 </View>
+              ) : visible && tieneDibujo(c.cara) ? (
+                <Icono e={c.cara} tam={lado * 0.72} />
               ) : (
                 <Text style={[estilos.cara, { fontSize: lado * 0.5 }, /^[A-ZÑ\d]+$/.test(c.cara) && estilos.texto]}>
                   {visible ? c.cara : "❓"}

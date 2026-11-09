@@ -10,6 +10,7 @@ import { useJuego } from "../../lib/juego";
 import { hablar, hablarYEsperar } from "../../lib/voz";
 import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../../lib/hora";
 import { useVozActiva } from "../../lib/habla";
+import { Icono, TextoIconos } from "../../components/Iconos";
 
 /** Clientes: animales vivos que entran caminando por la puerta. */
 const CLIENTES: AnimalId[] = ["oso", "conejo", "zorro", "panda", "rana", "llama"];
@@ -131,7 +132,7 @@ export default function Tiendita() {
             transform: [{ translateX: entrada.interpolate({ inputRange: [0, 1], outputRange: [0, 320 * k] }) }] }}
         >
           <View style={estilos.pedido}>
-            <Text style={[estilos.pedidoTexto, { fontSize: 26 * k }]}>{pedido.cantidad} × {pedido.producto.emoji}</Text>
+            <TextoIconos texto={`${pedido.cantidad} × ${pedido.producto.emoji}`} tam={36 * k} />
           </View>
           {feliz && <Text style={{ fontSize: 30 * k }}>💛</Text>}
           <AnimalVivo id={cliente} alto={(cliente === "llama" ? 120 : cliente === "rana" || cliente === "conejo" ? 70 : 90) * k} caminando={clienteCamina} contento={feliz} />
@@ -155,7 +156,7 @@ const Estante = ({ emoji, k }: { emoji: string; k: number }) => (
   <View style={{ width: 104 * k, height: 180 * k, backgroundColor: "#A1887F", borderRadius: 8 * k, padding: 4 * k, justifyContent: "space-around", borderWidth: 3, borderColor: "#6D4C41" }}>
     {[0, 1, 2].map((fila) => (
       <View key={fila} style={{ flexDirection: "row", justifyContent: "center", borderBottomWidth: 5 * k, borderBottomColor: "#6D4C41" }}>
-        <Text style={{ fontSize: 30 * k }}>{emoji}{emoji}</Text>
+        <Icono e={emoji} tam={38 * k} sinSombra /><Icono e={emoji} tam={38 * k} sinSombra />
       </View>
     ))}
   </View>

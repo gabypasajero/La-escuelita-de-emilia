@@ -5,6 +5,7 @@ import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 export default function Animales() {
   const [jugando, setJugando] = useState(false);
@@ -17,14 +18,14 @@ export default function Animales() {
       {jugando ? (
         <Pregunta
           generar={(nivel) => rondaSonidoAnimal(nivel)}
-          opcion={(a) => <Text style={estilos.emoji}>{a.emoji}</Text>}
+          opcion={(a) => <Icono e={a.emoji} tam={78} />}
           alAcertar={(r) => `¡Sí! Es el ${r.correcta.nombre}`}
         />
       ) : (
         <ScrollView contentContainerStyle={estilos.grilla}>
           {ANIMALES.map((a) => (
             <Pressable key={a.id} style={estilos.tarjeta} onPress={() => hablar(`${a.nombre}. ${a.sonido}`)}>
-              <Text style={estilos.emoji}>{a.emoji}</Text>
+              <Icono e={a.emoji} tam={78} />
               <Text style={estilos.nombre}>{a.nombre}</Text>
             </Pressable>
           ))}

@@ -6,6 +6,7 @@ import { Pantalla } from "../components/Pantalla";
 import { Globo } from "../components/Personajes";
 import { ACCESORIOS, useJuego, type Accesorio } from "../lib/juego";
 import { hablar } from "../lib/voz";
+import { Icono } from "../components/Iconos";
 
 /**
  * Tienda de disfraces: se compran accesorios con las monedas ganadas jugando
@@ -58,7 +59,7 @@ export default function Disfraces() {
           return (
             <Pressable key={a.id} onPress={() => tocar(a)} accessibilityLabel={a.nombre}
               style={[estilos.item, puesto && estilos.puesto, !tiene && monedas < a.precio && estilos.caro]}>
-              <Text style={estilos.itemEmoji}>{a.emoji}</Text>
+              <Icono e={a.emoji} tam={62} />
               {a.ranura === "tito" && <Text style={estilos.paraTito}>para Tito</Text>}
               <Text style={estilos.precio}>{tiene ? (puesto ? "✅ Puesto" : "Ponérmelo") : `🪙 ${a.precio}`}</Text>
             </Pressable>
