@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
-import { EmiliaAnimada, TitoAnimado, type Expresion } from "./Articulados";
+import { EmiliaAnimada, ojoTierno, TitoAnimado, type Expresion } from "./Articulados";
 export type { Expresion } from "./Articulados";
 
 /**
@@ -44,13 +44,13 @@ export function MaxDibujo({ alto = 160, saludando = false }: { alto?: number; sa
       <Path d="M50 30 Q78 28 92 36 Q78 40 62 36 Z" fill="#1565C0" />
       <Circle cx="50" cy="15" r="3" fill="#1565C0" />
       {/* Cara */}
-      <Circle cx="41" cy="47" r="3.5" fill="#2E1A12" />
-      <Circle cx="59" cy="47" r="3.5" fill="#2E1A12" />
-      <Circle cx="42" cy="46" r="1.2" fill="#fff" />
-      <Circle cx="60" cy="46" r="1.2" fill="#fff" />
-      <Circle cx="34" cy="56" r="4" fill="#E57373" opacity="0.45" />
-      <Circle cx="66" cy="56" r="4" fill="#E57373" opacity="0.45" />
-      <Path d="M41 57 Q50 66 59 57" stroke="#2E1A12" strokeWidth="2.5" strokeLinecap="round" fill="#fff" />
+      {ojoTierno(41, 48, 4.6)}
+      {ojoTierno(59, 48, 4.6)}
+      <Ellipse cx="50" cy="53" rx="1.6" ry="1.1" fill="#000" opacity="0.14" />
+      <Ellipse cx="33.5" cy="57" rx="6" ry="4.2" fill="#FF8A80" opacity="0.38" />
+      <Ellipse cx="66.5" cy="57" rx="6" ry="4.2" fill="#FF8A80" opacity="0.38" />
+      <Path d="M42.5 58 Q50 67 57.5 58 Q50 60.5 42.5 58 Z" fill="#8E3B46" />
+      <Ellipse cx="50" cy="62.6" rx="3.4" ry="1.7" fill="#F48FB1" />
     </Svg>
   );
 }

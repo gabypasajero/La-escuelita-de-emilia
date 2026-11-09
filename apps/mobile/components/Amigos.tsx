@@ -1,4 +1,5 @@
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
+import { ojoTierno } from "./Articulados";
 
 /**
  * Los amigos de otros países que llegan en bus al paradero (Max está en
@@ -13,7 +14,7 @@ interface Props {
 function Brazos({ piel, saludando }: { piel: string; saludando?: boolean }) {
   return (
     <>
-      <Path d="M34 78 Q20 92 24 108" stroke={piel} strokeWidth="8" strokeLinecap="round" fill="none" />
+      <Path d="M34 78 Q20 92 24 108" stroke={piel} strokeWidth="7.4" strokeLinecap="round" fill="none" />
       {saludando ? (
         <Path d="M66 78 Q84 66 84 50" stroke={piel} strokeWidth="8" strokeLinecap="round" fill="none" />
       ) : (
@@ -27,13 +28,15 @@ function Brazos({ piel, saludando }: { piel: string; saludando?: boolean }) {
 function Cara({ ojos = "#2E1A12", mejillas = "#F48FB1" }: { ojos?: string; mejillas?: string }) {
   return (
     <>
-      <Circle cx="41" cy="47" r="3.5" fill={ojos} />
-      <Circle cx="59" cy="47" r="3.5" fill={ojos} />
-      <Circle cx="42" cy="46" r="1.2" fill="#fff" />
-      <Circle cx="60" cy="46" r="1.2" fill="#fff" />
-      <Circle cx="34" cy="56" r="4" fill={mejillas} opacity="0.5" />
-      <Circle cx="66" cy="56" r="4" fill={mejillas} opacity="0.5" />
-      <Path d="M42 57 Q50 65 58 57" stroke={ojos} strokeWidth="2.5" strokeLinecap="round" fill="#fff" />
+      {/* Brillo suave en la frente y la mejilla */}
+      <Ellipse cx="40" cy="34" rx="9" ry="5" fill="#fff" opacity="0.18" />
+      {ojoTierno(41, 48, 4.6, ojos === "#2E1A12" ? "#6D4C41" : ojos)}
+      {ojoTierno(59, 48, 4.6, ojos === "#2E1A12" ? "#6D4C41" : ojos)}
+      <Ellipse cx="50" cy="53" rx="1.6" ry="1.1" fill="#000" opacity="0.14" />
+      <Ellipse cx="33.5" cy="57" rx="6" ry="4.2" fill={mejillas === "#F48FB1" ? "#FF8A80" : mejillas} opacity="0.4" />
+      <Ellipse cx="66.5" cy="57" rx="6" ry="4.2" fill={mejillas === "#F48FB1" ? "#FF8A80" : mejillas} opacity="0.4" />
+      <Path d="M42.5 58 Q50 67 57.5 58 Q50 60.5 42.5 58 Z" fill="#8E3B46" />
+      <Ellipse cx="50" cy="62.6" rx="3.4" ry="1.7" fill="#F48FB1" />
     </>
   );
 }

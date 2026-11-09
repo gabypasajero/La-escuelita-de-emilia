@@ -1,6 +1,6 @@
 import { Animated, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
-import { angulo, CONTORNO, onda, Pieza, Sombreado, useSombreado, useCiclo, useParpadeo } from "./Articulados";
+import { angulo, CONTORNO, ojoTierno, onda, Pieza, Sombreado, useSombreado, useCiclo, useParpadeo } from "./Articulados";
 
 /**
  * Adultos del barrio, articulados como Emilia: Don Pedro (granja y huerto),
@@ -166,10 +166,10 @@ export function Adulto({ id, alto = 180, hablando = false, saludando = false }: 
   const cabeza = angulo(0, hablando ? onda(charla, 4, Math.PI / 2) : onda(calma, 2));
   const C = { px: 50, py: 72, w: 110, h: 110 };
   const ox = C.px - C.w / 2, oy = C.py - C.h / 2;
-  const aberturaBoca = hablando ? boca.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.25, 1, 0.25] }) : new Animated.Value(0.25);
+  const aberturaBoca = hablando ? boca.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.3, 1, 0.3] }) : new Animated.Value(0);
 
   return (
-    <Animated.View pointerEvents="none" style={{ width: 100 * s, height: 180 * s, transform: [{ translateY: bote as never }] }}>
+    <Animated.View pointerEvents="none" style={{ width: 100 * s, height: 180 * s, transformOrigin: "bottom", transform: [{ translateY: bote as never }, { scaleY: calma.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.022, 1] }) as never }, { scaleX: calma.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 0.99, 1] }) as never }] }}>
       {/* Piernas y zapatos (o falda) */}
       <Svg width={100 * s} height={180 * s} viewBox="0 0 100 180" style={{ position: "absolute" }}>
         <Sombreado suf={sh.suf} />
@@ -195,19 +195,19 @@ export function Adulto({ id, alto = 180, hablando = false, saludando = false }: 
         {/* Torso con volumen */}
         <Path d="M32 76 Q50 70 68 76 L70 124 L30 124 Z" fill={e.camisa} />
         <Path d="M32 76 Q50 70 68 76 L70 124 L30 124 Z" fill={sh.volL} {...CONTORNO} />
-        <Ellipse cx="50" cy="75" rx="10" ry="3.5" fill="#000" opacity="0.18" />
+        <Ellipse cx="50" cy="75" rx="10" ry="3.5" fill="#8A4B2A" opacity="0.12" />
         {e.encima(s)}
       </Svg>
       {/* Brazos */}
       <Pieza s={s} px={33} py={80} w={84} h={84} rot={brazoIzq}>
-        <Path d="M33 80 Q24 98 26 116" stroke="#000" strokeOpacity="0.18" strokeWidth="11.6" strokeLinecap="round" fill="none" />
+        <Path d="M33 80 Q24 98 26 116" stroke="#6D3B1F" strokeOpacity="0.08" strokeWidth="11" strokeLinecap="round" fill="none" />
         <Path d="M33 80 Q24 98 26 116" stroke={e.camisa} strokeWidth="10" strokeLinecap="round" fill="none" />
         <Path d="M31 84 Q24 98 25 112" stroke="#fff" strokeOpacity="0.25" strokeWidth="2.4" strokeLinecap="round" fill="none" />
         <Circle cx="26" cy="119" r="5.5" fill={e.piel} {...CONTORNO} />
         <Circle cx="24.6" cy="117.6" r="2" fill="#fff" opacity="0.3" />
       </Pieza>
       <Pieza s={s} px={67} py={80} w={84} h={84} rot={brazoDer}>
-        <Path d="M67 80 Q76 98 74 116" stroke="#000" strokeOpacity="0.18" strokeWidth="11.6" strokeLinecap="round" fill="none" />
+        <Path d="M67 80 Q76 98 74 116" stroke="#6D3B1F" strokeOpacity="0.08" strokeWidth="11" strokeLinecap="round" fill="none" />
         <Path d="M67 80 Q76 98 74 116" stroke={id === "lucas" ? "#FAFAFA" : e.camisa} strokeWidth="10" strokeLinecap="round" fill="none" />
         <Path d="M69 86 Q75 98 74.5 110" stroke="#000" strokeOpacity="0.1" strokeWidth="2.4" strokeLinecap="round" fill="none" />
         <Circle cx="74" cy="119" r="5.5" fill={e.piel} {...CONTORNO} />
@@ -219,31 +219,32 @@ export function Adulto({ id, alto = 180, hablando = false, saludando = false }: 
             <Sombreado suf={sh.suf} />
             {e.peloAtras}
             <Rect x="44" y="60" width="12" height="14" fill={e.piel} />
-            <Rect x="44" y="60" width="12" height="8" fill="#000" opacity="0.15" />
+            <Rect x="44" y="60" width="12" height="8" fill="#8A4B2A" opacity="0.12" />
             <Ellipse cx="25" cy="44" rx="4" ry="6" fill={e.piel} {...CONTORNO} />
             <Ellipse cx="75" cy="44" rx="4" ry="6" fill={e.piel} {...CONTORNO} />
             <Ellipse cx="50" cy="42" rx="25" ry="27" fill={e.piel} />
             <Ellipse cx="50" cy="42" rx="25" ry="27" fill={sh.vol} {...CONTORNO} />
-            <Path d="M47 44 Q50 52 53 48" stroke="#00000033" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <Circle cx="35" cy="52" r="4" fill="#F48FB1" opacity="0.35" />
-            <Circle cx="65" cy="52" r="4" fill="#F48FB1" opacity="0.35" />
-            <G stroke="#00000066" strokeWidth="1.8" strokeLinecap="round" fill="none"><Path d="M35 33 Q40 31 45 33" /><Path d="M55 33 Q60 31 65 33" /></G>
+            <Ellipse cx="50" cy="48" rx="2.2" ry="1.6" fill="#000" opacity="0.1" />
+            {/* Sonrisa amable (la boca animada se abre encima al hablar) */}
+            <Path d="M43 55 Q50 61.5 57 55" stroke="#8E3B46" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <Ellipse cx="34" cy="52" rx="5.5" ry="3.8" fill="#FF8A80" opacity="0.35" />
+            <Ellipse cx="66" cy="52" rx="5.5" ry="3.8" fill="#FF8A80" opacity="0.35" />
+            <G stroke="#00000044" strokeWidth="1.5" strokeLinecap="round" fill="none"><Path d="M35 33 Q40 31 45 33" /><Path d="M55 33 Q60 31 65 33" /></G>
             {e.cabeza}
           </Svg>
         </View>
         {/* Ojos que pestañean */}
         {[40, 60].map((cx) => (
-          <Animated.View key={cx} style={{ position: "absolute", left: (cx - 4 - ox) * s, top: (40 - 4 - oy) * s, width: 8 * s, height: 8 * s, transform: [{ scaleY: ojo as never }] }}>
-            <Svg width={8 * s} height={8 * s} viewBox={`${cx - 4} 36 8 8`}>
-              <Circle cx={cx} cy="40" r="3" fill="#3B2F5C" />
-              <Circle cx={cx + 0.9} cy="39" r="1" fill="#fff" />
+          <Animated.View key={cx} style={{ position: "absolute", left: (cx - 5 - ox) * s, top: (41 - 5 - oy) * s, width: 10 * s, height: 10 * s, transform: [{ scaleY: ojo as never }] }}>
+            <Svg width={10 * s} height={10 * s} viewBox={`${cx - 5} 36 10 10`}>
+              {ojoTierno(cx, 41, 3.8)}
             </Svg>
           </Animated.View>
         ))}
         {/* Boca: se abre y cierra al hablar */}
         <Animated.View style={{ position: "absolute", left: (43 - ox) * s, top: (54 - oy) * s, width: 14 * s, height: 10 * s, transform: [{ scaleY: aberturaBoca as never }] }}>
           <Svg width={14 * s} height={10 * s} viewBox="0 0 14 10">
-            <Path d="M1 1 Q7 2 13 1 Q12 9 7 9 Q2 9 1 1 Z" fill="#7B1F3A" />
+            <Path d="M1 1 Q7 2.5 13 1 Q12 9 7 9 Q2 9 1 1 Z" fill="#8E3B46" />
             <Path d="M4 6 Q7 8 10 6" fill="#F06292" />
           </Svg>
         </Animated.View>

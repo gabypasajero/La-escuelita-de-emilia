@@ -94,20 +94,20 @@ export function Sombreado({ suf }: { suf: string }) {
   return (
     <Defs>
       <RadialGradient id={`vol${suf}`} cx="34%" cy="28%" r="78%">
-        <Stop offset="0" stopColor="#fff" stopOpacity="0.38" />
-        <Stop offset="0.45" stopColor="#fff" stopOpacity="0" />
-        <Stop offset="0.8" stopColor="#000" stopOpacity="0.06" />
-        <Stop offset="1" stopColor="#000" stopOpacity="0.2" />
+        <Stop offset="0" stopColor="#fff" stopOpacity="0.32" />
+        <Stop offset="0.5" stopColor="#fff" stopOpacity="0" />
+        <Stop offset="0.85" stopColor="#B35A2E" stopOpacity="0.05" />
+        <Stop offset="1" stopColor="#B35A2E" stopOpacity="0.12" />
       </RadialGradient>
       <LinearGradient id={`volL${suf}`} x1="0" y1="0" x2="1" y2="1">
-        <Stop offset="0" stopColor="#fff" stopOpacity="0.3" />
-        <Stop offset="0.5" stopColor="#fff" stopOpacity="0" />
-        <Stop offset="1" stopColor="#000" stopOpacity="0.2" />
+        <Stop offset="0" stopColor="#fff" stopOpacity="0.26" />
+        <Stop offset="0.55" stopColor="#fff" stopOpacity="0" />
+        <Stop offset="1" stopColor="#8A4B2A" stopOpacity="0.12" />
       </LinearGradient>
       <LinearGradient id={`volV${suf}`} x1="0" y1="0" x2="0" y2="1">
-        <Stop offset="0" stopColor="#fff" stopOpacity="0.22" />
+        <Stop offset="0" stopColor="#fff" stopOpacity="0.2" />
         <Stop offset="0.6" stopColor="#fff" stopOpacity="0" />
-        <Stop offset="1" stopColor="#000" stopOpacity="0.18" />
+        <Stop offset="1" stopColor="#8A4B2A" stopOpacity="0.12" />
       </LinearGradient>
     </Defs>
   );
@@ -121,8 +121,24 @@ export function useSombreado() {
   const suf = useId().replace(/[^a-zA-Z0-9]/g, "");
   return { suf, vol: `url(#vol${suf})`, volL: `url(#volL${suf})`, volV: `url(#volV${suf})` };
 }
+/**
+ * Ojo tierno de dibujo animado: grande, con iris café, brillo grande y
+ * brillo chico. Sirve para todos los personajes.
+ */
+export function ojoTierno(cx: number, cy: number, r = 4.6, iris = "#6D4C41") {
+  return (
+    <G key={`ojo${cx}`}>
+      <Ellipse cx={cx} cy={cy} rx={r} ry={r * 1.12} fill="#2B1D16" />
+      <Ellipse cx={cx} cy={cy + r * 0.28} rx={r * 0.72} ry={r * 0.7} fill={iris} />
+      <Ellipse cx={cx} cy={cy + r * 0.55} rx={r * 0.45} ry={r * 0.28} fill="#fff" opacity="0.18" />
+      <Circle cx={cx - r * 0.32} cy={cy - r * 0.38} r={r * 0.42} fill="#fff" />
+      <Circle cx={cx + r * 0.4} cy={cy + r * 0.36} r={r * 0.17} fill="#fff" opacity="0.9" />
+    </G>
+  );
+}
+
 /** Contorno suave (más oscuro que el color de relleno, sin importar cuál sea). */
-export const CONTORNO = { stroke: "#000", strokeOpacity: 0.2, strokeWidth: 1.1 } as const;
+export const CONTORNO = { stroke: "#6D3B1F", strokeOpacity: 0.12, strokeWidth: 0.9 } as const;
 
 // ---------- Emilia ----------
 
@@ -130,6 +146,8 @@ const PIEL = "#F6D3B3";
 const PIEL_BRAZO = "#F1C7A5";
 const PELO = "#5D4037";
 const VESTIDO = "#FDD835";
+/** Pelo con flequillo ondulado (mechones sobre la frente), en vez de un casco liso. */
+const PELO_FLEQUILLO = "M22 46 Q20 14 50 12 Q80 14 78 46 Q76 36 70 31 Q66 37 60 34 Q56 39 50 35 Q44 39 40 34 Q34 37 30 31 Q24 36 22 46 Z";
 
 export function EmiliaAnimada({ alto = 160, caminando = false, expresion = "feliz" }: { alto?: number; caminando?: boolean; expresion?: Expresion }) {
   const sh = useSombreado();
@@ -160,17 +178,14 @@ export function EmiliaAnimada({ alto = 160, caminando = false, expresion = "feli
   const ojosCerrados = expresion === "celebrando";
   const mirar = expresion === "pensativa" ? { dx: 1.6, dy: -1.8 } : { dx: 0, dy: 0 };
   const Ojo = ({ cx }: { cx: number }) => (
-    <Animated.View style={{ position: "absolute", left: (cx - 5 - ox) * s, top: (46 - 5 - oy) * s, width: 10 * s, height: 10 * s, transform: [{ scaleY: ojosCerrados ? 1 : (ojo as never) }] }}>
-      <Svg width={10 * s} height={10 * s} viewBox={`${cx - 5} 41 10 10`}>
+    <Animated.View style={{ position: "absolute", left: (cx - 7 - ox) * s, top: (47 - 7 - oy) * s, width: 14 * s, height: 14 * s, transform: [{ scaleY: ojosCerrados ? 1 : (ojo as never) }] }}>
+      <Svg width={14 * s} height={14 * s} viewBox={`${cx - 7} 40 14 14`}>
         {ojosCerrados ? (
-          <Path d={`M${cx - 3.5} 47 Q${cx} 42 ${cx + 3.5} 47`} stroke="#3B2F5C" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+          <Path d={`M${cx - 4.2} 48 Q${cx} 42.5 ${cx + 4.2} 48`} stroke="#4E2C1E" strokeWidth="2.2" strokeLinecap="round" fill="none" />
         ) : (
           <>
-            <Circle cx={cx + mirar.dx} cy={46 + mirar.dy} r={expresion === "sorprendida" ? 4.2 : 3.7} fill="#3B2F5C" />
-            <Circle cx={cx + mirar.dx} cy={46.6 + mirar.dy} r={expresion === "sorprendida" ? 2.6 : 2.2} fill="#5D4037" opacity="0.7" />
-            <Circle cx={cx + 1.2 + mirar.dx} cy={44.8 + mirar.dy} r="1.4" fill="#fff" />
-            <Circle cx={cx - 1.3 + mirar.dx} cy={47.6 + mirar.dy} r="0.6" fill="#fff" opacity="0.8" />
-            <Path d={cx < 50 ? `M${cx - 3.4} 43.4 L${cx - 4.8} 42` : `M${cx + 3.4} 43.4 L${cx + 4.8} 42`} stroke="#3B2F5C" strokeWidth="1" strokeLinecap="round" />
+            {ojoTierno(cx + mirar.dx, 47 + mirar.dy, expresion === "sorprendida" ? 5.2 : 4.7)}
+            <Path d={cx < 50 ? `M${cx - 4.2} 43.2 Q${cx - 5.6} 42.4 ${cx - 6.2} 41.2` : `M${cx + 4.2} 43.2 Q${cx + 5.6} 42.4 ${cx + 6.2} 41.2`} stroke="#4E2C1E" strokeWidth="0.9" strokeLinecap="round" fill="none" />
           </>
         )}
       </Svg>
@@ -178,7 +193,7 @@ export function EmiliaAnimada({ alto = 160, caminando = false, expresion = "feli
   );
 
   return (
-    <Animated.View style={{ width: 100 * s, height: 160 * s, transform: [{ translateY: bote as never }] }} pointerEvents="none">
+    <Animated.View style={{ width: 100 * s, height: 160 * s, transformOrigin: "bottom", transform: [{ translateY: bote as never }, { scaleY: calma.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.022, 1] }) as never }, { scaleX: calma.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 0.99, 1] }) as never }] }} pointerEvents="none">
       {/* Piernas (giran desde la cadera) */}
       <Pieza s={s} px={42} py={122} w={44} h={66} rot={piernaIzq}>
         <Pierna x={38} />
@@ -210,17 +225,17 @@ export function EmiliaAnimada({ alto = 160, caminando = false, expresion = "feli
       </Pieza>
       {/* Cabeza (gira desde el cuello) con colitas, cara y ojos */}
       <Animated.View style={{ position: "absolute", left: ox * s, top: oy * s, width: C.w * s, height: C.h * s, transform: [{ rotate: inclinacion as never }] }}>
-        <Pieza s={s} px={26} py={34} w={40} h={40} rot={colitaIzq}>
+        <Pieza s={s} px={26} py={34} w={50} h={50} rot={colitaIzq}>
           <Sombreado suf={sh.suf} />
-          <Circle cx="18" cy="38" r="12" fill={PELO} />
-          <Circle cx="18" cy="38" r="12" fill={sh.vol} {...CONTORNO} />
-          <Path d="M10 34 Q15 28 22 30" stroke="#A1887F" strokeWidth="1.6" fill="none" opacity="0.7" strokeLinecap="round" />
+          <Path d="M24 32 Q12 26 8 36 Q4 46 12 50 Q8 56 16 56 Q24 54 22 46 Q28 40 24 32 Z" fill={PELO} />
+          <Path d="M24 32 Q12 26 8 36 Q4 46 12 50 Q8 56 16 56 Q24 54 22 46 Q28 40 24 32 Z" fill={sh.vol} {...CONTORNO} />
+          <Path d="M12 38 Q14 34 19 34 M11 46 Q14 44 17 45" stroke="#A1887F" strokeWidth="1.3" fill="none" opacity="0.6" strokeLinecap="round" />
         </Pieza>
-        <Pieza s={s} px={74} py={34} w={40} h={40} rot={colitaDer}>
+        <Pieza s={s} px={74} py={34} w={50} h={50} rot={colitaDer}>
           <Sombreado suf={sh.suf} />
-          <Circle cx="82" cy="38" r="12" fill={PELO} />
-          <Circle cx="82" cy="38" r="12" fill={sh.vol} {...CONTORNO} />
-          <Path d="M76 31 Q82 28 88 32" stroke="#A1887F" strokeWidth="1.6" fill="none" opacity="0.7" strokeLinecap="round" />
+          <Path d="M76 32 Q88 26 92 36 Q96 46 88 50 Q92 56 84 56 Q76 54 78 46 Q72 40 76 32 Z" fill={PELO} />
+          <Path d="M76 32 Q88 26 92 36 Q96 46 88 50 Q92 56 84 56 Q76 54 78 46 Q72 40 76 32 Z" fill={sh.vol} {...CONTORNO} />
+          <Path d="M81 34 Q86 34 88 38 M83 45 Q86 44 89 46" stroke="#A1887F" strokeWidth="1.3" fill="none" opacity="0.6" strokeLinecap="round" />
         </Pieza>
         <View style={{ position: "absolute", left: (0 - ox) * s, top: (0 - oy) * s }}>
           <Svg width={100 * s} height={80 * s} viewBox="0 0 100 80">
@@ -231,25 +246,24 @@ export function EmiliaAnimada({ alto = 160, caminando = false, expresion = "feli
             <Circle cx="50" cy="44" r="27" fill={PIEL} />
             <Circle cx="50" cy="44" r="27" fill={sh.vol} {...CONTORNO} />
             {/* Sombra del pelo sobre la frente */}
-            <Path d="M26 40 Q34 30 50 32 Q66 30 74 40 Q66 34 50 35 Q34 34 26 40 Z" fill="#000" opacity="0.08" />
-            <Path d="M23 42 Q26 14 50 14 Q76 14 77 42 Q66 26 50 28 Q34 26 23 42 Z" fill={PELO} />
-            <Path d="M23 42 Q26 14 50 14 Q76 14 77 42 Q66 26 50 28 Q34 26 23 42 Z" fill={sh.volL} {...CONTORNO} />
+            <Path d={PELO_FLEQUILLO} fill={PELO} />
+            <Path d={PELO_FLEQUILLO} fill={sh.volL} {...CONTORNO} />
             {/* Brillo y mechones del pelo */}
-            <Path d="M32 24 Q42 16 56 18" stroke="#fff" strokeWidth="2.6" fill="none" strokeLinecap="round" opacity="0.32" />
-            <Path d="M40 28 Q44 22 50 21 M58 28 Q60 22 66 22" stroke="#3E2723" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.5" />
+            <Path d="M33 22 Q42 16 54 17" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.28" />
+            <Path d="M38 31 Q41 26 45 24 M55 24 Q59 26 62 31" stroke="#3E2723" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.35" />
             {[25, 75].map((x) => <G key={x}><Circle cx={x} cy="30" r="4" fill="#E53935" {...CONTORNO} /><Circle cx={x - 1.3} cy="28.7" r="1.3" fill="#fff" opacity="0.7" /></G>)}
             {/* Nariz */}
-            <Path d="M48.5 50 Q50 52.5 51.8 50.6" stroke="#C98B6B" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+            <Ellipse cx="50" cy="52" rx="1.6" ry="1.1" fill="#E3A07F" />
             {/* Cejas */}
             {expresion === "sorprendida" ? (
               <G stroke={PELO} strokeWidth="2" strokeLinecap="round" fill="none"><Path d="M35 36 Q40 32 45 35" /><Path d="M55 35 Q60 32 65 36" /></G>
             ) : expresion === "pensativa" ? (
               <G stroke={PELO} strokeWidth="2" strokeLinecap="round" fill="none"><Path d="M35 39 Q40 38 45 39" /><Path d="M55 37 Q60 34 65 36" /></G>
             ) : (
-              <G stroke={PELO} strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.8"><Path d="M35 38 Q40 36 45 38" /><Path d="M55 38 Q60 36 65 38" /></G>
+              <G stroke="#7B5141" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.7"><Path d="M36 38.5 Q40 37 44 38.5" /><Path d="M56 38.5 Q60 37 64 38.5" /></G>
             )}
-            <Circle cx="33" cy="55" r="4.5" fill="#F48FB1" opacity={expresion === "celebrando" ? 0.85 : 0.6} />
-            <Circle cx="67" cy="55" r="4.5" fill="#F48FB1" opacity={expresion === "celebrando" ? 0.85 : 0.6} />
+            <Ellipse cx="32.5" cy="55.5" rx="6" ry="4.2" fill="#FF8A80" opacity={expresion === "celebrando" ? 0.55 : 0.38} />
+            <Ellipse cx="67.5" cy="55.5" rx="6" ry="4.2" fill="#FF8A80" opacity={expresion === "celebrando" ? 0.55 : 0.38} />
             {/* Boca según la expresión */}
             {expresion === "celebrando" ? (
               <G><Path d="M40 55 Q50 71 60 55 Z" fill="#7B1F3A" /><Path d="M44 63 Q50 67 56 63 Q50 60 44 63 Z" fill="#F06292" /></G>
@@ -258,7 +272,7 @@ export function EmiliaAnimada({ alto = 160, caminando = false, expresion = "feli
             ) : expresion === "pensativa" ? (
               <Path d="M44 59 Q49 57.5 56 60" stroke="#3B2F5C" strokeWidth="2.4" strokeLinecap="round" fill="none" />
             ) : (
-              <Path d="M42 57 Q50 65 58 57" stroke="#3B2F5C" strokeWidth="2.5" strokeLinecap="round" fill="#fff" />
+              <G><Path d="M42.5 57 Q50 66 57.5 57 Q50 59.5 42.5 57 Z" fill="#8E3B46" /><Ellipse cx="50" cy="61.6" rx="3.4" ry="1.7" fill="#F48FB1" /></G>
             )}
           </Svg>
         </View>
@@ -294,14 +308,18 @@ function Brazo({ hombro, codo, mano, piel, manga }: { hombro: [number, number]; 
   return (
     <G>
       <Sombreado suf={sh.suf} />
-      <Path d={d} stroke="#000" strokeOpacity="0.16" strokeWidth="9.6" strokeLinecap="round" fill="none" />
-      <Path d={d} stroke={piel} strokeWidth="8" strokeLinecap="round" fill="none" />
+      <Path d={d} stroke="#6D3B1F" strokeOpacity="0.08" strokeWidth="8.6" strokeLinecap="round" fill="none" />
+      <Path d={d} stroke={piel} strokeWidth="7.4" strokeLinecap="round" fill="none" />
       <Path d={`M${hombro[0] - lado * 1.5} ${hombro[1] + 2} Q${codo[0] - lado * 2} ${codo[1]} ${mano[0] - lado * 2} ${mano[1] - 2}`} stroke="#fff" strokeOpacity="0.28" strokeWidth="2" strokeLinecap="round" fill="none" />
       <Circle cx={mano[0]} cy={mano[1] + 2} r="5" fill={piel} {...CONTORNO} />
       <Circle cx={mano[0] - 1.3} cy={mano[1] + 0.6} r="1.8" fill="#fff" opacity="0.3" />
       {/* Manga */}
-      <Circle cx={hombro[0] + lado * 0.5} cy={hombro[1] + 2.5} r="6.2" fill={manga} />
-      <Circle cx={hombro[0] + lado * 0.5} cy={hombro[1] + 2.5} r="6.2" fill={sh.vol} {...CONTORNO} />
+      {/* Manga corta que sigue la dirección del brazo (no una bola) */}
+      <G transform={`rotate(${(Math.atan2(codo[0] - hombro[0], codo[1] - hombro[1]) * -180 * 0.6) / Math.PI} ${hombro[0]} ${hombro[1]})`}>
+        <Path d={`M${hombro[0] - 6} ${hombro[1] - 3} Q${hombro[0]} ${hombro[1] - 6} ${hombro[0] + 6} ${hombro[1] - 3} Q${hombro[0] + 9} ${hombro[1] + 3} ${hombro[0] + 6.5} ${hombro[1] + 8} Q${hombro[0]} ${hombro[1] + 11.5} ${hombro[0] - 6.5} ${hombro[1] + 8} Q${hombro[0] - 9} ${hombro[1] + 3} ${hombro[0] - 6} ${hombro[1] - 3} Z`} fill={manga} />
+        <Path d={`M${hombro[0] - 6} ${hombro[1] - 3} Q${hombro[0]} ${hombro[1] - 6} ${hombro[0] + 6} ${hombro[1] - 3} Q${hombro[0] + 9} ${hombro[1] + 3} ${hombro[0] + 6.5} ${hombro[1] + 8} Q${hombro[0]} ${hombro[1] + 11.5} ${hombro[0] - 6.5} ${hombro[1] + 8} Q${hombro[0] - 9} ${hombro[1] + 3} ${hombro[0] - 6} ${hombro[1] - 3} Z`} fill={sh.volL} {...CONTORNO} />
+        <Path d={`M${hombro[0] - 6} ${hombro[1] + 7} Q${hombro[0]} ${hombro[1] + 10} ${hombro[0] + 6} ${hombro[1] + 7}`} stroke="#fff" strokeOpacity="0.5" strokeWidth="1.2" fill="none" />
+      </G>
     </G>
   );
 }
@@ -364,10 +382,7 @@ export function TitoAnimado({ alto = 70, caminando = false, contento = false }: 
         </View>
         <Animated.View style={{ position: "absolute", left: (24 - 5 - ox) * s, top: (28 - 5 - oy) * s, width: 10 * s, height: 10 * s, transform: [{ scaleY: ojo as never }] }}>
           <Svg width={10 * s} height={10 * s} viewBox="19 23 10 10">
-            <Circle cx="24" cy="28" r="3.7" fill="#2B1F1A" />
-            <Circle cx="24" cy="28.6" r="2.2" fill="#5D4037" opacity="0.6" />
-            <Circle cx="25.2" cy="26.8" r="1.3" fill="#fff" />
-            <Circle cx="22.8" cy="29.6" r="0.6" fill="#fff" opacity="0.8" />
+            {ojoTierno(24, 28, 4.1)}
           </Svg>
         </Animated.View>
       </Animated.View>
