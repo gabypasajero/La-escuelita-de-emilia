@@ -4,7 +4,7 @@ import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
-import { Icono } from "../components/Iconos";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 /** "¿Qué animal empieza con mmm?": se ve y se escucha la letra, y se elige el animal. */
 export default function LetraAnimal() {
@@ -15,7 +15,7 @@ export default function LetraAnimal() {
         estimulo={(r) => (
           <Pressable style={estilos.letra} onPress={() => void hablar(`${r.letra.nombre}. Suena ${r.letra.sonido}.`)} accessibilityLabel="Escuchar la letra">
             <Text style={estilos.letraTexto}>{r.letra.letra} {r.letra.letra.toLowerCase()}</Text>
-            <Text style={estilos.sonido}>👂 {r.letra.sonido}</Text>
+            <TextoIconos estilo={estilos.sonido} texto={`👂 ${r.letra.sonido}`} />
           </Pressable>
         )}
         opcion={(a) => <Icono e={a.emoji} tam={86} />}

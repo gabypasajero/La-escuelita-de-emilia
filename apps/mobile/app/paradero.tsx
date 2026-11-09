@@ -11,6 +11,7 @@ import { useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
 import { LuzDelDia } from "../components/LuzDelDia";
 import { SombraContacto, VinetaEscena } from "../components/AmbienteInterior";
+import { TextoIconos } from "../components/Iconos";
 
 /** Amigos que el niño ya conoció en esta sesión (la segunda vez es más corto). */
 const conocidos = new Set<AmigoId>();
@@ -151,7 +152,7 @@ export default function Paradero() {
       </View>
       {elegido && puedeIr && (
         <Pressable style={[estilos.casa, { backgroundColor: elegido.color }]} onPress={() => router.push(`/amigo/${elegido.id}` as Href)} accessibilityLabel={`Casa de ${elegido.nombre}`}>
-          <Text style={estilos.casaTexto}>🏠 Casa de {elegido.nombre}</Text>
+          <TextoIconos estilo={estilos.casaTexto} texto={`🏠 Casa de ${elegido.nombre}`} />
         </Pressable>
       )}
     </Pantalla>

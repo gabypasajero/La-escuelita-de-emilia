@@ -12,7 +12,7 @@ import { DESBLOQUEOS, useJuego } from "../lib/juego";
 import { LuzDelDia } from "../components/LuzDelDia";
 import { CIELO_VENTANA, useMomento } from "../lib/hora";
 import { AmbienteFondo, SombraContacto, VinetaEscena } from "../components/AmbienteInterior";
-import { Icono } from "../components/Iconos";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 /** Cada paciente (por su emoji en los datos) como animal vivo. */
 const PACIENTE: Record<string, AnimalId> = { "🐶": "perro", "🐱": "gato", "🐰": "conejo", "🐦": "pajaro", "🐄": "vaca", "🐷": "cerdo", "🐻": "oso" };
@@ -34,7 +34,7 @@ export default function Veterinaria() {
           <View style={estilos.consulta}>
             <Doctor texto={r.enunciado} />
             <View style={estilos.camilla}>
-              <View style={estilos.burbuja}><Text style={estilos.triste}>🥺</Text></View>
+              <View style={estilos.burbuja}><TextoIconos estilo={estilos.triste} texto={`🥺`} /></View>
               <AnimalVivo id={PACIENTE[r.paciente.emoji] ?? "perro"} alto={r.paciente.emoji === "🐄" ? 110 : 90} />
               <Svg width={230} height={46} viewBox="0 0 230 46">
                 <Ellipse cx="122" cy="40" rx="118" ry="6" fill="#000" opacity="0.18" />

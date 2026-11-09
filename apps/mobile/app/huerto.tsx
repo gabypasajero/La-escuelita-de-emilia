@@ -233,7 +233,7 @@ export default function Huerto() {
       <Monedas />
       {/* Canasta de la cosecha */}
       <View style={estilos.canasta} pointerEvents="none">
-        <View style={{ flexDirection: "row", alignItems: "center" }}><Text style={estilos.canastaTexto}>🧺 </Text>{Object.keys(canasta).length ? <TextoIconos texto={Object.entries(canasta).map(([id, n]) => `${VERDURAS.find((v) => v.id === id)!.emoji}${n} `).join("")} tam={30} /> : <Text style={estilos.canastaTexto}>vacía</Text>}</View>
+        <View style={{ flexDirection: "row", alignItems: "center" }}><TextoIconos estilo={estilos.canastaTexto} texto={`🧺 `} />{Object.keys(canasta).length ? <TextoIconos texto={Object.entries(canasta).map(([id, n]) => `${VERDURAS.find((v) => v.id === id)!.emoji}${n} `).join("")} tam={30} /> : <Text style={estilos.canastaTexto}>vacía</Text>}</View>
       </View>
 
       {eligiendoSemilla ? (

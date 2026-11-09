@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Path, Polygon, Rect } from "react-native-svg";
 import { Pantalla } from "../../components/Pantalla";
 import { Pregunta } from "../../components/Pregunta";
-import { Icono } from "../../components/Iconos";
+import { Icono, TextoIconos } from "../../components/Iconos";
 
 /** Juegos de descubrir de la Escuelita: colores, formas, más y menos, patrones y verduras. */
 export default function Descubrir() {
@@ -48,7 +48,7 @@ export default function Descubrir() {
             estimulo={(r) => (
               <View style={estilos.secuencia}>
                 {r.secuencia.map((f, i) => <Icono key={i} e={f} tam={58} sinSombra />)}
-                <Text style={[estilos.ficha, estilos.hueco]}>❔</Text>
+                <TextoIconos estilo={[estilos.ficha, estilos.hueco]} texto={`❔`} />
               </View>
             )}
             opcion={(f) => <Icono e={f} tam={64} sinSombra />}

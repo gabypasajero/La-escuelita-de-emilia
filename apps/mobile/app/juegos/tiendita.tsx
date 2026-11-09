@@ -134,7 +134,7 @@ export default function Tiendita() {
           <View style={estilos.pedido}>
             <TextoIconos texto={`${pedido.cantidad} × ${pedido.producto.emoji}`} tam={36 * k} />
           </View>
-          {feliz && <Text style={{ fontSize: 30 * k }}>💛</Text>}
+          {feliz && <TextoIconos estilo={{ fontSize: 30 * k }} texto={`💛`} />}
           <AnimalVivo id={cliente} alto={(cliente === "llama" ? 120 : cliente === "rana" || cliente === "conejo" ? 70 : 90) * k} caminando={clienteCamina} contento={feliz} />
         </Animated.View>
         </>
@@ -142,11 +142,11 @@ export default function Tiendita() {
     >
       {/* La canasta del niño */}
       <Pressable style={estilos.canasta} onPress={() => { setCanasta((c) => c.slice(0, -1)); }} accessibilityLabel="Sacar uno de la canasta">
-        <Text style={estilos.canastaIcono}>🧺</Text>
+        <TextoIconos estilo={estilos.canastaIcono} texto={`🧺`} />
         <Text style={estilos.canastaTexto}>{canasta.length ? canasta.map((p) => p.emoji).join("") : "vacía"}</Text>
       </Pressable>
       <Pressable style={estilos.repetir} onPress={() => decir(pedido.enunciado)} accessibilityLabel="Repetir pedido">
-        <Text style={estilos.repetirTexto}>🔊 {pedido.cantidad} × {pedido.producto.emoji}</Text>
+        <TextoIconos estilo={estilos.repetirTexto} texto={`🔊 ${pedido.cantidad} × ${pedido.producto.emoji}`} />
       </Pressable>
     </EscenaRPG>
   );

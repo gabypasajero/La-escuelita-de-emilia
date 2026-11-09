@@ -6,7 +6,7 @@ import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
-import { Icono } from "../components/Iconos";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 /**
  * Letras por sus sonidos, para quien todavía no lee. Conocer: Emilia dice el
@@ -33,7 +33,7 @@ export default function Letras() {
           generar={(nivel) => rondaSonidoInicial(nivel)}
           estimulo={(r) => (
             <Pressable onPress={() => void hablar(r.correcta.sonido)} accessibilityLabel="Escuchar el sonido" style={estilos.oreja}>
-              <Text style={estilos.orejaTexto}>👂 {r.correcta.sonido}</Text>
+              <TextoIconos estilo={estilos.orejaTexto} texto={`👂 ${r.correcta.sonido}`} />
             </Pressable>
           )}
           opcion={(l) => <Icono e={l.emoji} tam={86} />}
@@ -51,13 +51,13 @@ export default function Letras() {
                 <Text style={estilos.inicial}>{elegida.palabra[0]}</Text>
                 {elegida.palabra.slice(1)}
               </Text>
-              <Text style={estilos.repetir}>🔊</Text>
+              <TextoIconos estilo={estilos.repetir} texto={`🔊`} />
               <Pressable
                 style={estilos.escribir}
                 accessibilityLabel="Escribir esta letra"
                 onPress={() => router.push(`/trazar?serie=${elegida.esVocal ? "vocales" : "abecedario"}&c=${elegida.letra}`)}
               >
-                <Text style={[estilos.escribirTexto, { color: "#fff" }]}>✏️ Escribir</Text>
+                <TextoIconos estilo={[estilos.escribirTexto, { color: "#fff" }]} texto={`✏️ Escribir`} />
               </Pressable>
             </Pressable>
           )}

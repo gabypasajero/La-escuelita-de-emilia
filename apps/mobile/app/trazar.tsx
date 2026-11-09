@@ -7,7 +7,7 @@ import { EmiliaDibujo, Globo } from "../components/Personajes";
 import { Trazado } from "../components/Trazado";
 import { useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
-import { Icono } from "../components/Iconos";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 type Serie = "vocales" | "abecedario" | "numeros";
 const SERIES: Record<Serie, { nombre: string; emoji: string; caracteres: string[] }> = {
@@ -91,17 +91,17 @@ export default function Trazar() {
         <View style={estilos.lado}>
           <Pressable onPress={() => void hablar(presentar(c!))} accessibilityLabel="Escuchar">
             <Text style={estilos.modelo}>{c}</Text>
-            <Text style={estilos.escuchar}>🔊 Escuchar</Text>
+            <TextoIconos estilo={estilos.escuchar} texto={`🔊 Escuchar`} />
           </Pressable>
           {!/\d/.test(c!) && <Icono e={LETRAS.find((l) => l.letra === c!.toUpperCase())!.emoji} tam={84} />}
-          {/\d/.test(c!) && <Text style={estilos.cantidad}>{"⭐".repeat(Number(c))}</Text>}
+          {/\d/.test(c!) && <TextoIconos estilo={estilos.cantidad} texto={"⭐".repeat(Number(c))} />}
         </View>
         <Trazado key={`${c}-${intento}`} caracter={c!} alto={alto} alCompletar={() => void completado()} />
         <View style={estilos.lado}>
           <Globo texto={dicho} />
           {listo && (
             <Pressable style={estilos.siguiente} onPress={siguiente} accessibilityLabel="Siguiente">
-              <Text style={estilos.siguienteTexto}>➡️ Siguiente</Text>
+              <TextoIconos estilo={estilos.siguienteTexto} texto={`➡️ Siguiente`} />
             </Pressable>
           )}
         </View>

@@ -4,6 +4,7 @@ import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-nativ
 import Svg, { Circle, Path, Polyline, Text as SvgText } from "react-native-svg";
 import { useSuperficieDibujo } from "../lib/puntero";
 import { hablar } from "../lib/voz";
+import { TextoIconos } from "./Iconos";
 
 // Caja de los trazos: x de -10 a 110, y de -25 a 150 (deja espacio a la tilde de la Ñ).
 const VB = { x: -10, y: -25, w: 120, h: 175 };
@@ -146,10 +147,10 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
       </View>
       <View style={estilos.botones}>
         <Pressable style={estilos.boton} onPress={mirame} accessibilityLabel="Mírame">
-          <Text style={estilos.botonTexto}>👀 Mírame</Text>
+          <TextoIconos estilo={estilos.botonTexto} texto={`👀 Mírame`} />
         </Pressable>
         <Pressable style={estilos.boton} onPress={reiniciar} accessibilityLabel="Borrar y empezar">
-          <Text style={estilos.botonTexto}>🧽 Otra vez</Text>
+          <TextoIconos estilo={estilos.botonTexto} texto={`🧽 Otra vez`} />
         </Pressable>
       </View>
     </View>

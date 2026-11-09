@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Animated, Easing, StyleSheet, Text, View } from "react-native";
 import { anunciarDespues } from "./voz";
+import { TextoIconos } from "../components/Iconos";
 
 /** Cómo se ve el personaje del niño. */
 export interface Apariencia {
@@ -213,7 +214,7 @@ function AvisoVisual({ texto }: { texto: string }) {
   if (!visible) return null;
   return (
     <View style={estilos.aviso} pointerEvents="none">
-      <Text style={estilos.avisoTexto}>👧 {texto}</Text>
+      <TextoIconos estilo={estilos.avisoTexto} texto={`👧 ${texto}`} />
     </View>
   );
 }
@@ -241,7 +242,7 @@ function Premio({ n }: { n: number }) {
           ],
         }}
       >
-        <Text style={estilos.premioTexto}>+{n} 🪙</Text>
+        <TextoIconos estilo={estilos.premioTexto} texto={`+${n} 🪙`} />
       </Animated.View>
     </View>
   );
@@ -252,7 +253,7 @@ export function Monedas() {
   const { monedas } = useJuego();
   return (
     <View style={estilos.monedas} pointerEvents="none">
-      <Text style={estilos.monedasTexto}>🪙 {monedas}</Text>
+      <TextoIconos estilo={estilos.monedasTexto} texto={`🪙 ${monedas}`} />
     </View>
   );
 }

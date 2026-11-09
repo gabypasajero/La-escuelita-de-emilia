@@ -6,6 +6,7 @@ import { Monedas, useJuego } from "../lib/juego";
 import type { Barrio3D } from "../lib/barrio3d";
 import type { Lugar } from "../lib/lugares";
 import { hablar } from "../lib/voz";
+import { TextoIconos } from "../components/Iconos";
 
 /**
  * Prueba del barrio en 3D (solo en la versión web, por ahora). Usa los mismos
@@ -67,7 +68,7 @@ export default function Barrio3D() {
       <View style={estilos.dialogo} pointerEvents="none"><Globo texto={dicho} /></View>
       <Monedas />
       <Pressable style={estilos.volver} onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))} accessibilityLabel="Volver al barrio 2D">
-        <Text style={estilos.botonTexto}>🗺️ Barrio 2D</Text>
+        <TextoIconos estilo={estilos.botonTexto} texto={`🗺️ Barrio 2D`} />
       </Pressable>
     </View>
   );

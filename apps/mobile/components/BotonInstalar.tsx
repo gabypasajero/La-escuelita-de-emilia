@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { TextoIconos } from "./Iconos";
 
 /**
  * Botón visible "📲 Instalar el juego" (solo en la versión web).
@@ -118,7 +119,7 @@ export function BotonInstalar({ estilo }: { estilo?: object }) {
   return (
     <>
       <Pressable style={[estilos.boton, estilo]} onPress={instalar} accessibilityLabel="Instalar el juego">
-        <Text style={estilos.botonTexto}>📲 Instalar el juego</Text>
+        <TextoIconos estilo={estilos.botonTexto} texto={`📲 Instalar el juego`} />
       </Pressable>
       <Modal visible={ayuda} transparent animationType="fade" onRequestClose={() => setAyuda(false)}>
         <View style={estilos.velo}>
@@ -132,7 +133,7 @@ export function BotonInstalar({ estilo }: { estilo?: object }) {
             <View style={estilos.fila}>
               {nav === "dentro-de-app" && (
                 <Pressable style={[estilos.accion, { backgroundColor: "#1E88E5" }]} onPress={copiar} accessibilityLabel="Copiar link">
-                  <Text style={estilos.accionTexto}>{copiado ? "✅ Link copiado" : "📋 Copiar link"}</Text>
+                  <TextoIconos estilo={estilos.accionTexto} texto={copiado ? "✅ Link copiado" : "📋 Copiar link"} />
                 </Pressable>
               )}
               <Pressable style={estilos.accion} onPress={() => setAyuda(false)} accessibilityLabel="Cerrar">

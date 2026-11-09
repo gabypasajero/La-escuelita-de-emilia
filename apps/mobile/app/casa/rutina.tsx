@@ -7,7 +7,7 @@ import { Pantalla } from "../../components/Pantalla";
 import { EmiliaDibujo, Globo } from "../../components/Personajes";
 import { useJuego } from "../../lib/juego";
 import { hablar } from "../../lib/voz";
-import { Icono } from "../../components/Iconos";
+import { Icono, TextoIconos } from "../../components/Iconos";
 
 /**
  * Modo acompañante: Emilia guía la rutina real (manos o dientes) paso a paso,
@@ -61,9 +61,9 @@ export default function Rutina() {
         </Pressable>
       ) : terminado ? (
         <View style={estilos.centro}>
-          <Text style={estilos.estrellas}>⭐🎉⭐</Text>
+          <TextoIconos estilo={estilos.estrellas} texto={`⭐🎉⭐`} />
           <Pressable style={estilos.boton} onPress={() => { ultimoPaso.current = -1; setSegundos(null); }} accessibilityLabel="Otra vez">
-            <Text style={estilos.botonTexto}>🔁 Otra vez</Text>
+            <TextoIconos estilo={estilos.botonTexto} texto={`🔁 Otra vez`} />
           </Pressable>
         </View>
       ) : (

@@ -11,6 +11,7 @@ import { EmiliaDibujo, Globo, type Expresion } from "../components/Personajes";
 import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
 import { despuesDeHablar, hablar, reactivarVoz } from "../lib/voz";
 import { horaActual } from "../lib/hora";
+import { TextoIconos } from "../components/Iconos";
 
 /**
  * El barrio de Emilia como un mundo para caminar (vista desde arriba, estilo
@@ -358,19 +359,19 @@ function Mundo() {
       </View>
       <Monedas />
       <Pressable style={estilos.miPersonaje} onPress={() => router.push("/personaje")} accessibilityLabel="Cambiar mi personaje">
-        <Text style={estilos.botonTexto}>✏️ Mi personaje</Text>
+        <TextoIconos estilo={estilos.botonTexto} texto={`✏️ Mi personaje`} />
       </Pressable>
       <Pressable style={estilos.probar3d} onPress={() => router.push("/barrio3d")} accessibilityLabel="Probar barrio 3D">
-        <Text style={estilos.botonTexto}>🧊 Probar 3D</Text>
+        <TextoIconos estilo={estilos.botonTexto} texto={`🧊 Probar 3D`} />
       </Pressable>
       <Pressable style={estilos.cambiarJugador} onPress={() => { elegirJugador(null); router.replace("/quien-juega"); }} accessibilityLabel="Cambiar de jugador">
-        <Text style={estilos.botonTexto}>👫 Cambiar</Text>
+        <TextoIconos estilo={estilos.botonTexto} texto={`👫 Cambiar`} />
       </Pressable>
       <Pressable style={estilos.sonido} onPress={() => reactivarVoz()} accessibilityLabel="Reactivar sonido">
-        <Text style={estilos.botonTexto}>🔊 Sonido</Text>
+        <TextoIconos estilo={estilos.botonTexto} texto={`🔊 Sonido`} />
       </Pressable>
       <Pressable style={estilos.padres} accessibilityLabel="Zona de padres" onPress={() => router.push("/padres")}>
-        <Text style={estilos.padresTexto}>👪 Padres</Text>
+        <TextoIconos estilo={estilos.padresTexto} texto={`👪 Padres`} />
       </Pressable>
     </View>
   );

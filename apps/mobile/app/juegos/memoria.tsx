@@ -100,7 +100,7 @@ export default function Memoria() {
         </Pressable>
         <View style={estilos.niveles}>
           {Array.from({ length: NIVELES_MEMORIA }, (_, k) => (
-            <Text key={k} style={[estilos.nivel, k < nivel && estilos.nivelHecho]}>{k < nivel ? "⭐" : "○"}</Text>
+            <Icono key={k} e={k < nivel ? "⭐" : "☆"} tam={30} sinSombra />
           ))}
         </View>
       </View>

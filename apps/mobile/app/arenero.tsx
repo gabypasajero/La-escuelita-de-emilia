@@ -6,7 +6,7 @@ import { Pantalla } from "../components/Pantalla";
 import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
 import { DESBLOQUEOS, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
-import { Icono } from "../components/Iconos";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 const TESOROS = [
   { emoji: "🐚", nombre: "una concha" },
@@ -91,19 +91,19 @@ export default function Arenero() {
           </View>
           {encontrados === total && (
             <Pressable style={estilos.boton} onPress={() => { setMontones(nuevoArenero()); decir("¡Escondí tesoros nuevos! A buscar."); }} accessibilityLabel="Otra vez">
-              <Text style={estilos.botonTexto}>🔁 Otra vez</Text>
+              <TextoIconos estilo={estilos.botonTexto} texto={`🔁 Otra vez`} />
             </Pressable>
           )}
         </>
       ) : (
         <View style={estilos.castillo}>
-          {torres >= 5 && <Text style={estilos.bandera}>🚩</Text>}
+          {torres >= 5 && <TextoIconos estilo={estilos.bandera} texto={`🚩`} />}
           <View style={estilos.torres}>
             {Array.from({ length: torres }, (_, k) => <View key={k} style={[estilos.torre, { height: 60 + (k % 2) * 30 }]} />)}
           </View>
           <View style={estilos.base} />
           <Pressable style={estilos.boton} onPress={torres >= 5 ? () => { setTorres(0); decir("¡Hagamos otro castillo!"); } : torre} accessibilityLabel="Agregar torre">
-            <Text style={estilos.botonTexto}>{torres >= 5 ? "🔁 Otro castillo" : "🪣 Agregar torre"}</Text>
+            <TextoIconos estilo={estilos.botonTexto} texto={torres >= 5 ? "🔁 Otro castillo" : "🪣 Agregar torre"} />
           </Pressable>
         </View>
       )}

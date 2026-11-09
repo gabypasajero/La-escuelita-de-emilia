@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../../components/Pantalla";
 import { Adulto } from "../../components/Personas";
 import { Pregunta } from "../../components/Pregunta";
-import { Icono } from "../../components/Iconos";
+import { Icono, TextoIconos } from "../../components/Iconos";
 
 /** Mesa de la abuela Nina: elegir lo que le hace mejor al cuerpo (sin culpas: los dulces son "de vez en cuando"). */
 export default function Plato() {
@@ -15,7 +15,7 @@ export default function Plato() {
         estimulo={(r) => (
           <View style={estilos.abuela}>
             <Nina clave={r} />
-            <Text style={estilos.plato}>🍽️</Text>
+            <TextoIconos estilo={estilos.plato} texto={`🍽️`} />
           </View>
         )}
         opcion={(a) => <Icono e={a.emoji} tam={84} />}

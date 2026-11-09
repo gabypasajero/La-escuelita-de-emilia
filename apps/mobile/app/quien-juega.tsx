@@ -7,6 +7,7 @@ import { BotonInstalar } from "../components/BotonInstalar";
 import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
 import { ACCESORIOS, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
+import { TextoIconos } from "../components/Iconos";
 
 /** Al abrir el juego: cada niño toca su personaje para entrar con sus monedas y sus cosas. */
 export default function QuienJuega() {
@@ -42,7 +43,7 @@ export default function QuienJuega() {
               )}
             />
             <Text style={estilos.nombre}>{j.perfil.nombre}</Text>
-            <Text style={estilos.monedas}>🪙 {j.monedas}</Text>
+            <TextoIconos estilo={estilos.monedas} texto={`🪙 ${j.monedas}`} />
           </Pressable>
         ))}
         <Pressable
@@ -53,13 +54,13 @@ export default function QuienJuega() {
             router.push("/personaje");
           }}
         >
-          <Text style={estilos.mas}>➕</Text>
+          <TextoIconos estilo={estilos.mas} texto={`➕`} />
           <Text style={estilos.nombre}>Nuevo</Text>
         </Pressable>
       </View>
       {jugadores.length >= 2 && (
         <Pressable style={estilos.juntos} onPress={() => router.push("/juntos")} accessibilityLabel="Jugar juntos">
-          <Text style={estilos.juntosTexto}>👫 Jugar juntos</Text>
+          <TextoIconos estilo={estilos.juntosTexto} texto={`👫 Jugar juntos`} />
         </Pressable>
       )}
       <BotonInstalar estilo={estilos.instalar} />

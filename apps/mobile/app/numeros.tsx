@@ -6,7 +6,7 @@ import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
-import { Icono } from "../components/Iconos";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 const OBJETO_POR_NUMERO = ["", "⭐", "🍎", "🎈", "🐟", "🌼", "🐞", "🍓", "🚗", "🦋", "🍪"];
 const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -66,7 +66,7 @@ export default function Numeros() {
                 </View>
                 {n.valor < 10 && (
                   <Pressable style={estilos.lapiz} onPress={() => router.push(`/trazar?serie=numeros&c=${n.valor}`)} accessibilityLabel={`Escribir el ${n.palabra}`}>
-                    <Text style={estilos.lapizTexto}>✏️</Text>
+                    <TextoIconos estilo={estilos.lapizTexto} texto={`✏️`} />
                   </Pressable>
                 )}
               </Pressable>

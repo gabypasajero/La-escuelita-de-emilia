@@ -8,7 +8,7 @@ import { BotonCasa } from "../components/BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Personajes";
 import { ACCESORIOS, useJuego, type Jugador } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
-import { Icono } from "../components/Iconos";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 const META = 10;
 
@@ -45,7 +45,7 @@ export default function Juntos() {
               }}>
               <AvatarDe j={j} alto={140} />
               <Text style={estilos.nombre}>{j.perfil.nombre}</Text>
-              {si && <Text style={estilos.check}>✅</Text>}
+              {si && <TextoIconos estilo={estilos.check} texto={`✅`} />}
             </Pressable>
           );
         })}
@@ -141,13 +141,13 @@ function Partida({ equipo, alSalir }: { equipo: Jugador[]; alSalir: () => void }
   if (fiesta) {
     return (
       <SafeAreaView style={[estilos.fondo, estilos.fondoFiesta]}>
-        <Text style={estilos.confeti}>🎉🎈🎊🎈🎉</Text>
+        <TextoIconos estilo={estilos.confeti} texto={`🎉🎈🎊🎈🎉`} />
         <Globo texto={dicho} />
         <View style={estilos.equipoFiesta}>
           <EmiliaDibujo alto={150} />
           {equipo.map((j) => <AvatarDe key={j.id} j={j} alto={150} />)}
           <TitoDibujo alto={70} />
-          <Text style={estilos.torta}>🎂</Text>
+          <TextoIconos estilo={estilos.torta} texto={`🎂`} />
         </View>
         <View style={estilos.botones}>
           <Pressable style={estilos.empezar} onPress={() => {
@@ -155,10 +155,10 @@ function Partida({ equipo, alSalir }: { equipo: Jugador[]; alSalir: () => void }
             setFiesta(false); setEstrellas(0); setTurno(0); setErrores(0); setRonda(r);
             void presentarTurno(equipo[0]!, r);
           }} accessibilityLabel="Jugar otra vez">
-            <Text style={estilos.empezarTexto}>🔁 Otra vez</Text>
+            <TextoIconos estilo={estilos.empezarTexto} texto={`🔁 Otra vez`} />
           </Pressable>
           <Pressable style={[estilos.empezar, estilos.secundario]} onPress={() => { alSalir(); router.replace("/"); }} accessibilityLabel="Volver al barrio">
-            <Text style={estilos.empezarTexto}>🏠 Al barrio</Text>
+            <TextoIconos estilo={estilos.empezarTexto} texto={`🏠 Al barrio`} />
           </Pressable>
         </View>
       </SafeAreaView>
@@ -170,8 +170,8 @@ function Partida({ equipo, alSalir }: { equipo: Jugador[]; alSalir: () => void }
       <BotonCasa />
       {/* Meta del equipo: estrellas para la fiesta de Tito */}
       <View style={estilos.meta}>
-        {Array.from({ length: META }, (_, k) => <Text key={k} style={estilos.estrella}>{k < estrellas ? "⭐" : "☆"}</Text>)}
-        <Text style={estilos.estrella}>🎂</Text>
+        {Array.from({ length: META }, (_, k) => <Icono key={k} e={k < estrellas ? "⭐" : "☆"} tam={34} sinSombra />)}
+        <TextoIconos estilo={estilos.estrella} texto={`🎂`} />
       </View>
       <View style={estilos.equipo}>
         {equipo.map((j, k) => {

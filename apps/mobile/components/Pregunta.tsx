@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { COLORES, TOQUE_MINIMO } from "../lib/tema";
 import { useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar, type Idioma } from "../lib/voz";
+import { TextoIconos } from "./Iconos";
 
 type RondaCualquiera = Ronda<any>;
 type Opcion<R extends RondaCualquiera> = R["opciones"][number];
@@ -59,11 +60,11 @@ export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion,
     <View style={estilos.contenedor}>
       <View style={estilos.cabecera}>
         <Pressable onPress={() => hablar(ronda.enunciado, idioma)} accessibilityLabel="Repetir pregunta">
-          <Text style={estilos.enunciado}>🔊 {ronda.enunciado}</Text>
+          <TextoIconos estilo={estilos.enunciado} texto={`🔊 ${ronda.enunciado}`} />
         </Pressable>
         {ayuda && (
           <Pressable onPress={() => hablar(ayuda(ronda))} accessibilityLabel="Ayuda de Emilia" style={estilos.ayuda}>
-            <Text style={estilos.ayudaTexto}>🤔 Ayuda</Text>
+            <TextoIconos estilo={estilos.ayudaTexto} texto={`🤔 Ayuda`} />
           </Pressable>
         )}
       </View>
@@ -79,7 +80,7 @@ export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion,
           </Pressable>
         ))}
       </View>
-      {celebrando && <Text style={estilos.celebracion}>⭐🎉⭐</Text>}
+      {celebrando && <TextoIconos estilo={estilos.celebracion} texto={`⭐🎉⭐`} />}
     </View>
   );
 }

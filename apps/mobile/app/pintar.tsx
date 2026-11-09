@@ -5,6 +5,7 @@ import { Pantalla } from "../components/Pantalla";
 import { useSuperficieDibujo } from "../lib/puntero";
 import { COLORES } from "../lib/tema";
 import { hablar } from "../lib/voz";
+import { TextoIconos } from "../components/Iconos";
 
 const PALETA = ["#E53935", "#FB8C00", "#FDD835", "#43A047", "#1E88E5", "#8E24AA", "#F06292", "#6D4C41", "#212121"];
 const GROSORES = [8, 16, 28];
@@ -79,7 +80,7 @@ export default function Pintar() {
           <Pressable key={c} accessibilityLabel={`Color ${c}`} onPress={() => setColor(c)} style={[estilos.color, { backgroundColor: c }, c === color && estilos.elegido]} />
         ))}
         <Pressable accessibilityLabel="Borrador" onPress={() => { setColor(BORRADOR); hablar("Borrador"); }} style={[estilos.boton, color === BORRADOR && estilos.elegido]}>
-          <Text style={estilos.icono}>🧽</Text>
+          <TextoIconos estilo={estilos.icono} texto={`🧽`} />
         </Pressable>
         {GROSORES.map((g) => (
           <Pressable key={g} accessibilityLabel={`Grosor ${g}`} onPress={() => setGrosor(g)} style={[estilos.boton, g === grosor && estilos.elegido]}>
@@ -90,7 +91,7 @@ export default function Pintar() {
           <Text style={estilos.icono}>↩️</Text>
         </Pressable>
         <Pressable onPress={borrarTodo} style={estilos.boton} accessibilityLabel="Hoja nueva">
-          <Text style={estilos.icono}>📄</Text>
+          <TextoIconos estilo={estilos.icono} texto={`📄`} />
         </Pressable>
       </View>
     </Pantalla>

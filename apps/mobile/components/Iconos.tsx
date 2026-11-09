@@ -1,5 +1,5 @@
 import { memo, useId, type ReactNode } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View, type StyleProp, type TextStyle } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, Line, Mask, Path, Polygon, RadialGradient, Rect, Stop, Text as SvgText } from "react-native-svg";
 import { AnimalVivo, PROPORCION, type AnimalId } from "./AnimalesVivos";
 
@@ -60,14 +60,24 @@ export const Icono = memo(function Icono({ e, tam, sinSombra = false, quieto = f
   );
 });
 
-/** Un texto con emojis (por ejemplo "🍎🍎🍎" o "🥕2") con los emojis dibujados. */
-export function TextoIconos({ texto, tam, color = "#3B2F5C" }: { texto: string; tam: number; color?: string }) {
-  const partes = Array.from(texto.matchAll(/(\p{Extended_Pictographic}️?(?:‍\p{Extended_Pictographic}️?)*)|([^\p{Extended_Pictographic}]+)/gu));
+/**
+ * Un texto con emojis (por ejemplo "🔊 Escuchar", "🪙 12" o "🍎🍎🍎") con los
+ * emojis dibujados y el resto como texto con el estilo indicado. El tamaño
+ * de los dibujos sale del tamaño de letra si no se indica.
+ */
+export function TextoIconos({ texto, tam, color = "#3B2F5C", estilo }: { texto: string | number; tam?: number; color?: string; estilo?: StyleProp<TextStyle> }) {
+  const plano = StyleSheet.flatten(estilo) ?? {};
+  const fuente = (plano.fontSize as number | undefined) ?? (tam ? tam * 0.7 : 20);
+  const t = tam ?? Math.round(fuente * 1.3);
+  const re = /([\u{1F1E6}-\u{1F1FF}]{2}|\p{Extended_Pictographic}\uFE0F?(?:\u200D\p{Extended_Pictographic}\uFE0F?)*)|((?:(?![\u{1F1E6}-\u{1F1FF}])[^\p{Extended_Pictographic}])+)/gu;
+  const partes = Array.from(String(texto).matchAll(re));
+  const { margin, marginTop, marginBottom, marginVertical, marginHorizontal, padding, paddingHorizontal, paddingVertical, backgroundColor, borderRadius, borderWidth, borderColor, overflow, position, top, left, right, bottom, alignSelf, ...soloTexto } = plano as TextStyle;
+  const caja = { margin, marginTop, marginBottom, marginVertical, marginHorizontal, padding, paddingHorizontal, paddingVertical, backgroundColor, borderRadius, borderWidth, borderColor, overflow, position, top, left, right, bottom, alignSelf };
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
+    <View style={[{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }, caja as object]}>
       {partes.map((m, i) => m[1]
-        ? <Icono key={i} e={m[1]} tam={tam} sinSombra />
-        : <Text key={i} style={{ fontSize: tam * 0.7, fontWeight: "900", color }}>{m[2]}</Text>)}
+        ? <Icono key={i} e={m[1]} tam={t} sinSombra quieto />
+        : <Text key={i} style={[{ fontSize: fuente, fontWeight: "900", color, flexShrink: 1 }, soloTexto]}>{m[2]}</Text>)}
     </View>
   );
 }
@@ -262,6 +272,35 @@ export const D: Record<string, ReactNode> = {
   "🍃": <G>{hoja(18, 62, -30, "#66BB6A", 46)}{hoja(36, 72, -60, "#43A047", 40)}<Path d="M70 20 Q86 30 90 44" stroke="#B3E5FC" strokeWidth="3" fill="none" strokeLinecap="round" /></G>,
   "🤗": <G>{cara("#FDD835")}<Path d="M30 44 Q36 38 42 44 M58 44 Q64 38 70 44" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" /><Path d="M38 60 Q50 72 62 60" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" /><Ellipse cx="16" cy="74" rx="12" ry="9" fill="#FFCA28" stroke="#F9A825" strokeWidth="2" /><Ellipse cx="84" cy="74" rx="12" ry="9" fill="#FFCA28" stroke="#F9A825" strokeWidth="2" /></G>,
   "🏰": <G><Rect x="22" y="40" width="56" height="48" fill="#FFE0B2" />{[14, 66].map((x) => <G key={x}><Rect x={x} y="28" width="20" height="60" fill="#FFCC80" /><Path d={`M${x} 28 h4 v-6 h4 v6 h4 v-6 h4 v6 h4`} stroke="#FFCC80" strokeWidth="0" fill="#FFCC80" /><Rect x={x} y="22" width="4" height="8" fill="#FFCC80" /><Rect x={x + 8} y="22" width="4" height="8" fill="#FFCC80" /><Rect x={x + 16} y="22" width="4" height="8" fill="#FFCC80" /></G>)}<Path d="M42 88 V70 Q50 62 58 70 V88 Z" fill="#8D6E63" /><Rect x="49" y="10" width="3" height="30" fill="#8D6E63" /><Path d="M52 10 L66 15 L52 20 Z" fill="#E53935" /></G>,
+  // Interfaz
+  "⬅️": <G><Circle cx="50" cy="50" r="40" fill="#42A5F5" /><Path d="M24 50 L48 26 V40 H74 V60 H48 V74 Z" fill="#fff" strokeLinejoin="round" stroke="#fff" strokeWidth="4" /></G>,
+  "➡️": <G><Circle cx="50" cy="50" r="40" fill="#66BB6A" /><Path d="M76 50 L52 26 V40 H26 V60 H52 V74 Z" fill="#fff" strokeLinejoin="round" stroke="#fff" strokeWidth="4" /></G>,
+  "🔊": <G><Path d="M14 38 H32 L54 18 V82 L32 62 H14 Z" fill="#5C6BC0" strokeLinejoin="round" stroke="#5C6BC0" strokeWidth="4" /><Path d="M64 34 Q74 50 64 66 M74 24 Q90 50 74 76" stroke="#29B6F6" strokeWidth="6" fill="none" strokeLinecap="round" /></G>,
+  "✖": <G><Circle cx="50" cy="50" r="38" fill="#EF5350" /><Path d="M34 34 L66 66 M66 34 L34 66" stroke="#fff" strokeWidth="10" strokeLinecap="round" /></G>,
+  "🔁": <G><Circle cx="50" cy="50" r="40" fill="#26A69A" /><Path d="M28 52 Q28 30 50 30 H64" stroke="#fff" strokeWidth="7" fill="none" strokeLinecap="round" /><Path d="M60 20 L72 30 L60 40 Z" fill="#fff" /><Path d="M72 48 Q72 70 50 70 H36" stroke="#fff" strokeWidth="7" fill="none" strokeLinecap="round" /><Path d="M40 60 L28 70 L40 80 Z" fill="#fff" /></G>,
+  "🗺️": <G><Path d="M10 24 L36 14 L64 24 L90 14 V76 L64 86 L36 76 L10 86 Z" fill="#AED581" /><Path d="M36 14 V76 M64 24 V86" stroke="#7CB342" strokeWidth="2" /><Path d="M18 60 Q30 40 46 52 T80 36" stroke="#E53935" strokeWidth="3" fill="none" strokeDasharray="5 4" /><Circle cx="80" cy="36" r="5" fill="#E53935" /><Path d="M54 66 Q60 58 66 66 Q60 74 54 66 Z" fill="#4FC3F7" /></G>,
+  "🚧": <G><Rect x="16" y="56" width="6" height="34" fill="#616161" /><Rect x="78" y="56" width="6" height="34" fill="#616161" /><Rect x="8" y="30" width="84" height="30" rx="4" fill="#FDD835" />{[14, 34, 54, 74].map((x) => <Path key={x} d={`M${x} 30 H${x + 10} L${x - 2} 60 H${x - 12} Z`} fill="#212121" />)}<Circle cx="20" cy="22" r="6" fill="#FF7043" /><Circle cx="80" cy="22" r="6" fill="#FF7043" /></G>,
+  "✅": <G><Rect x="12" y="12" width="76" height="76" rx="18" fill="#43A047" /><Path d="M28 52 L44 66 L74 34" stroke="#fff" strokeWidth="10" fill="none" strokeLinecap="round" strokeLinejoin="round" /></G>,
+  "🎉": <G><Path d="M14 88 L36 30 L70 64 Z" fill="#FFB300" /><Path d="M20 72 L44 82 M26 56 L56 70" stroke="#E53935" strokeWidth="4" /><Path d="M48 34 Q56 14 70 18 M62 46 Q78 40 86 52 M54 22 L58 10" stroke="#8E24AA" strokeWidth="4" fill="none" strokeLinecap="round" />{[[76, 20, "#29B6F6"], [88, 34, "#E53935"], [70, 8, "#43A047"], [90, 66, "#FDD835"]].map(([x, y, c]) => <Circle key={x as number} cx={x as number} cy={y as number} r="4" fill={c as string} />)}</G>,
+  "🎊": <G><Path d="M50 10 V22" stroke="#8D6E63" strokeWidth="3" /><Circle cx="50" cy="50" r="28" fill="#EC407A" /><Path d="M22 50 H78" stroke="#AD1457" strokeWidth="3" />{[[20, 84, "#FDD835"], [36, 90, "#29B6F6"], [64, 88, "#43A047"], [80, 82, "#FB8C00"], [50, 94, "#8E24AA"]].map(([x, y, c]) => <Rect key={x as number} x={x as number} y={y as number} width="7" height="4" rx="1" fill={c as string} transform={`rotate(${(x as number) * 4} ${x} ${y})`} />)}</G>,
+  "🤔": <G>{cara("#FDD835")}<Path d="M30 40 L42 36 M58 34 L70 40" stroke="#5D4037" strokeWidth="3" strokeLinecap="round" />{ojo(38, 46, 3.5)}{ojo(62, 46, 3.5)}<Path d="M40 66 Q50 62 60 68" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" /><Path d="M54 92 Q50 80 58 76 Q66 74 70 82 Q72 92 62 94 Z" fill="#FBC02D" stroke="#F9A825" strokeWidth="2" /></G>,
+  "❔": <G><Circle cx="50" cy="50" r="38" fill="#fff" stroke="#B0BEC5" strokeWidth="3" strokeDasharray="6 5" /><SvgText x="50" y="66" fontSize="46" fontWeight="bold" fill="#90A4AE" textAnchor="middle">?</SvgText></G>,
+  "❓": <G><Circle cx="50" cy="50" r="38" fill="#7E57C2" /><SvgText x="50" y="67" fontSize="50" fontWeight="bold" fill="#fff" textAnchor="middle">?</SvgText></G>,
+  "👫": <G><Circle cx="32" cy="30" r="14" fill="#F6D3B3" /><Path d="M18 28 Q20 12 32 14 Q46 12 46 28 Q40 20 32 21 Q24 20 18 28 Z" fill="#5D4037" /><Circle cx="18" cy="26" r="6" fill="#5D4037" /><Circle cx="46" cy="26" r="6" fill="#5D4037" /><Path d="M18 48 H46 L54 84 H10 Z" fill="#FDD835" /><Circle cx="68" cy="32" r="14" fill="#E0A878" /><Path d="M54 30 Q56 14 68 16 Q82 14 82 30 Q76 22 68 23 Q60 22 54 30 Z" fill="#212121" /><Path d="M54 50 H82 L84 84 H52 Z" fill="#1E88E5" /><Path d="M46 62 H54" stroke="#F1C7A5" strokeWidth="6" strokeLinecap="round" /></G>,
+  "👪": <G>{[[24, 34, 13, "#F6D3B3", "#5D4037", "#E57373"], [76, 34, 13, "#E0A878", "#212121", "#42A5F5"], [50, 52, 10, "#F1C7A5", "#8D6E63", "#FDD835"]].map(([x, y, r, piel, pelo, ropa]) => (
+    <G key={x as number}><Path d={`M${(x as number) - (r as number) * 1.2} ${(y as number) + (r as number) * 1.3} H${(x as number) + (r as number) * 1.2} L${(x as number) + (r as number) * 1.5} 92 H${(x as number) - (r as number) * 1.5} Z`} fill={ropa as string} /><Circle cx={x as number} cy={y as number} r={r as number} fill={piel as string} /><Path d={`M${(x as number) - (r as number)} ${y} Q${x} ${(y as number) - (r as number) * 1.6} ${(x as number) + (r as number)} ${y} Q${x} ${(y as number) - (r as number) * 0.6} ${(x as number) - (r as number)} ${y} Z`} fill={pelo as string} /></G>
+  ))}</G>,
+  "🧊": <G><Path d="M50 12 L86 30 V70 L50 88 L14 70 V30 Z" fill="#81D4FA" /><Path d="M50 12 L86 30 L50 48 L14 30 Z" fill="#E1F5FE" /><Path d="M50 48 L86 30 V70 L50 88 Z" fill="#4FC3F7" /><Path d="M24 36 L40 44" stroke="#fff" strokeWidth="3" opacity="0.7" /></G>,
+  "📲": <G><Rect x="34" y="8" width="40" height="80" rx="8" fill="#37474F" /><Rect x="38" y="16" width="32" height="60" rx="3" fill="#B3E5FC" /><Circle cx="54" cy="82" r="3" fill="#90A4AE" /><Path d="M6 48 H30 M22 38 L32 48 L22 58" stroke="#43A047" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round" /></G>,
+  "📄": <G><Path d="M22 8 H62 L80 26 V92 H22 Z" fill="#fff" stroke="#B0BEC5" strokeWidth="3" /><Path d="M62 8 V26 H80" fill="#ECEFF1" stroke="#B0BEC5" strokeWidth="3" />{[40, 52, 64, 76].map((y) => <Rect key={y} x="32" y={y} width="38" height="4" rx="2" fill="#CFD8DC" />)}</G>,
+  "💛": <Path d="M50 86 L16 50 A18 18 0 0 1 50 24 A18 18 0 0 1 84 50 Z" fill="#FDD835" stroke="#F9A825" strokeWidth="3" />,
+  "🥺": <G>{cara("#FDD835")}<Circle cx="38" cy="48" r="8" fill="#3E2723" /><Circle cx="62" cy="48" r="8" fill="#3E2723" /><Circle cx="35" cy="45" r="3" fill="#fff" /><Circle cx="59" cy="45" r="3" fill="#fff" /><Path d="M30 34 Q36 30 44 36 M56 36 Q64 30 70 34" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" /><Path d="M42 70 Q50 64 58 70" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" />{gota(70, 62, 0.35, "#4FC3F7")}</G>,
+  "👧": <G><Circle cx="20" cy="40" r="12" fill="#5D4037" /><Circle cx="80" cy="40" r="12" fill="#5D4037" /><Circle cx="50" cy="52" r="32" fill="#F6D3B3" /><Path d="M18 50 Q20 16 50 16 Q82 16 82 50 Q70 32 50 34 Q32 32 18 50 Z" fill="#5D4037" /><Circle cx="20" cy="34" r="4.5" fill="#E53935" /><Circle cx="80" cy="34" r="4.5" fill="#E53935" />{ojo(38, 54, 4)}{ojo(62, 54, 4)}<Path d="M40 68 Q50 76 60 68" stroke="#3B2F5C" strokeWidth="3" fill="none" strokeLinecap="round" /><Circle cx="30" cy="64" r="5" fill="#F48FB1" opacity="0.6" /><Circle cx="70" cy="64" r="5" fill="#F48FB1" opacity="0.6" /></G>,
+  "☆": <G opacity="0.45">{estrella(50, 52, 36, "#CFD8DC")}</G>,
+  "🇺🇸": <G><Rect x="8" y="22" width="84" height="56" rx="6" fill="#fff" />{[0, 2, 4, 6].map((i) => <Rect key={i} x="8" y={22 + i * 8} width="84" height="8" fill="#E53935" />)}<Rect x="8" y="70" width="84" height="8" fill="#E53935" /><Rect x="8" y="22" width="38" height="30" fill="#1E3A8A" />{[[16, 30], [26, 30], [36, 30], [21, 38], [31, 38], [16, 46], [26, 46], [36, 46]].map(([x, y]) => <Circle key={`${x}${y}`} cx={x} cy={y} r="2" fill="#fff" />)}</G>,
+  "🇧🇷": <G><Rect x="8" y="22" width="84" height="56" rx="6" fill="#43A047" /><Path d="M50 28 L86 50 L50 72 L14 50 Z" fill="#FDD835" /><Circle cx="50" cy="50" r="13" fill="#1E3A8A" /><Path d="M38 47 Q50 42 62 50" stroke="#fff" strokeWidth="2.5" fill="none" /></G>,
+  "🇫🇷": <G><Rect x="8" y="22" width="84" height="56" rx="6" fill="#fff" /><Path d="M14 22 H36 V78 H14 Q8 78 8 72 V28 Q8 22 14 22 Z" fill="#1E3A8A" /><Path d="M64 22 H86 Q92 22 92 28 V72 Q92 78 86 78 H64 Z" fill="#E53935" /></G>,
+  "🇨🇳": <G><Rect x="8" y="22" width="84" height="56" rx="6" fill="#E53935" />{estrella(26, 40, 10, "#FDD835")}{[[42, 28], [48, 36], [48, 46], [42, 54]].map(([x, y]) => <G key={`${x}${y}`}>{estrella(x!, y!, 3.4, "#FDD835")}</G>)}</G>,
   // Accesorios de la tienda
   "🎀": <G><Path d="M50 50 L14 26 Q8 50 14 74 Z" fill="#EC407A" /><Path d="M50 50 L86 26 Q92 50 86 74 Z" fill="#EC407A" /><Path d="M46 54 L36 92 L46 86 Z M54 54 L64 92 L54 86 Z" fill="#D81B60" /><Circle cx="50" cy="50" r="10" fill="#F06292" /></G>,
   "🎩": <G><Ellipse cx="50" cy="76" rx="42" ry="10" fill="#263238" /><Rect x="26" y="20" width="48" height="56" rx="4" fill="#37474F" /><Ellipse cx="50" cy="20" rx="24" ry="5" fill="#455A64" /><Rect x="26" y="58" width="48" height="10" fill="#E53935" /></G>,
@@ -276,3 +315,10 @@ export const D: Record<string, ReactNode> = {
 /** Las claves sin el selector de emoji (U+FE0F), para encontrar "☀️" igual que "☀". */
 const DIBUJOS: Record<string, ReactNode> = Object.fromEntries(Object.entries(D).map(([k, v]) => [limpio(k), v]));
 const ANIMALES: Record<string, AnimalId> = Object.fromEntries(Object.entries(ANIMAL).map(([k, v]) => [limpio(k), v]));
+
+/** Un dibujo dentro de otro SVG (centrado en x, y), para escenarios dibujados. */
+export function dibujoEnSvg(e: string, x: number, y: number, tam: number) {
+  const d = DIBUJOS[limpio(e)];
+  if (!d) return null;
+  return <G transform={`translate(${x - tam / 2} ${y - tam / 2}) scale(${tam / 100})`}>{d}</G>;
+}

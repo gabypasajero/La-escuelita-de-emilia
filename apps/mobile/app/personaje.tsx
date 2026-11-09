@@ -6,6 +6,7 @@ import { APARIENCIA_INICIAL, Avatar, PEINADOS, PELOS, PIELES, ROPAS } from "../c
 import { EmiliaDibujo, Globo } from "../components/Personajes";
 import { useJuego, type Apariencia } from "../lib/juego";
 import { hablar } from "../lib/voz";
+import { TextoIconos } from "../components/Iconos";
 
 const NOMBRE_PEINADO: Record<Apariencia["peinado"], string> = { corto: "Corto", colitas: "Colitas", largo: "Largo", rizado: "Rizado" };
 
@@ -77,7 +78,7 @@ export default function Personaje() {
         </View>
 
         <Pressable style={estilos.listo} onPress={listo} accessibilityLabel="Listo">
-          <Text style={estilos.listoTexto}>✅ ¡Listo!</Text>
+          <TextoIconos estilo={estilos.listoTexto} texto={`✅ ¡Listo!`} />
         </Pressable>
       </ScrollView>
     </SafeAreaView>

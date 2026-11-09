@@ -11,6 +11,7 @@ import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
 import { SombraContacto, VinetaPantalla } from "../components/AmbienteInterior";
+import { TextoIconos } from "../components/Iconos";
 
 /**
  * Parque de juegos: el personaje del niño se sube al columpio (con Emilia al
@@ -238,8 +239,8 @@ export default function Plaza() {
             void decir(`El arenero está en construcción. Tito está ayudando. Se abre con ${DESBLOQUEOS.arenero} estrellas: ¡te faltan ${faltan}! Gana estrellas jugando en la escuelita.`);
           }}
         >
-          <Text style={estilos.botonEmoji}>{estrellas >= DESBLOQUEOS.arenero ? "🏖️" : "🚧"}</Text>
-          <Text style={estilos.botonTexto}>{estrellas >= DESBLOQUEOS.arenero ? "Arenero" : `⭐ ${Math.min(estrellas, DESBLOQUEOS.arenero)}/${DESBLOQUEOS.arenero}`}</Text>
+          <TextoIconos estilo={estilos.botonEmoji} texto={estrellas >= DESBLOQUEOS.arenero ? "🏖️" : "🚧"} />
+          <TextoIconos estilo={estilos.botonTexto} texto={estrellas >= DESBLOQUEOS.arenero ? "Arenero" : `⭐ ${Math.min(estrellas, DESBLOQUEOS.arenero)}/${DESBLOQUEOS.arenero}`} />
         </Pressable>
       </View>
     </View>

@@ -8,7 +8,7 @@ import { EscenaRPG, type ObjetoEscena } from "../components/EscenaRPG";
 import { useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 import { useVozActiva } from "../lib/habla";
-import { Icono } from "../components/Iconos";
+import { Icono, TextoIconos } from "../components/Iconos";
 
 /**
  * Granja de Don Pedro para recorrer: los animales pasean por su corral; al
@@ -107,7 +107,7 @@ function AnimalDeGranja({ id, k, paseo, feliz }: { id: AnimalId; k: number; pase
   const alto = (grande ? 100 : id === "oveja" || id === "cerdo" ? 82 : 70) * k;
   return (
     <View style={{ alignItems: "center" }}>
-      {feliz && <Text style={{ fontSize: 26 * k }}>💛</Text>}
+      {feliz && <TextoIconos estilo={{ fontSize: 26 * k }} texto={`💛`} />}
       <AnimalPaseando id={id} alto={alto} paseo={paseo * k} contento={feliz} />
       <View style={{ width: alto * PROPORCION[id] * 0.6, height: 10 * k, borderRadius: 40, backgroundColor: "rgba(0,0,0,0.14)", marginTop: -8 * k }} />
     </View>

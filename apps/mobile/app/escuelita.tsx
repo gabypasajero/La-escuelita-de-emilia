@@ -8,7 +8,7 @@ import { Adulto } from "../components/Personas";
 import { despuesDeHablar, hablar } from "../lib/voz";
 import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../lib/hora";
 import { useVozActiva } from "../lib/habla";
-import { Icono } from "../components/Iconos";
+import { dibujoEnSvg, Icono, TextoIconos } from "../components/Iconos";
 
 /** Todos los juegos (también se abren desde el botón «Todos los juegos»). */
 const SALAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; frase: string }> = [
@@ -67,7 +67,7 @@ export default function Escuelita() {
     { id: "radio", x: 1010, y: 400, ancho: 120, alto: 170, etiqueta: "Radio de los sonidos", letrero: "Sonidos", dibujo: (k) => <Radio k={k} />, alLlegar: ir("Sonidos") },
     // Mesitas del medio
     { id: "frutas", x: 230, y: 540, ancho: 170, alto: 110, etiqueta: "Mesa de las frutas", letrero: "Sumas", dibujo: (k) => <Mesita k={k} encima={<G>{["#E53935", "#E53935", "#FDD835"].map((c, i) => <Circle key={i} cx={56 + i * 26} cy={22} r="11" fill={c} />)}</G>} />, alLlegar: ir("Sumas") },
-    { id: "cartas", x: 500, y: 550, ancho: 170, alto: 110, etiqueta: "Mesa de las cartas", letrero: "Memoria", dibujo: (k) => <Mesita k={k} encima={<G>{[0, 1, 2, 3].map((i) => <Rect key={i} x={40 + i * 24} y={10 + (i % 2) * 3} width="20" height="26" rx="3" fill={i === 1 ? "#fff" : "#AB47BC"} stroke="#fff" strokeWidth="2" />)}<SvgText x="74" y="31" fontSize="14" textAnchor="middle">🐶</SvgText></G>} />, alLlegar: ir("Memoria") },
+    { id: "cartas", x: 500, y: 550, ancho: 170, alto: 110, etiqueta: "Mesa de las cartas", letrero: "Memoria", dibujo: (k) => <Mesita k={k} encima={<G>{[0, 1, 2, 3].map((i) => <Rect key={i} x={40 + i * 24} y={10 + (i % 2) * 3} width="20" height="26" rx="3" fill={i === 1 ? "#fff" : "#AB47BC"} stroke="#fff" strokeWidth="2" />)}{dibujoEnSvg("🍓", 74, 23, 16)}</G>} />, alLlegar: ir("Memoria") },
     { id: "figuras", x: 770, y: 540, ancho: 170, alto: 110, etiqueta: "Mesa de las figuras", letrero: "Formas", dibujo: (k) => <Mesita k={k} encima={<G><Circle cx="56" cy="22" r="12" fill="#E53935" /><Rect x="76" y="10" width="22" height="22" fill="#1E88E5" /><Polygon points="118,32 106,10 130,10" fill="#43A047" transform="rotate(180 118 21)" /></G>} />, alLlegar: ir("Formas") },
     { id: "balanza", x: 1010, y: 560, ancho: 140, alto: 140, etiqueta: "Balanza", letrero: "Más y menos", dibujo: (k) => <Balanza k={k} />, alLlegar: ir("Más y menos") },
     // Rincones de adelante
@@ -103,7 +103,7 @@ export default function Escuelita() {
                 </Pressable>
               ))}
             </ScrollView>
-            <Pressable style={estilos.cerrar} onPress={() => setTodos(false)} accessibilityLabel="Cerrar"><Text style={estilos.todosTexto}>✖ Cerrar</Text></Pressable>
+            <Pressable style={estilos.cerrar} onPress={() => setTodos(false)} accessibilityLabel="Cerrar"><TextoIconos estilo={estilos.todosTexto} texto={`✖ Cerrar`} /></Pressable>
           </View>
         </View>
       </Modal>
@@ -253,7 +253,7 @@ function RinconLectura({ k }: { k: number }) {
       {[0, 1, 2, 3].map((i) => <Rect key={i} x={124 + i * 13} y="38" width="11" height="30" fill={["#EF5350", "#42A5F5", "#66BB6A", "#FFCA28"][i]} />)}
       {[0, 1, 2].map((i) => <Rect key={i} x={126 + i * 17} y="76" width="14" height="28" fill={["#AB47BC", "#FF7043", "#26A69A"][i]} />)}
       <Path d="M50 74 L70 66 L90 74 L90 88 L70 80 L50 88 Z" fill="#fff" stroke="#42A5F5" strokeWidth="2" />
-      <SvgText x="62" y="80" fontSize="10">🐒</SvgText>
+      {dibujoEnSvg("🐒", 67, 76, 12)}
     </Svg>
   );
 }
@@ -286,8 +286,8 @@ function Canasta({ k }: { k: number }) {
   return (
     <Svg width={150 * k} height={100 * k} viewBox="0 0 150 100">
       <Path d="M40 40 Q75 0 110 40" stroke="#A1887F" strokeWidth="5" fill="none" />
-      <SvgText x="52" y="50" fontSize="26">🥕</SvgText>
-      <SvgText x="80" y="46" fontSize="24">🥦</SvgText>
+      {dibujoEnSvg("🥕", 64, 42, 28)}
+      {dibujoEnSvg("🥦", 92, 38, 26)}
       <Path d="M28 44 L122 44 L110 92 L40 92 Z" fill="#D7A86E" />
       {[56, 70, 84].map((y) => <Line key={y} x1="32" y1={y} x2="118" y2={y} stroke="#A1887F" strokeWidth="2" />)}
     </Svg>
