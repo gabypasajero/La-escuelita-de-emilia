@@ -41,7 +41,7 @@ export default function Disfraces() {
   if (!perfil) return <Redirect href="/quien-juega" />;
 
   return (
-    <Pantalla color="#F8BBD0">
+    <Pantalla color="#F8BBD0" fondo="tienda">
       <View style={estilos.arriba}>
         <View style={estilos.espejo}>
           <Avatar apariencia={perfil.apariencia} alto={190} accesorios={{

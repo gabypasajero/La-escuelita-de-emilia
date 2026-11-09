@@ -36,7 +36,7 @@ export default function CasaDeAmigo() {
 
   const { Dibujo } = amigo;
   return (
-    <Pantalla color={amigo.fondo}>
+    <Pantalla color={amigo.fondo} fondo="sala" acento={amigo.color}>
       <View style={estilos.fila}>
         <Dibujo alto={150} saludando />
         <Globo texto={amigo.globoCasa} alLado="izquierda" />

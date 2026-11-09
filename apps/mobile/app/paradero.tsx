@@ -10,6 +10,7 @@ import { AMIGOS, type Amigo, type AmigoId } from "../lib/amigos";
 import { useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
 import { LuzDelDia } from "../components/LuzDelDia";
+import { SombraContacto, VinetaEscena } from "../components/AmbienteInterior";
 
 /** Amigos que el niño ya conoció en esta sesión (la segunda vez es más corto). */
 const conocidos = new Set<AmigoId>();
@@ -106,8 +107,9 @@ export default function Paradero() {
       {/* Fondo a pantalla completa: cielo, barrio, vereda y calle */}
       <View pointerEvents="none" style={[estilos.mundo, { width, height }]}>
         <Fondo ancho={width} alto={height} />
-        <View style={estilos.vereda} />
+        <View style={estilos.vereda}><Vereda ancho={width} /></View>
         <View style={estilos.calle}>
+          <Asfalto ancho={width} />
           {Array.from({ length: Math.ceil(width / 90) }, (_, i) => <View key={i} style={estilos.linea} />)}
         </View>
       </View>
@@ -125,8 +127,8 @@ export default function Paradero() {
         </View>
         {/* Emilia y Tito esperando */}
         <Animated.View style={[estilos.emilia, { transform: [{ translateY: respirar }] }]}>
-          <EmiliaDibujo alto={190} expresion={globo.quien === "emilia" ? "saludando" : "feliz"} />
-          <TitoDibujo alto={70} />
+          <View><SombraContacto ancho={110} /><EmiliaDibujo alto={190} expresion={globo.quien === "emilia" ? "saludando" : "feliz"} /></View>
+          <View><SombraContacto ancho={80} /><TitoDibujo alto={70} /></View>
         </Animated.View>
         {/* El bus */}
         <Animated.View style={[estilos.bus, { transform: [{ translateX: bus }] }]}>
@@ -136,7 +138,7 @@ export default function Paradero() {
         {AMIGOS.map((a, i) => (
           <Animated.View key={a.id} style={[estilos.amigo, { left: 300 + i * 125, opacity: bajan, transform: [{ translateY: saltos[a.id] }] }]}>
             <Pressable onPress={() => void tocar(a)} accessibilityLabel={a.nombre} style={estilos.amigoToque}>
-              <a.Dibujo alto={175} saludando={globo.quien === a.id} />
+              <View><SombraContacto ancho={100} /><a.Dibujo alto={175} saludando={globo.quien === a.id} /></View>
               <View style={[estilos.placa, { backgroundColor: a.color }, elegido?.id === a.id && estilos.placaElegida]}>
                 <Text style={estilos.placaTexto}>{a.bandera} {a.nombre}</Text>
               </View>
@@ -194,6 +196,7 @@ function Fondo({ ancho, alto }: { ancho: number; alto: number }) {
       <Nube escala={e} ancho={1100} y={150} ms={95000} retraso={25000} tam={140} sombra={false} />
       <Nube escala={e} ancho={1100} y={90} ms={80000} retraso={50000} tam={120} sombra={false} />
       <Bandada escala={e} ancho={1100} y={200} ms={17000} retraso={5000} />
+      <VinetaEscena k={e} ancho={1100} alto={Math.ceil(alto / e)} zIndex={1} />
       <LuzDelDia k={e} ancho={1100} alto={Math.ceil(alto / e)} cielo={300} suelo={{ yMin: 380, yMax: Math.ceil(alto / e) - 150 }} />
     </View>
   );
@@ -204,6 +207,7 @@ function Refugio() {
   return (
     <View style={estilos.refugio} pointerEvents="none">
       <Svg width={250} height={217} viewBox="0 0 300 260">
+        <Ellipse cx="160" cy="256" rx="150" ry="7" fill="#000" opacity="0.18" />
         <Rect x="10" y="40" width="10" height="220" fill="#78909C" />
         <Rect x="280" y="40" width="10" height="220" fill="#78909C" />
         <Path d="M0 30 L300 30 L290 52 L10 52 Z" fill="#26A69A" />
@@ -226,11 +230,17 @@ function Refugio() {
 
 function Bus() {
   return (
-    <Svg width={360} height={190} viewBox="0 0 360 190">
+    <Svg width={360} height={196} viewBox="0 0 360 196">
+      <Ellipse cx="180" cy="188" rx="176" ry="8" fill="#000" opacity="0.28" />
       <Rect x="6" y="20" width="340" height="140" rx="24" fill="#FDD835" stroke="#F9A825" strokeWidth="5" />
       <Rect x="6" y="118" width="340" height="14" fill="#F57F17" />
+      <Rect x="20" y="26" width="300" height="5" rx="2.5" fill="#fff" opacity="0.45" />
+      <Rect x="6" y="132" width="340" height="26" fill="#000" opacity="0.08" />
       {[30, 100, 170].map((x) => (
-        <Rect key={x} x={x} y="40" width="56" height="48" rx="8" fill="#B3E5FC" stroke="#fff" strokeWidth="3" />
+        <G key={x}>
+          <Rect x={x} y="40" width="56" height="48" rx="8" fill="#B3E5FC" stroke="#fff" strokeWidth="3" />
+          <Path d={`M${x + 6} ${82} L${x + 30} ${44} H${x + 40} L${x + 14} ${84} Z`} fill="#fff" opacity="0.35" />
+        </G>
       ))}
       {/* Pasajeros y el chofer saludando */}
       <Circle cx="58" cy="70" r="10" fill="#FFCC80" />
@@ -274,3 +284,30 @@ const estilos = StyleSheet.create({
   casa: { position: "absolute", top: 20, right: 150, borderRadius: 30, paddingHorizontal: 26, paddingVertical: 14, borderWidth: 4, borderColor: "#fff" },
   casaTexto: { color: "#fff", fontSize: 24, fontWeight: "900" },
 });
+
+/** Vereda de baldosas con solera (borde) y sombra hacia la calle. */
+function Vereda({ ancho }: { ancho: number }) {
+  return (
+    <Svg width={ancho} height={50} style={StyleSheet.absoluteFill}>
+      <Rect x="0" y="0" width={ancho} height="50" fill="#CFD8DC" />
+      <Rect x="0" y="0" width={ancho} height="6" fill="#B0BEC5" />
+      {Array.from({ length: Math.ceil(ancho / 60) + 1 }, (_, i) => <Line key={i} x1={i * 60 + (i % 2) * 8} y1="6" x2={i * 60 - 10} y2="42" stroke="#B0BEC5" strokeWidth="1.5" />)}
+      <Line x1="0" y1="24" x2={ancho} y2="24" stroke="#B0BEC5" strokeWidth="1.2" />
+      <Rect x="0" y="40" width={ancho} height="10" fill="#ECEFF1" />
+      <Rect x="0" y="40" width={ancho} height="2" fill="#fff" opacity="0.8" />
+    </Svg>
+  );
+}
+
+/** Asfalto con textura y la sombra de la solera. */
+function Asfalto({ ancho }: { ancho: number }) {
+  return (
+    <Svg width={ancho} height={70} style={StyleSheet.absoluteFill}>
+      {Array.from({ length: Math.ceil(ancho / 9) }, (_, i) => (
+        <Circle key={i} cx={(i * 9.7) % ancho} cy={8 + ((i * 37) % 56)} r={i % 3 ? 1 : 1.6} fill={i % 2 ? "#607D8B" : "#455A64"} opacity="0.7" />
+      ))}
+      <Rect x="0" y="0" width={ancho} height="8" fill="#000" opacity="0.22" />
+      <Rect x="0" y="62" width={ancho} height="8" fill="#000" opacity="0.12" />
+    </Svg>
+  );
+}

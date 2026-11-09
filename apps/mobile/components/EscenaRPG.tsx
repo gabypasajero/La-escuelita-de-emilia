@@ -7,7 +7,7 @@ import { BotonCasa } from "./BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo } from "./Personajes";
 import { Monedas } from "../lib/juego";
 import { LuzDelDia, VeloPantalla } from "./LuzDelDia";
-import { AmbienteFondo, SombraContacto, VinetaEscena, type Ventana } from "./AmbienteInterior";
+import { AmbienteFondo, SombraContacto, VinetaPantalla, type Ventana } from "./AmbienteInterior";
 
 /**
  * Escena para caminar (estilo RPG, como el barrio): el niño toca el suelo y
@@ -185,10 +185,10 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
             <Avatar apariencia={perfil.apariencia} alto={avH} accesorios={{ cabeza: accesorioPuesto("cabeza"), cara: accesorioPuesto("cara"), cuello: accesorioPuesto("cuello"), mano: accesorioPuesto("mano") }} />
           </View>
         </Animated.View>
-        <VinetaEscena k={k} ancho={diseno.ancho} alto={diseno.alto} />
         <LuzDelDia k={k} ancho={diseno.ancho} alto={diseno.alto} interior={luz.interior ?? false} cielo={luz.cielo} suelo={luz.suelo} luces={luz.luces} />
       </View>
 
+      <VinetaPantalla />
       <View style={estilos.dialogo} pointerEvents="none"><Globo texto={dialogo} /></View>
       <BotonCasa />
       <Monedas />

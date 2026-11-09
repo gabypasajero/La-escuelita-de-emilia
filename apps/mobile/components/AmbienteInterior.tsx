@@ -112,3 +112,21 @@ export function VinetaEscena({ k, ancho, alto, zIndex = 4900 }: { k: number; anc
     </View>
   );
 }
+
+/** Viñeta a pantalla completa (incluye los bordes que quedan fuera del escenario). */
+export function VinetaPantalla() {
+  const id = `vp${uid()}`;
+  return (
+    <View pointerEvents="none" style={{ position: "absolute", left: 0, top: 0, right: 0, bottom: 0 }}>
+      <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <Defs>
+          <RadialGradient id={id} cx="50%" cy="52%" r="72%">
+            <Stop offset="0.6" stopColor="#1A0F08" stopOpacity="0" />
+            <Stop offset="1" stopColor="#1A0F08" stopOpacity="0.24" />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100" height="100" fill={`url(#${id})`} />
+      </Svg>
+    </View>
+  );
+}

@@ -1,7 +1,7 @@
 import { VERDURAS, type Verdura } from "@escuelita/core";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
+import Svg, { Defs, LinearGradient, RadialGradient, Stop, Circle, Ellipse, G, Path, Rect } from "react-native-svg";
 import { Abeja, MariposaVolando, Nube, Sol } from "../components/Ambiente";
 import { Adulto } from "../components/Personas";
 import { Avatar } from "../components/Avatar";
@@ -10,6 +10,7 @@ import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
 import { Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
+import { SombraContacto, VinetaPantalla } from "../components/AmbienteInterior";
 import { useVozActiva } from "../lib/habla";
 
 /**
@@ -201,7 +202,7 @@ export default function Huerto() {
 
         {/* Don Pedro junto a su galpón: habla moviendo boca y manos */}
         <View pointerEvents="none" style={{ position: "absolute", left: 935 * k, top: 92 * k, alignItems: "center", zIndex: 5 }}>
-          <Adulto id="pedro" alto={140 * k} hablando={pedroHabla && voz} />
+          <View><SombraContacto ancho={80 * k} /><Adulto id="pedro" alto={140 * k} hablando={pedroHabla && voz} /></View>
           <Text style={estilos.nombre}>Don Pedro</Text>
         </View>
 
@@ -215,15 +216,17 @@ export default function Huerto() {
           );
         })}
 
-        <Animated.View pointerEvents="none" style={coloca(tito, tiW, tiH, false)}><TitoDibujo alto={tiH} /></Animated.View>
-        <Animated.View pointerEvents="none" style={coloca(emilia, emW, emH, false)}><EmiliaDibujo alto={emH} /></Animated.View>
+        <Animated.View pointerEvents="none" style={coloca(tito, tiW, tiH, false)}><SombraContacto ancho={tiW * 0.9} /><TitoDibujo alto={tiH} /></Animated.View>
+        <Animated.View pointerEvents="none" style={coloca(emilia, emW, emH, false)}><SombraContacto ancho={emW * 0.8} /><EmiliaDibujo alto={emH} /></Animated.View>
         <Animated.View pointerEvents="none" style={coloca(pos, avW, avH, true)}>
+          <SombraContacto ancho={avW * 0.8} />
           <View style={{ transform: [{ scaleX: mira }] }}>
             <Avatar apariencia={perfil.apariencia} alto={avH} accesorios={{ cabeza: accesorioPuesto("cabeza"), cara: accesorioPuesto("cara"), cuello: accesorioPuesto("cuello"), mano: accesorioPuesto("mano") }} />
           </View>
         </Animated.View>
       </View>
 
+      <VinetaPantalla />
       <View style={estilos.dialogo} pointerEvents="none"><Globo texto={dicho} /></View>
       <BotonCasa />
       <Monedas />
@@ -263,29 +266,88 @@ function PlantaDe({ parcela: p, k }: { parcela: Parcela; k: number }) {
       {[0, 1, 2].map((s) => <View key={s} style={[estilos.surco, { top: (22 + s * 32) * k }]} />)}
       <View style={estilos.planta}>
         {p.etapa === "hoyo" && <View style={{ width: 50 * k, height: 20 * k, borderRadius: 25 * k, backgroundColor: "#3E2723" }} />}
-        {p.etapa === "sembrada" && <Text style={centro}>🟤</Text>}
-        {p.etapa === "regada" && <Text style={centro}>💧</Text>}
-        {p.etapa === "brote" && <Text style={centro}>🌱</Text>}
-        {p.etapa === "creciendo" && <Text style={{ ...centro, fontSize: 50 * k }}>🌿</Text>}
+        {p.etapa !== "hoyo" && p.etapa !== "lista" && <Etapa etapa={p.etapa} k={k} />}
         {p.etapa === "lista" && p.verdura && <Text style={{ ...centro, fontSize: 62 * k }}>✨{p.verdura.emoji}✨</Text>}
       </View>
     </View>
   );
 }
 
+/** Semillas, gotas, brote y planta dibujados (con volumen) según la etapa. */
+function Etapa({ etapa, k }: { etapa: Parcela["etapa"]; k: number }) {
+  return (
+    <Svg width={80 * k} height={70 * k} viewBox="0 0 80 70">
+      {etapa === "sembrada" && (
+        <G>
+          <Ellipse cx="40" cy="52" rx="22" ry="7" fill="#3E2723" />
+          {[[32, 50], [40, 53], [48, 50]].map(([x, y]) => <G key={x}><Ellipse cx={x} cy={y} rx="3.4" ry="2.4" fill="#A1887F" /><Ellipse cx={x! - 1} cy={y! - 0.8} rx="1.2" ry="0.8" fill="#fff" opacity="0.5" /></G>)}
+        </G>
+      )}
+      {etapa === "regada" && (
+        <G>
+          <Ellipse cx="40" cy="54" rx="26" ry="8" fill="#3E2723" />
+          <Ellipse cx="34" cy="52" rx="8" ry="2" fill="#90CAF9" opacity="0.5" />
+          {[[30, 24], [44, 16], [52, 30]].map(([x, y]) => (
+            <G key={x}>
+              <Path d={`M${x} ${y} Q${x! + 6} ${y! + 10} ${x} ${y! + 14} Q${x! - 6} ${y! + 10} ${x} ${y} Z`} fill="#29B6F6" />
+              <Ellipse cx={x! - 1.5} cy={y! + 9} rx="1.4" ry="2.4" fill="#fff" opacity="0.7" />
+            </G>
+          ))}
+        </G>
+      )}
+      {(etapa === "brote" || etapa === "creciendo") && (
+        <G>
+          <Ellipse cx="42" cy="60" rx="20" ry="5" fill="#000" opacity="0.2" />
+          <Path d="M40 60 Q39 46 40 34" stroke="#558B2F" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <Path d="M40 40 Q26 30 22 38 Q30 46 40 40 Z" fill="#7CB342" />
+          <Path d="M40 36 Q54 24 60 32 Q52 42 40 36 Z" fill="#8BC34A" />
+          <Path d="M40 40 Q30 36 24 38" stroke="#fff" strokeOpacity="0.4" strokeWidth="1" fill="none" />
+          {etapa === "creciendo" && (
+            <G>
+              <Path d="M40 50 Q22 46 16 56 Q28 62 40 50 Z" fill="#689F38" />
+              <Path d="M40 48 Q58 42 64 52 Q52 58 40 48 Z" fill="#7CB342" />
+              <Path d="M40 30 Q34 14 40 8 Q46 14 40 30 Z" fill="#9CCC65" />
+            </G>
+          )}
+        </G>
+      )}
+    </Svg>
+  );
+}
+
 function Fondo({ k }: { k: number }) {
   return (
     <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700" pointerEvents="none">
-      <Rect x="0" y="0" width="1100" height="700" fill="#9CCC65" />
-      <Rect x="0" y="0" width="1100" height="170" fill="#B3E5FC" />
+      <Defs>
+        <LinearGradient id="cieloH" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#81D4FA" /><Stop offset="1" stopColor="#E1F5FE" /></LinearGradient>
+        <LinearGradient id="pastoH" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor="#B5D96E" /><Stop offset="1" stopColor="#7CB342" /></LinearGradient>
+        <RadialGradient id="sombraH" cx="50%" cy="50%" r="50%"><Stop offset="0" stopColor="#1B3A12" stopOpacity="0.38" /><Stop offset="1" stopColor="#1B3A12" stopOpacity="0" /></RadialGradient>
+        <RadialGradient id="copaH" cx="35%" cy="30%" r="70%"><Stop offset="0" stopColor="#fff" stopOpacity="0.28" /><Stop offset="0.5" stopColor="#fff" stopOpacity="0" /><Stop offset="1" stopColor="#000" stopOpacity="0.22" /></RadialGradient>
+      </Defs>
+      <Rect x="0" y="0" width="1100" height="700" fill="url(#pastoH)" />
+      <Rect x="0" y="0" width="1100" height="170" fill="url(#cieloH)" />
+      {/* Cordillera lejana con neblina */}
+      {[0, 280, 560, 840].map((x, i) => <Path key={x} d={`M${x - 60} 165 L${x + 120} ${70 + (i % 2) * 18} L${x + 300} 165 Z`} fill="#A7BBC7" opacity="0.85" />)}
+      {[0, 280, 560, 840].map((x, i) => <Path key={`n${x}`} d={`M${x + 96} ${86 + (i % 2) * 18} L${x + 120} ${70 + (i % 2) * 18} L${x + 146} ${88 + (i % 2) * 18} Z`} fill="#fff" />)}
       <Path d="M0 170 Q 250 110 520 160 T 1100 150 V 200 H 0 Z" fill="#8BC34A" />
-      <Rect x="0" y="190" width="1100" height="510" fill="#9CCC65" />
+      <Rect x="0" y="190" width="1100" height="510" fill="url(#pastoH)" />
+      {Array.from({ length: 160 }, (_, i) => {
+        const x = (i * 211.7) % 1100, y = 250 + ((i * 97.3) % 330);
+        return <Path key={`b${i}`} d={`M${x - 3} ${y} Q${x - 3} ${y - 6} ${x - 5} ${y - 9} M${x} ${y} Q${x + 1} ${y - 9} ${x} ${y - 11} M${x + 3} ${y} Q${x + 3} ${y - 6} ${x + 6} ${y - 8}`} stroke={i % 2 ? "#689F38" : "#7CB342"} strokeWidth="1.6" fill="none" strokeLinecap="round" />;
+      })}
+      {/* Sombras del galpón, el árbol y la cerca */}
+      <Ellipse cx="1010" cy="212" rx="110" ry="12" fill="url(#sombraH)" />
+      <Ellipse cx="100" cy="500" rx="80" ry="12" fill="url(#sombraH)" />
+      <Rect x="6" y="232" width="1090" height="6" fill="#1B3A12" opacity="0.12" />
       {/* Cerros al fondo */}
       <Path d="M0 160 Q120 100 240 150 Q360 90 480 150 Q600 105 720 150 L720 175 L0 175 Z" fill="#AED581" opacity="0.8" />
       {/* Galpón de Don Pedro, con tablas, ventana y herramientas */}
       <Path d="M900 120 L990 70 L1080 120 Z" fill="#B71C1C" />
       <Path d="M900 120 L990 70 L1080 120" stroke="#fff" strokeWidth="4" fill="none" />
+      <Path d="M1070 118 L1092 106 V196 L1070 208 Z" fill="#C25050" />
+      <Path d="M1080 120 L1102 108" stroke="#8E1F1F" strokeWidth="4" />
       <Rect x="910" y="118" width="160" height="90" fill="#E57373" />
+      <Rect x="910" y="118" width="160" height="8" fill="#000" opacity="0.15" />
       {[930, 950, 970, 1010, 1030, 1050].map((x) => <Rect key={x} x={x} y="120" width="2" height="86" fill="#D84343" />)}
       <Rect x="975" y="150" width="34" height="58" fill="#5D4037" />
       <Rect x="1024" y="134" width="30" height="24" fill="#BBDEFB" stroke="#fff" strokeWidth="3" />
@@ -309,9 +371,13 @@ function Fondo({ k }: { k: number }) {
         <G key={i}><Path d={`M${30 + i * 50} 612 l0 -14`} stroke="#558B2F" strokeWidth="2" /><Circle cx={30 + i * 50} cy={596} r="5" fill={["#F06292", "#FFF176", "#BA68C8", "#fff"][i % 4]} /></G>
       ))}
       {/* Camino y árbol */}
+      <Ellipse cx="560" cy="652" rx="566" ry="44" fill="#B08D57" />
       <Ellipse cx="560" cy="650" rx="560" ry="40" fill="#D7B98E" />
+      {Array.from({ length: 40 }, (_, i) => <Ellipse key={`p${i}`} cx={(i * 131) % 1100} cy={630 + ((i * 17) % 34)} rx="3" ry="2" fill={i % 2 ? "#A88B5E" : "#EFE0C2"} />)}
       <Rect x="60" y="430" width="16" height="70" fill="#6D4C41" />
+      <Rect x="69" y="430" width="7" height="70" fill="#4E342E" opacity="0.6" />
       <Circle cx="68" cy="420" r="46" fill="#43A047" />
+      <Circle cx="68" cy="420" r="46" fill="url(#copaH)" />
       {[50, 80, 66].map((x, i) => <Circle key={i} cx={x} cy={405 + i * 12} r="6" fill="#FB8C00" />)}
     </Svg>
   );
@@ -321,7 +387,7 @@ const estilos = StyleSheet.create({
   fondo: { flex: 1, backgroundColor: "#9CCC65", justifyContent: "center" },
   parcela: { position: "absolute", borderRadius: 18 },
   parcelaCerca: { borderWidth: 4, borderColor: "#FDD835" },
-  tierra: { flex: 1, borderRadius: 16, backgroundColor: "#8D6E63", overflow: "hidden" },
+  tierra: { flex: 1, borderRadius: 16, backgroundColor: "#8D6E63", overflow: "hidden", borderWidth: 5, borderColor: "#795548", borderBottomWidth: 9, borderBottomColor: "#5D4037", shadowColor: "#1B3A12", shadowOpacity: 0.35, shadowRadius: 8, shadowOffset: { width: 6, height: 8 } },
   tierraHumeda: { backgroundColor: "#5D4037" },
   surco: { position: "absolute", left: 8, right: 8, height: 8, borderRadius: 4, backgroundColor: "rgba(0,0,0,0.15)" },
   planta: { flex: 1, alignItems: "center", justifyContent: "center" },

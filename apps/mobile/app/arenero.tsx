@@ -71,7 +71,7 @@ export default function Arenero() {
   }
 
   return (
-    <Pantalla color="#FFE0B2">
+    <Pantalla color="#FFE0B2" fondo="arenero">
       <View style={estilos.fila}>
         <EmiliaDibujo alto={100} />
         <TitoDibujo alto={48} />

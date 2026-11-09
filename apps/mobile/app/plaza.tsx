@@ -1,7 +1,7 @@
 import { Redirect, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
+import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, RadialGradient, Rect, Stop } from "react-native-svg";
 import { Abeja, Bandada, MariposaVolando, Nube, Sol } from "../components/Ambiente";
 import { AnimalPaseando, AnimalVivo } from "../components/AnimalesVivos";
 import { Avatar } from "../components/Avatar";
@@ -10,6 +10,7 @@ import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Pers
 import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
 import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
+import { SombraContacto, VinetaPantalla } from "../components/AmbienteInterior";
 
 /**
  * Parque de juegos: el personaje del niño se sube al columpio (con Emilia al
@@ -139,12 +140,17 @@ export default function Plaza() {
           <Line x1="110" y1="215" x2="70" y2="560" stroke="#E53935" strokeWidth="14" strokeLinecap="round" />
           <Line x1="350" y1="215" x2="390" y2="560" stroke="#E53935" strokeWidth="14" strokeLinecap="round" />
           <Line x1="100" y1="215" x2="360" y2="215" stroke="#C62828" strokeWidth="16" strokeLinecap="round" />
+          <Line x1="106" y1="225" x2="68" y2="556" stroke="#fff" strokeOpacity="0.3" strokeWidth="3" strokeLinecap="round" />
+          <Line x1="346" y1="225" x2="384" y2="556" stroke="#fff" strokeOpacity="0.3" strokeWidth="3" strokeLinecap="round" />
+          <Line x1="106" y1="210" x2="354" y2="210" stroke="#fff" strokeOpacity="0.3" strokeWidth="3" strokeLinecap="round" />
           {/* Resbalín: escalera, plataforma y tobogán */}
           <Line x1="510" y1={SUELO} x2="530" y2="300" stroke="#1E88E5" strokeWidth="9" />
           <Line x1="560" y1={SUELO} x2="580" y2="300" stroke="#1E88E5" strokeWidth="9" />
           {[330, 370, 410, 450, 490, 530].map((y) => <Line key={y} x1={510 + (SUELO - y) * 0.077} y1={y} x2={560 + (SUELO - y) * 0.077} y2={y} stroke="#1565C0" strokeWidth="6" />)}
           <Rect x="520" y="292" width="90" height="16" rx="6" fill="#1565C0" />
           <Path d="M600 300 Q 700 320 790 520 L 830 530 L 830 548 L 780 548 Q 690 340 600 320 Z" fill="#FDD835" stroke="#F9A825" strokeWidth="4" />
+          <Path d="M604 304 Q 698 322 786 516" stroke="#fff" strokeOpacity="0.55" strokeWidth="4" fill="none" strokeLinecap="round" />
+          <Path d="M602 318 Q 690 338 780 544" stroke="#E6A800" strokeOpacity="0.6" strokeWidth="3" fill="none" />
           {/* Base del balancín */}
           <Path d={`M${BALANCIN.x - 30} ${SUELO} L${BALANCIN.x} ${BALANCIN.y} L${BALANCIN.x + 30} ${SUELO} Z`} fill="#8D6E63" />
         </Svg>
@@ -191,20 +197,24 @@ export default function Plaza() {
               ],
             }}
           >
+            <SombraContacto ancho={avW * 0.8} />
             <Avatar apariencia={perfil.apariencia} alto={avH} accesorios={accesorios} />
           </Animated.View>
         )}
         {juego !== "columpio" && juego !== "balancin" && (
           <View pointerEvents="none" style={{ position: "absolute", left: 300 * k, top: SUELO * k - avH }}>
+            <SombraContacto ancho={avW * 0.8} />
             <EmiliaDibujo alto={avH} />
           </View>
         )}
         <Animated.View pointerEvents="none" style={{ position: "absolute", left: 650 * k, top: SUELO * k - 50 * k, transform: [{ translateY: juego ? tito : 0 }] }}>
+          <SombraContacto ancho={60 * k} />
           <TitoDibujo alto={55 * k} />
         </Animated.View>
         <LuzDelDia k={k} ancho={1100} alto={620} cielo={300} suelo={{ yMin: 420, yMax: 560 }} luces={[{ x: 1071, y: 372, r: 90 }]} />
       </View>
 
+      <VinetaPantalla />
       <View style={estilos.dialogo} pointerEvents="none">
         <Globo texto={dicho} />
       </View>
@@ -238,7 +248,7 @@ export default function Plaza() {
 
 const estilos = StyleSheet.create({
   fondo: { flex: 1, backgroundColor: "#81D4FA", justifyContent: "center" },
-  pasto: { position: "absolute", left: 0, right: 0, bottom: 0, height: "50%", backgroundColor: "#9CCC65" },
+  pasto: { position: "absolute", left: 0, right: 0, bottom: 0, height: "50%", backgroundColor: "#7CB342" },
   cuerda: { position: "absolute", top: 0, width: 4, backgroundColor: "#5D4037" },
   asiento: { position: "absolute", left: 10, right: 10, borderRadius: 6, backgroundColor: "#FB8C00" },
   tabla: { flex: 1, backgroundColor: "#43A047", borderRadius: 8, borderWidth: 3, borderColor: "#2E7D32" },
@@ -257,11 +267,16 @@ const estilos = StyleSheet.create({
 function FondoParque() {
   const arbol = (x: number, y: number, r: number, c: string) => (
     <G key={`${x}-${y}`}>
+      <Ellipse cx={x + r * 0.5} cy={y + r * 0.1 + 4} rx={r * 1.3} ry={r * 0.22} fill="url(#sombraP)" />
       <Rect x={x - 7} y={y - 10} width="14" height={r + 14} fill="#6D4C41" />
+      <Rect x={x + 1} y={y - 10} width="6" height={r + 14} fill="#4E342E" opacity="0.6" />
       <Circle cx={x} cy={y - r * 0.6} r={r} fill={c} />
       <Circle cx={x - r * 0.6} cy={y - r * 0.2} r={r * 0.7} fill={c} />
       <Circle cx={x + r * 0.6} cy={y - r * 0.25} r={r * 0.72} fill={c} />
-      <Circle cx={x - r * 0.25} cy={y - r * 0.85} r={r * 0.3} fill="#fff" opacity="0.15" />
+      <Circle cx={x} cy={y - r * 0.6} r={r} fill="url(#copaP)" />
+      <Circle cx={x + r * 0.6} cy={y - r * 0.25} r={r * 0.72} fill="#000" opacity="0.12" />
+      <Circle cx={x - r * 0.35} cy={y - r * 0.95} r={r * 0.32} fill="#fff" opacity="0.16" />
+      <Circle cx={x - r * 0.75} cy={y - r * 0.35} r={r * 0.2} fill="#fff" opacity="0.12" />
     </G>
   );
   return (
@@ -270,6 +285,24 @@ function FondoParque() {
         <LinearGradient id="cieloParque" x1="0" y1="0" x2="0" y2="1">
           <Stop offset="0" stopColor="#81D4FA" />
           <Stop offset="1" stopColor="#E1F5FE" />
+        </LinearGradient>
+        <RadialGradient id="sombraP" cx="50%" cy="50%" r="50%">
+          <Stop offset="0" stopColor="#1B3A12" stopOpacity="0.38" />
+          <Stop offset="0.65" stopColor="#1B3A12" stopOpacity="0.16" />
+          <Stop offset="1" stopColor="#1B3A12" stopOpacity="0" />
+        </RadialGradient>
+        <RadialGradient id="copaP" cx="35%" cy="30%" r="70%">
+          <Stop offset="0" stopColor="#fff" stopOpacity="0.28" />
+          <Stop offset="0.5" stopColor="#fff" stopOpacity="0" />
+          <Stop offset="1" stopColor="#000" stopOpacity="0.2" />
+        </RadialGradient>
+        <LinearGradient id="arenaP" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor="#FFE9C4" />
+          <Stop offset="1" stopColor="#F5CF98" />
+        </LinearGradient>
+        <LinearGradient id="pastoP" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor="#9CCC65" />
+          <Stop offset="1" stopColor="#7CB342" />
         </LinearGradient>
       </Defs>
       <Rect x="0" y="0" width="1100" height="620" fill="url(#cieloParque)" />
@@ -288,7 +321,7 @@ function FondoParque() {
       {arbol(860, 440, 50, "#558B2F")}
       {arbol(1080, 450, 44, "#66BB6A")}
       {/* Pasto */}
-      <Rect x="0" y="470" width="1100" height="150" fill="#9CCC65" />
+      <Rect x="0" y="470" width="1100" height="150" fill="url(#pastoP)" />
       {/* Laguna con patos (detrás de los columpios) */}
       <Ellipse cx="230" cy="478" rx="110" ry="20" fill="#4FC3F7" />
       <Ellipse cx="230" cy="474" rx="90" ry="10" fill="#81D4FA" />
@@ -330,8 +363,22 @@ function FondoParque() {
       <Rect x="1068" y="380" width="6" height="110" fill="#455A64" />
       <Path d="M1058 382 L1084 382 L1078 362 L1064 362 Z" fill="#FFF59D" stroke="#455A64" strokeWidth="3" />
       {/* Arenero del parque */}
-      <Ellipse cx="550" cy="560" rx="520" ry="60" fill="#FFE0B2" />
+      <Ellipse cx="550" cy="563" rx="524" ry="62" fill="#D7B07A" />
+      <Ellipse cx="550" cy="560" rx="520" ry="60" fill="url(#arenaP)" />
       <Ellipse cx="550" cy="552" rx="500" ry="50" fill="none" stroke="#FFCC80" strokeWidth="3" strokeDasharray="4 14" />
+      {/* Granitos de arena y huellitas */}
+      {Array.from({ length: 160 }, (_, i) => {
+        const azar = (n: number) => { const v = Math.sin(n * 12.9898) * 43758.5453; return v - Math.floor(v); };
+        const a = azar(i + 1) * Math.PI * 2, rr = Math.sqrt(azar(i + 77));
+        return <Circle key={i} cx={550 + Math.cos(a) * rr * 500} cy={560 + Math.sin(a) * rr * 52} r={i % 3 ? 1.3 : 2} fill={i % 2 ? "#E0B97F" : "#FFF3DC"} opacity="0.85" />;
+      })}
+      {([[450, 590], [470, 600], [640, 596], [660, 584]] as const).map(([x, y]) => <Ellipse key={x} cx={x} cy={y} rx="5" ry="3" fill="#D9AE73" opacity="0.6" />)}
+      {/* Sombras proyectadas de los juegos (la luz viene de arriba a la izquierda) */}
+      <Ellipse cx="260" cy="566" rx="200" ry="14" fill="url(#sombraP)" />
+      <Ellipse cx="720" cy="556" rx="190" ry="18" fill="url(#sombraP)" />
+      <Ellipse cx="990" cy="566" rx="120" ry="10" fill="url(#sombraP)" />
+      <Ellipse cx="985" cy="494" rx="78" ry="9" fill="url(#sombraP)" />
+      <Ellipse cx="460" cy="514" rx="58" ry="6" fill="url(#sombraP)" />
       {/* Matas de pasto */}
       {([[20, 600], [1080, 596], [60, 520], [1040, 530]] as const).map(([x, y]) => (
         <Path key={x} d={`M${x - 10} ${y} Q${x - 6} ${y - 16} ${x - 2} ${y} Q${x} ${y - 22} ${x + 3} ${y} Q${x + 8} ${y - 15} ${x + 11} ${y} Z`} fill="#7CB342" />

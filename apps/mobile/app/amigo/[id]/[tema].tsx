@@ -14,7 +14,7 @@ export default function JuegoDeAmigo() {
   const tema: TemaIngles = datos?.tema ?? "colores";
   const { Dibujo } = amigo;
   return (
-    <Pantalla color={datos?.fondo ?? amigo.fondo}>
+    <Pantalla color={datos?.fondo ?? amigo.fondo} fondo="sala" acento={amigo.color}>
       <View style={estilos.amigo}>
         <Dibujo alto={130} />
       </View>

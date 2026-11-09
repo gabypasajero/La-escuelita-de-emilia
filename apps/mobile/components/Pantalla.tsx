@@ -8,13 +8,13 @@ import { BotonCasa } from "./BotonCasa";
 import { FondoJuego, type TemaFondo } from "./FondosJuego";
 
 /** `fondo`: el lugar donde ocurre el juego, dibujado detrás (sigue la luz de la hora real). */
-export function Pantalla({ children, color = COLORES.fondo, fondo }: { children: ReactNode; color?: string; fondo?: TemaFondo }) {
+export function Pantalla({ children, color = COLORES.fondo, fondo, acento }: { children: ReactNode; color?: string; fondo?: TemaFondo; acento?: string }) {
   // Si se abrió una pantalla sin elegir jugador (por ejemplo, al recargar), primero se pregunta quién juega.
   const { cargado, jugadores, activoId } = useJuego();
   if (cargado && jugadores.length && !activoId) return <Redirect href="/quien-juega" />;
   return (
     <SafeAreaView style={[estilos.fondo, { backgroundColor: color }]}>
-      {fondo && <FondoJuego tema={fondo} />}
+      {fondo && <FondoJuego tema={fondo} acento={acento} />}
       <BotonCasa />
       <Monedas />
       <View style={estilos.contenido}>{children}</View>

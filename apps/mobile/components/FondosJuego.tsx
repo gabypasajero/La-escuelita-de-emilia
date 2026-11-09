@@ -4,6 +4,7 @@ import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../lib/hora";
 import { MariposaVolando, Nube, Reloj, Sol } from "./Ambiente";
 import { AnimalVivo } from "./AnimalesVivos";
 import { LuzDelDia } from "./LuzDelDia";
+import { AmbienteFondo, VinetaEscena, type Ventana } from "./AmbienteInterior";
 
 /**
  * Fondos para los juegos por dentro: el lugar donde ocurre el juego se ve
@@ -12,24 +13,35 @@ import { LuzDelDia } from "./LuzDelDia";
  * centro, donde están la pregunta y las tarjetas, quede despejado.
  * Mundo de 1100×700 unidades que cubre la pantalla apoyado abajo.
  */
-export type TemaFondo = "aula" | "cocina" | "pieza" | "bano" | "campo" | "huerto";
+export type TemaFondo = "aula" | "cocina" | "pieza" | "bano" | "campo" | "huerto" | "tienda" | "sala" | "arenero";
 
 const ANCHO = 1100, ALTO = 700;
-const EXTERIOR: TemaFondo[] = ["campo", "huerto"];
+const EXTERIOR: TemaFondo[] = ["campo", "huerto", "arenero"];
+/** Ventana de cada lugar (por donde entra el rayo de luz) y hacia dónde cae. */
+const VENTANAS: Partial<Record<TemaFondo, { v: Ventana; dir: 1 | -1 }>> = {
+  aula: { v: { x: 40, y: 200, w: 150, h: 130 }, dir: 1 },
+  cocina: { v: { x: 900, y: 190, w: 160, h: 140 }, dir: -1 },
+  pieza: { v: { x: 40, y: 190, w: 150, h: 140 }, dir: 1 },
+  bano: { v: { x: 930, y: 190, w: 130, h: 110 }, dir: -1 },
+  tienda: { v: { x: 40, y: 170, w: 150, h: 150 }, dir: 1 },
+  sala: { v: { x: 920, y: 180, w: 150, h: 140 }, dir: -1 },
+};
 
-export function FondoJuego({ tema }: { tema: TemaFondo }) {
+export function FondoJuego({ tema, acento = "#1E88E5" }: { tema: TemaFondo; acento?: string }) {
   const { width, height } = useWindowDimensions();
   const k = Math.max(width / ANCHO, height / ALTO);
   const momento = useMomento();
   const cielo = CIELO_VENTANA[momento], astro = ASTRO_VENTANA[momento];
-  const Dibujo = { aula: Aula, cocina: Cocina, pieza: Pieza, bano: Bano, campo: Campo, huerto: Huerto }[tema];
+  const Dibujo = { aula: Aula, cocina: Cocina, pieza: Pieza, bano: Bano, campo: Campo, huerto: Huerto, tienda: Tienda, sala: Sala, arenero: Arenero }[tema];
   return (
     <View pointerEvents="none" style={{ position: "absolute", left: 0, top: 0, width, height, overflow: "hidden" }}>
       <View style={{ position: "absolute", left: (width - ANCHO * k) / 2, top: height - ALTO * k, width: ANCHO * k, height: ALTO * k }}>
         <Svg width={ANCHO * k} height={ALTO * k} viewBox={`0 0 ${ANCHO} ${ALTO}`}>
-          <Dibujo cielo={cielo} astro={astro} />
+          <Dibujo cielo={cielo} astro={astro} acento={acento} />
         </Svg>
+        {VENTANAS[tema] && <AmbienteFondo k={k} ancho={ANCHO} alto={ALTO} muro={600} ventana={VENTANAS[tema]!.v} dir={VENTANAS[tema]!.dir} />}
         <Vida tema={tema} k={k} />
+        <VinetaEscena k={k} ancho={ANCHO} alto={ALTO} zIndex={1} />
         <LuzDelDia k={k} ancho={ANCHO} alto={ALTO} interior={!EXTERIOR.includes(tema)} cielo={EXTERIOR.includes(tema) ? 300 : 0} zIndex={1} />
       </View>
     </View>
@@ -51,6 +63,16 @@ function Vida({ tema, k }: { tema: TemaFondo; k: number }) {
       </>
     );
   }
+  if (tema === "arenero") {
+    return (
+      <>
+        <Sol k={k} x={980} y={150} r={40} />
+        <Nube escala={k} ancho={ANCHO} y={120} ms={80000} retraso={5000} tam={150} sombra={false} />
+        <MariposaVolando escala={k} x={150} y={520} fase={2} />
+      </>
+    );
+  }
+  if (tema === "sala") return <><Reloj k={k} x={560} y={150} r={24} /><View style={{ position: "absolute", left: 90 * k, top: 600 * k }}><AnimalVivo id="gato" alto={46 * k} /></View></>;
   if (tema === "huerto") {
     return (
       <>
@@ -64,7 +86,7 @@ function Vida({ tema, k }: { tema: TemaFondo; k: number }) {
   return null;
 }
 
-type P = { cielo: string; astro: string };
+type P = { cielo: string; astro: string; acento?: string };
 
 function Ventana({ x, y, w, h, cielo, astro, marco = "#fff" }: P & { x: number; y: number; w: number; h: number; marco?: string }) {
   return (
@@ -265,6 +287,100 @@ function Huerto(_: P) {
       <Path d="M960 520 h70 v-50 h-70 Z" fill="#26A69A" />
       <Path d="M1030 480 L1070 450" stroke="#26A69A" strokeWidth="8" strokeLinecap="round" />
       <Path d="M975 470 Q995 440 1015 470" stroke="#00897B" strokeWidth="5" fill="none" />
+    </G>
+  );
+}
+
+// ---------- Tienda de disfraces ----------
+function Tienda({ cielo, astro }: P) {
+  return (
+    <G>
+      <Rect x="0" y="0" width={ANCHO} height={ALTO} fill="#F8BBD0" />
+      {Array.from({ length: 22 }, (_, i) => <Rect key={i} x={i * 50} y="0" width="25" height="600" fill="#F48FB1" opacity="0.25" />)}
+      <Ventana x={40} y={170} w={150} h={150} cielo={cielo} astro={astro} marco="#FCE4EC" />
+      {/* Barra con disfraces colgados */}
+      <Rect x="20" y="380" width="200" height="8" rx="4" fill="#8D6E63" />
+      {[["#7E57C2", 45], ["#FDD835", 95], ["#26A69A", 145], ["#E53935", 190]].map(([c, x]) => (
+        <G key={x as number}>
+          <Path d={`M${x} 388 l-10 10 h20 Z`} fill="none" stroke="#90A4AE" strokeWidth="2" />
+          <Path d={`M${(x as number) - 18} 398 h36 l8 70 h-52 Z`} fill={c as string} />
+          <Path d={`M${(x as number) - 18} 398 h36 l8 70 h-52 Z`} fill="#000" opacity="0.08" />
+          <Path d={`M${(x as number) - 14} 402 l6 60`} stroke="#fff" strokeOpacity="0.3" strokeWidth="3" />
+        </G>
+      ))}
+      <Rect x="20" y="470" width="8" height="130" fill="#8D6E63" /><Rect x="212" y="470" width="8" height="130" fill="#8D6E63" />
+      {/* Espejo y probador con cortina */}
+      <Rect x="880" y="200" width="90" height="300" rx="45" fill="#FFF8E1" stroke="#FFB300" strokeWidth="8" />
+      <Rect x="890" y="210" width="70" height="280" rx="35" fill="#E1F5FE" />
+      <Path d="M900 300 L930 230 H945 L912 320 Z" fill="#fff" opacity="0.6" />
+      <Rect x="985" y="150" width="105" height="10" fill="#8D6E63" />
+      <Path d="M988 160 Q1000 380 990 600 H1090 Q1080 380 1088 160 Z" fill="#AD1457" />
+      {[1010, 1035, 1060].map((x) => <Path key={x} d={`M${x} 162 Q${x + 6} 380 ${x - 2} 598`} stroke="#880E4F" strokeWidth="3" fill="none" />)}
+      {/* Estrellitas y sombreros en repisa */}
+      <Rect x="880" y="140" width="0" height="0" fill="none" />
+      {[[300, 130], [420, 90], [700, 110], [800, 150]].map(([x, y]) => <Path key={x} d={`M${x} ${y! - 9} l2.6 6 6.6 .7 -5 4.4 1.5 6.4 -5.7 -3.4 -5.7 3.4 1.5 -6.4 -5 -4.4 6.6 -.7 Z`} fill="#FFF59D" />)}
+      <PisoMadera y={600} color="#D7A86E" linea="#C49358" />
+      <Ellipse cx="550" cy="660" rx="300" ry="30" fill="#CE93D8" opacity="0.6" />
+    </G>
+  );
+}
+
+// ---------- Living de la casa de un amigo ----------
+function Sala({ cielo, astro, acento = "#1E88E5" }: P) {
+  return (
+    <G>
+      <Rect x="0" y="0" width={ANCHO} height={ALTO} fill="#FFF8E1" />
+      {Array.from({ length: 23 }, (_, i) => <Rect key={i} x={i * 48} y="0" width="3" height="600" fill={acento} opacity="0.12" />)}
+      <Rect x="0" y="560" width={ANCHO} height="40" fill={acento} opacity="0.25" />
+      <Ventana x={920} y={180} w={150} h={140} cielo={cielo} astro={astro} />
+      <Path d="M910 172 Q926 250 912 330 L930 330 Q940 250 928 172 Z" fill={acento} opacity="0.7" />
+      <Path d="M1080 172 Q1064 250 1078 330 L1060 330 Q1050 250 1062 172 Z" fill={acento} opacity="0.7" />
+      {/* Cuadros */}
+      <Rect x="230" y="150" width="70" height="56" fill="#fff" stroke="#8D6E63" strokeWidth="5" />
+      <Path d="M236 200 L256 176 L270 190 L282 172 L294 200 Z" fill="#81C784" />
+      <Circle cx="282" cy="164" r="6" fill="#FFCA28" />
+      <Rect x="770" y="150" width="56" height="70" fill="#fff" stroke="#8D6E63" strokeWidth="5" />
+      <Circle cx="798" cy="178" r="12" fill={acento} opacity="0.6" />
+      {/* Sofá a la izquierda */}
+      <Rect x="0" y="470" width="220" height="110" rx="20" fill={acento} />
+      <Rect x="0" y="470" width="220" height="110" rx="20" fill="#000" opacity="0.12" />
+      <Rect x="10" y="420" width="200" height="70" rx="18" fill={acento} />
+      <Rect x="20" y="430" width="90" height="10" rx="5" fill="#fff" opacity="0.25" />
+      <Rect x="40" y="440" width="60" height="44" rx="10" fill="#FFCA28" />
+      {/* Lámpara de pie y planta a la derecha */}
+      <Rect x="1000" y="420" width="6" height="180" fill="#5D4037" />
+      <Path d="M968 420 L1038 420 L1024 370 L982 370 Z" fill="#FFE082" />
+      <Ellipse cx="1003" cy="600" rx="24" ry="6" fill="#5D4037" />
+      <Planta x={900} y={600} />
+      <PisoMadera y={600} color="#D7A86E" linea="#C49358" />
+      <Ellipse cx="550" cy="660" rx="300" ry="30" fill={acento} opacity="0.3" />
+    </G>
+  );
+}
+
+// ---------- Arenero del parque ----------
+function Arenero(_: P) {
+  return (
+    <G>
+      <Rect x="0" y="0" width={ANCHO} height={ALTO} fill="#B3E5FC" />
+      <Path d="M0 460 Q260 390 540 450 Q820 390 1100 450 V700 H0 Z" fill="#AED581" />
+      {[[70, 420, 50], [1040, 410, 56], [900, 440, 40]].map(([x, y, r]) => (
+        <G key={x}>
+          <Rect x={x! - 7} y={y} width="14" height="70" fill="#6D4C41" />
+          <Circle cx={x} cy={y! - 10} r={r} fill="#43A047" />
+          <Circle cx={x! - r! * 0.3} cy={y! - r! * 0.5} r={r! * 0.35} fill="#fff" opacity="0.15" />
+        </G>
+      ))}
+      <Rect x="0" y="520" width={ANCHO} height="180" fill="#8BC34A" />
+      {/* Borde de madera y arena */}
+      <Rect x="30" y="540" width="1040" height="160" rx="16" fill="#A1887F" />
+      <Rect x="44" y="552" width="1012" height="148" rx="12" fill="#FFE0B2" />
+      {Array.from({ length: 120 }, (_, i) => <Circle key={i} cx={60 + ((i * 167.3) % 980)} cy={560 + ((i * 53.7) % 130)} r={i % 3 ? 1.4 : 2.2} fill={i % 2 ? "#E0B97F" : "#FFF3DC"} />)}
+      {/* Balde y pala */}
+      <Path d="M120 600 h50 l-6 46 h-38 Z" fill="#E53935" />
+      <Path d="M122 600 q23 -26 46 0" stroke="#B71C1C" strokeWidth="3" fill="none" />
+      <Rect x="960" y="560" width="8" height="70" rx="3" fill="#1E88E5" transform="rotate(25 964 595)" />
+      <Path d="M980 630 q12 6 6 22 q-14 2 -20 -10 Z" fill="#1E88E5" />
     </G>
   );
 }

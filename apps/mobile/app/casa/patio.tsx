@@ -7,6 +7,7 @@ import { Pantalla } from "../../components/Pantalla";
 import { EmiliaDibujo, Globo, TitoDibujo, useSalto } from "../../components/Personajes";
 import { hablar } from "../../lib/voz";
 import { LuzDelDia } from "../../components/LuzDelDia";
+import { SombraContacto, VinetaEscena } from "../../components/AmbienteInterior";
 
 /** Mundo del patio en unidades de 1100×700 (se recorta para llenar la pantalla, apoyado abajo). */
 const ANCHO = 1100, ALTO = 700;
@@ -85,7 +86,7 @@ export default function Patio() {
       <Globo texto={texto} />
       <View style={estilos.escena}>
         <View style={estilos.grupo}>
-          <EmiliaDibujo alto={220} expresion={respirando ? "pensativa" : contento ? "celebrando" : "feliz"} />
+          <View><SombraContacto ancho={130} /><EmiliaDibujo alto={220} expresion={respirando ? "pensativa" : contento ? "celebrando" : "feliz"} /></View>
           {respirando ? (
             <View style={estilos.globoCaja}>
               <Animated.View style={{ transform: [{ scale: globo }] }}>
@@ -95,6 +96,7 @@ export default function Patio() {
             </View>
           ) : (
             <Pressable onPress={carino} accessibilityLabel="Acariciar a Tito" style={estilos.tito}>
+              <SombraContacto ancho={190} />
               <Animated.View style={{ transform: [{ translateY: y }] }}>
                 <TitoDibujo alto={180} contento={contento} />
               </Animated.View>
@@ -259,6 +261,7 @@ function FondoPatio({ e }: { e: number }) {
       <View pointerEvents="none" style={{ position: "absolute", left: 930 * e, top: 220 * e }}>
         <AnimalVivo id="pajaro" alto={30 * e} />
       </View>
+      <VinetaEscena k={e} ancho={ANCHO} alto={ALTO} zIndex={1} />
       <LuzDelDia k={e} ancho={ANCHO} alto={ALTO} cielo={340} suelo={{ yMin: 440, yMax: 650 }} luces={[{ x: 80, y: 235, r: 90 }]} />
     </>
   );
