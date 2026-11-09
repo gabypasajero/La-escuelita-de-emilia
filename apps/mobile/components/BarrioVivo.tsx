@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Animated, Easing, View } from "react-native";
 import Svg, { Circle, Ellipse, Path } from "react-native-svg";
 import { AnimalVivo } from "./AnimalesVivos";
+import { TINTE, useMomento } from "../lib/hora";
 
 /**
  * Lo que hace que el barrio se sienta vivo: nubes que pasan con su sombra,
@@ -53,10 +54,12 @@ export function Nube({ escala, ancho, y, ms, retraso, tam, sombra = true }: { es
 }
 
 export function Bandada({ escala, ancho, y, ms, retraso }: { escala: number; ancho: number; y: number; ms: number; retraso: number }) {
+  const momento = useMomento();
   const t = useBucle(ms, retraso);
   // Vuelan de derecha a izquierda (así miran los pájaros), con una ondulación suave.
   const x = t.interpolate({ inputRange: [0, 1], outputRange: [(ancho + 100) * escala, -200 * escala] });
   const ondula = t.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, -18 * escala, 0, 18 * escala, 0] });
+  if (momento === "noche") return null; // de noche duermen
   return (
     <Animated.View pointerEvents="none" style={{ position: "absolute", top: y * escala, transform: [{ translateX: x as never }, { translateY: ondula as never }], zIndex: 2100 }}>
       {[[0, 0], [38, -22], [44, 26]].map(([dx, dy], i) => (
@@ -69,11 +72,13 @@ export function Bandada({ escala, ancho, y, ms, retraso }: { escala: number; anc
 }
 
 export function MariposaVolando({ escala, x, y, fase }: { escala: number; x: number; y: number; fase: number }) {
+  const momento = useMomento();
   const t = useBucle(9000 + fase * 1300, fase * 400);
   const n = 24;
   const pts = Array.from({ length: n + 1 }, (_, i) => i / n);
   const dx = t.interpolate({ inputRange: pts, outputRange: pts.map((p) => Math.sin(2 * Math.PI * p + fase) * 70 * escala) });
   const dy = t.interpolate({ inputRange: pts, outputRange: pts.map((p) => (Math.sin(4 * Math.PI * p + fase) * 26 - Math.abs(Math.sin(12 * Math.PI * p)) * 8) * escala) });
+  if (momento === "noche") return null; // de noche duermen
   return (
     <Animated.View pointerEvents="none" style={{ position: "absolute", left: x * escala, top: y * escala, transform: [{ translateX: dx as never }, { translateY: dy as never }], zIndex: Math.round(y / 25) + 40 }}>
       <AnimalVivo id="mariposa" alto={26 * escala} />
@@ -125,21 +130,7 @@ function Onda({ escala, x, y, retraso }: { escala: number; x: number; y: number;
   );
 }
 
-type Momento = "amanecer" | "dia" | "tarde" | "noche";
-function momentoDelDia(h: number): Momento {
-  if (h >= 6 && h < 8) return "amanecer";
-  if (h >= 8 && h < 18) return "dia";
-  if (h >= 18 && h < 20) return "tarde";
-  return "noche";
-}
-const TINTE: Record<Momento, { color: string; opacidad: number }> = {
-  amanecer: { color: "#FF8A80", opacidad: 0.12 },
-  dia: { color: "#fff", opacidad: 0 },
-  tarde: { color: "#FF9800", opacidad: 0.16 },
-  noche: { color: "#1A237E", opacidad: 0.36 },
-};
-
-function Luciernaga({ escala, x, y, fase }: { escala: number; x: number; y: number; fase: number }) {
+export function Luciernaga({ escala, x, y, fase }: { escala: number; x: number; y: number; fase: number }) {
   const t = useBucle(5000 + fase * 700, fase * 300);
   return (
     <Animated.View
@@ -162,13 +153,8 @@ function Luciernaga({ escala, x, y, fase }: { escala: number; x: number; y: numb
 }
 
 export function BarrioVivo({ escala, ancho, alto, chimenea, laguna, flores }: Props) {
-  const [hora, setHora] = useState(() => new Date().getHours());
-  useEffect(() => {
-    const t = setInterval(() => setHora(new Date().getHours()), 60000);
-    return () => clearInterval(t);
-  }, []);
-  const momento = momentoDelDia(hora);
-  const tinte = TINTE[momento];
+  const momento = useMomento();
+  const tinte = { color: TINTE[momento].color, opacidad: TINTE[momento].exterior };
   const luciernagas = useMemo(() => Array.from({ length: 14 }, (_, i) => ({ x: (i * 397) % ancho, y: 220 + ((i * 613) % (alto - 260)), f: i })), [ancho, alto]);
 
   return (

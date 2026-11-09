@@ -8,6 +8,7 @@ import { EscenaRPG, type EscenaRPGRef, type ObjetoEscena } from "../../component
 import { Adulto } from "../../components/Personas";
 import { useJuego } from "../../lib/juego";
 import { hablar, hablarYEsperar } from "../../lib/voz";
+import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../../lib/hora";
 
 /** Clientes: animales vivos que entran caminando por la puerta. */
 const CLIENTES: AnimalId[] = ["oso", "conejo", "zorro", "panda", "rana", "llama"];
@@ -115,6 +116,7 @@ export default function Tiendita() {
       piso={{ xMin: 40, xMax: 1060, yMin: 400, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#FFE0B2"
+      luz={{ interior: true, luces: [{ x: 330, y: 170, r: 90 }, { x: 760, y: 170, r: 90 }] }}
       extras={(k) => (
         <>
         {/* El gato de Doña Rosa, arriba del primer estante */}
@@ -167,6 +169,7 @@ const Meson = ({ k }: { k: number }) => (
 );
 
 function Almacen({ k }: { k: number }) {
+  const momento = useMomento();
   return (
     <>
       <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700">
@@ -178,8 +181,8 @@ function Almacen({ k }: { k: number }) {
         <SvgText x="900" y="46" fontSize="30" fontWeight="bold" fill="#8D6E63" textAnchor="middle">DOÑA ROSA</SvgText>
         {Array.from({ length: 22 }, (_, i) => <Path key={i} d={`M${i * 50} 70 h50 v26 q-25 18 -50 0 z`} fill={i % 2 ? "#fff" : "#E53935"} />)}
         {/* Ventana a la calle */}
-        <Rect x="960" y="120" width="120" height="110" rx="6" fill="#B3E5FC" stroke="#8D6E63" strokeWidth="8" />
-        <Circle cx="1050" cy="148" r="12" fill="#FFEB3B" />
+        <Rect x="960" y="120" width="120" height="110" rx="6" fill={CIELO_VENTANA[momento]} stroke="#8D6E63" strokeWidth="8" />
+        <Circle cx="1050" cy="148" r="12" fill={ASTRO_VENTANA[momento]} />
         <Path d="M964 210 Q1000 180 1040 205 Q1060 195 1076 206 V226 H964 Z" fill="#81C784" />
         <Path d="M1020 124 V226 M964 175 H1076" stroke="#8D6E63" strokeWidth="5" />
         {/* Piso de madera y zócalo */}

@@ -6,6 +6,7 @@ import { LamparaColgante, MariposaVolando, Reloj } from "../components/Ambiente"
 import { EscenaRPG, type ObjetoEscena } from "../components/EscenaRPG";
 import { Adulto } from "../components/Personas";
 import { hablar } from "../lib/voz";
+import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../lib/hora";
 
 const JUEGOS: Record<string, { ruta: Href; frase: string }> = {
   Pintar: { ruta: "/pintar", frase: "¡Al caballete! Pinta lo que tú quieras." },
@@ -73,6 +74,7 @@ export default function Taller() {
       piso={{ xMin: 40, xMax: 1060, yMin: 440, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#F3E5F5"
+      luz={{ interior: true, luces: [{ x: 860, y: 76, r: 90 }] }}
     />
   );
 }
@@ -80,6 +82,7 @@ export default function Taller() {
 // ---------- Dibujos del taller ----------
 
 function SalaArte({ k }: { k: number }) {
+  const momento = useMomento();
   return (
     <>
       <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700">
@@ -91,9 +94,9 @@ function SalaArte({ k }: { k: number }) {
           <Path key={x as number} d={`M${x} ${y} q12 -16 24 -4 q16 -6 14 12 q12 10 -4 18 q-4 16 -18 6 q-16 6 -16 -10 q-12 -10 0 -22 Z`} fill={c as string} opacity="0.55" />
         ))}
         {/* Ventanal con luz */}
-        <Rect x="440" y="60" width="240" height="150" rx="8" fill="#B3E5FC" stroke="#fff" strokeWidth="10" />
+        <Rect x="440" y="60" width="240" height="150" rx="8" fill={CIELO_VENTANA[momento]} stroke="#fff" strokeWidth="10" />
         <Path d="M444 180 Q500 140 560 176 Q610 150 676 172 V206 H444 Z" fill="#81C784" />
-        <Circle cx="640" cy="100" r="16" fill="#FFEB3B" />
+        <Circle cx="640" cy="100" r="16" fill={ASTRO_VENTANA[momento]} />
         <Path d="M560 64 V206 M444 135 H676" stroke="#fff" strokeWidth="6" />
         <Path d="M440 216 L680 216 L700 232 L420 232 Z" fill="#CE93D8" />
         {/* Repisa con macetero de pinceles y rollos de papel */}

@@ -9,6 +9,8 @@ import { Pantalla } from "../components/Pantalla";
 import { Adulto } from "../components/Personas";
 import { Pregunta } from "../components/Pregunta";
 import { DESBLOQUEOS, useJuego } from "../lib/juego";
+import { LuzDelDia } from "../components/LuzDelDia";
+import { CIELO_VENTANA, useMomento } from "../lib/hora";
 
 /** Cada paciente (por su emoji en los datos) como animal vivo. */
 const PACIENTE: Record<string, AnimalId> = { "🐶": "perro", "🐱": "gato", "🐰": "conejo", "🐦": "pajaro", "🐄": "vaca", "🐷": "cerdo", "🐻": "oso" };
@@ -67,6 +69,7 @@ function Doctor({ texto }: { texto: string }) {
 function Consultorio() {
   const { width, height } = useWindowDimensions();
   const k = Math.max(width / 1100, height / 700);
+  const momento = useMomento();
   return (
     <View pointerEvents="none" style={[estilos.sala, { width, height }]}>
       <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700">
@@ -78,7 +81,7 @@ function Consultorio() {
         {Array.from({ length: 12 }, (_, i) => <Path key={i} d={`M${i * 100} 470 V700`} stroke="#CFD8DC" strokeWidth="2" />)}
         {Array.from({ length: 4 }, (_, i) => <Path key={i} d={`M0 ${520 + i * 55} H1100`} stroke="#CFD8DC" strokeWidth="2" />)}
         {/* Ventana con árbol */}
-        <Rect x="70" y="120" width="170" height="140" rx="8" fill="#B3E5FC" stroke="#fff" strokeWidth="10" />
+        <Rect x="70" y="120" width="170" height="140" rx="8" fill={CIELO_VENTANA[momento]} stroke="#fff" strokeWidth="10" />
         <Circle cx="150" cy="215" r="40" fill="#66BB6A" />
         <Rect x="144" y="230" width="12" height="30" fill="#6D4C41" />
         <Path d="M155 125 V260 M75 190 H235" stroke="#fff" strokeWidth="6" />
@@ -96,6 +99,7 @@ function Consultorio() {
       </Svg>
       <Reloj k={k} x={600} y={110} r={30} />
       <Acuario k={k} x={770} y={270} w={180} h={110} />
+      <LuzDelDia k={k} ancho={1100} alto={700} interior luces={[{ x: 155, y: 190, r: 110 }]} />
     </View>
   );
 }

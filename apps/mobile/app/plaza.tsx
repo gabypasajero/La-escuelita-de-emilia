@@ -9,6 +9,7 @@ import { BotonCasa } from "../components/BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Personajes";
 import { DESBLOQUEOS, Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
+import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
 
 /**
  * Parque de juegos: el personaje del niño se sube al columpio (con Emilia al
@@ -130,6 +131,7 @@ export default function Plaza() {
   return (
     <View style={estilos.fondo}>
       <View pointerEvents="none" style={estilos.pasto} />
+      <VeloPantalla />
       <View style={{ width: 1100 * k, height: 620 * k, alignSelf: "center" }}>
         <Svg width={1100 * k} height={620 * k} viewBox="0 0 1100 620" style={StyleSheet.absoluteFill}>
           <FondoParque />
@@ -200,6 +202,7 @@ export default function Plaza() {
         <Animated.View pointerEvents="none" style={{ position: "absolute", left: 650 * k, top: SUELO * k - 50 * k, transform: [{ translateY: juego ? tito : 0 }] }}>
           <TitoDibujo alto={55 * k} />
         </Animated.View>
+        <LuzDelDia k={k} ancho={1100} alto={620} cielo={300} suelo={{ yMin: 420, yMax: 560 }} luces={[{ x: 1071, y: 372, r: 90 }]} />
       </View>
 
       <View style={estilos.dialogo} pointerEvents="none">

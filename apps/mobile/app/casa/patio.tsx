@@ -6,6 +6,7 @@ import { AnimalVivo } from "../../components/AnimalesVivos";
 import { Pantalla } from "../../components/Pantalla";
 import { EmiliaDibujo, Globo, TitoDibujo, useSalto } from "../../components/Personajes";
 import { hablar } from "../../lib/voz";
+import { LuzDelDia } from "../../components/LuzDelDia";
 
 /** Mundo del patio en unidades de 1100×700 (se recorta para llenar la pantalla, apoyado abajo). */
 const ANCHO = 1100, ALTO = 700;
@@ -258,6 +259,7 @@ function FondoPatio({ e }: { e: number }) {
       <View pointerEvents="none" style={{ position: "absolute", left: 930 * e, top: 220 * e }}>
         <AnimalVivo id="pajaro" alto={30 * e} />
       </View>
+      <LuzDelDia k={e} ancho={ANCHO} alto={ALTO} cielo={340} suelo={{ yMin: 440, yMax: 650 }} luces={[{ x: 80, y: 235, r: 90 }]} />
     </>
   );
 }

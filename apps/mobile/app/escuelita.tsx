@@ -6,6 +6,7 @@ import { MariposaVolando, Reloj } from "../components/Ambiente";
 import { EscenaRPG, type EscenaRPGRef, type ObjetoEscena } from "../components/EscenaRPG";
 import { Adulto } from "../components/Personas";
 import { hablar } from "../lib/voz";
+import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../lib/hora";
 
 /** Todos los juegos (también se abren desde el botón «Todos los juegos»). */
 const SALAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; frase: string }> = [
@@ -82,6 +83,7 @@ export default function Escuelita() {
       piso={{ xMin: 40, xMax: 1060, yMin: 420, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#FFF8E1"
+      luz={{ interior: true, luces: [{ x: 305, y: 140, r: 80 }] }}
     >
       <Pressable style={estilos.todos} onPress={() => setTodos(true)} accessibilityLabel="Todos los juegos">
         <Text style={estilos.todosTexto}>📋 Todos los juegos</Text>
@@ -109,6 +111,7 @@ export default function Escuelita() {
 // ---------- Dibujos de la sala ----------
 
 function Sala({ k }: { k: number }) {
+  const momento = useMomento();
   const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
   return (
     <>
@@ -129,8 +132,8 @@ function Sala({ k }: { k: number }) {
           );
         })}
         {/* Ventana */}
-        <Rect x="250" y="90" width="110" height="100" rx="6" fill="#B3E5FC" stroke="#fff" strokeWidth="8" />
-        <Circle cx="335" cy="115" r="12" fill="#FFEB3B" />
+        <Rect x="250" y="90" width="110" height="100" rx="6" fill={CIELO_VENTANA[momento]} stroke="#fff" strokeWidth="8" />
+        <Circle cx="335" cy="115" r="12" fill={ASTRO_VENTANA[momento]} />
         <Path d="M254 170 Q290 150 330 168 Q345 160 356 166 V186 H254 Z" fill="#81C784" />
         <Path d="M305 94 V186 M254 140 H356" stroke="#fff" strokeWidth="5" />
         {/* Diario mural con dibujos de los niños */}

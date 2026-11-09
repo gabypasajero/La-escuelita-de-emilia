@@ -81,6 +81,7 @@ export default function Granja() {
       piso={{ xMin: 40, xMax: 1060, yMin: 330, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#9CCC65"
+      luz={{ interior: false, cielo: 250, suelo: { yMin: 340, yMax: 660 } }}
     >
       {cerca && (
         <View style={estilos.barra}>

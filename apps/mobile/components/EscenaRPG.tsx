@@ -6,6 +6,7 @@ import { Avatar } from "./Avatar";
 import { BotonCasa } from "./BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo } from "./Personajes";
 import { Monedas } from "../lib/juego";
+import { LuzDelDia, VeloPantalla } from "./LuzDelDia";
 
 /**
  * Escena para caminar (estilo RPG, como el barrio): el niño toca el suelo y
@@ -47,10 +48,12 @@ interface Props {
   diseno?: { ancho: number; alto: number };
   /** Elementos que viven dentro de la escena (por ejemplo, un cliente que entra). */
   extras?: (k: number) => ReactNode;
+  /** Luz según la hora real: interior (velo suave) o exterior (estrellas, luciérnagas). */
+  luz?: { interior?: boolean; cielo?: number; suelo?: { yMin: number; yMax: number }; luces?: Array<{ x: number; y: number; r?: number }> };
 }
 
 export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
-  { fondo, objetos, inicio, piso, dialogo, colorFondo = "#FFF3E0", children, diseno = { ancho: 1100, alto: 700 }, extras },
+  { fondo, objetos, inicio, piso, dialogo, colorFondo = "#FFF3E0", children, diseno = { ancho: 1100, alto: 700 }, extras, luz = { interior: true } },
   ref,
 ) {
   const { perfil, accesorioPuesto, cargado, jugadores, activoId } = useJuego();
@@ -119,6 +122,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
 
   return (
     <View style={[estilos.fondo, { backgroundColor: colorFondo }]}>
+      <VeloPantalla interior={luz.interior ?? false} />
       <View
         ref={contenedor}
         onLayout={() => contenedor.current?.measureInWindow((x, y) => { origen.current = { x, y }; })}
@@ -167,6 +171,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
             <Avatar apariencia={perfil.apariencia} alto={avH} accesorios={{ cabeza: accesorioPuesto("cabeza"), cara: accesorioPuesto("cara"), cuello: accesorioPuesto("cuello"), mano: accesorioPuesto("mano") }} />
           </View>
         </Animated.View>
+        <LuzDelDia k={k} ancho={diseno.ancho} alto={diseno.alto} interior={luz.interior ?? false} cielo={luz.cielo} suelo={luz.suelo} luces={luz.luces} />
       </View>
 
       <View style={estilos.dialogo} pointerEvents="none"><Globo texto={dialogo} /></View>

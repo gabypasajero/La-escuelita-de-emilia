@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Animated, Easing, View } from "react-native";
 import Svg, { Circle, Ellipse, Line, Path, Rect } from "react-native-svg";
+import { useMomento } from "../lib/hora";
 
 /**
  * Detalles que dan vida a los escenarios de cada lugar: sol con rayos que
@@ -22,34 +23,51 @@ function useBucle(ms: number, retraso = 0, idaYVuelta = false) {
   return v;
 }
 
+/** Sol con rayos que giran; de noche es una luna y al amanecer o la tarde se pone anaranjado. */
 export function Sol({ k, x, y, r = 50 }: { k: number; x: number; y: number; r?: number }) {
   const giro = useBucle(30000);
+  const momento = useMomento();
   const t = r * 2.6;
+  if (momento === "noche") {
+    return (
+      <View pointerEvents="none" style={{ position: "absolute", left: (x - t / 2) * k, top: (y - t / 2) * k, width: t * k, height: t * k }}>
+        <Svg width={t * k} height={t * k} viewBox={`${-t / 2} ${-t / 2} ${t} ${t}`}>
+          <Circle r={r * 1.25} fill="#FFF9C4" opacity="0.18" />
+          <Path d={`M0 ${-r * 0.85} A${r * 0.85} ${r * 0.85} 0 1 0 0 ${r * 0.85} A${r * 0.6} ${r * 0.85} 0 1 1 0 ${-r * 0.85} Z`} fill="#FFF9C4" transform={`rotate(-20)`} />
+          <Circle cx={-r * 0.5} cy={r * 0.1} r={r * 0.09} fill="#F0E68C" />
+          <Circle cx={-r * 0.35} cy={-r * 0.4} r={r * 0.07} fill="#F0E68C" />
+        </Svg>
+      </View>
+    );
+  }
+  const calido = momento !== "dia";
   return (
     <View pointerEvents="none" style={{ position: "absolute", left: (x - t / 2) * k, top: (y - t / 2) * k, width: t * k, height: t * k }}>
       <Animated.View style={{ position: "absolute", width: t * k, height: t * k, transform: [{ rotate: giro.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] }) as never }] }}>
         <Svg width={t * k} height={t * k} viewBox={`${-t / 2} ${-t / 2} ${t} ${t}`}>
           {Array.from({ length: 12 }, (_, i) => {
             const a = (i * Math.PI) / 6;
-            return <Line key={i} x1={Math.cos(a) * r * 1.1} y1={Math.sin(a) * r * 1.1} x2={Math.cos(a) * r * 1.25} y2={Math.sin(a) * r * 1.25} stroke="#FFE082" strokeWidth={r * 0.12} strokeLinecap="round" />;
+            return <Line key={i} x1={Math.cos(a) * r * 1.1} y1={Math.sin(a) * r * 1.1} x2={Math.cos(a) * r * 1.25} y2={Math.sin(a) * r * 1.25} stroke={calido ? "#FFAB40" : "#FFE082"} strokeWidth={r * 0.12} strokeLinecap="round" />;
           })}
         </Svg>
       </Animated.View>
       <Svg width={t * k} height={t * k} viewBox={`${-t / 2} ${-t / 2} ${t} ${t}`} style={{ position: "absolute" }}>
-        <Circle r={r} fill="#FFEB3B" />
-        <Circle r={r * 0.8} fill="#FFF176" />
+        <Circle r={r} fill={calido ? "#FF9800" : "#FFEB3B"} />
+        <Circle r={r * 0.8} fill={calido ? "#FFB74D" : "#FFF176"} />
       </Svg>
     </View>
   );
 }
 
 export function Abeja({ k, x, y, fase = 0, radio = 60 }: { k: number; x: number; y: number; fase?: number; radio?: number }) {
+  const momento = useMomento();
   const t = useBucle(7000 + fase * 900, fase * 300);
   const ala = useBucle(90);
   const n = 32, pts = Array.from({ length: n + 1 }, (_, i) => i / n);
   const dx = t.interpolate({ inputRange: pts, outputRange: pts.map((p) => Math.sin(2 * Math.PI * p + fase) * radio * k) });
   const dy = t.interpolate({ inputRange: pts, outputRange: pts.map((p) => Math.sin(4 * Math.PI * p + fase) * radio * 0.4 * k) });
   const mira = t.interpolate({ inputRange: pts, outputRange: pts.map((p) => (Math.cos(2 * Math.PI * p + fase) >= 0 ? -1 : 1)) });
+  if (momento === "noche") return null; // de noche las abejas duermen
   return (
     <Animated.View pointerEvents="none" style={{ position: "absolute", left: x * k, top: y * k, zIndex: 900, transform: [{ translateX: dx as never }, { translateY: dy as never }, { scaleX: mira as never }] }}>
       <Animated.View style={{ position: "absolute", left: 6 * k, top: -6 * k, opacity: 0.75, transform: [{ scaleY: ala.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 0.3, 1] }) as never }] }}>

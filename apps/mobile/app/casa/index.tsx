@@ -7,6 +7,7 @@ import { AnimalVivo } from "../../components/AnimalesVivos";
 import { EscenaRPG, type EscenaRPGRef, type ObjetoEscena } from "../../components/EscenaRPG";
 import { Adulto } from "../../components/Personas";
 import { hablar } from "../../lib/voz";
+import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../../lib/hora";
 
 /**
  * Casa de Emilia para recorrer (como el barrio): baño, dormitorio y cocina en
@@ -63,12 +64,16 @@ export default function Casa() {
       piso={{ xMin: 40, xMax: 1060, yMin: 360, yMax: 690 }}
       dialogo={dicho}
       colorFondo="#FFE0B2"
+      luz={{ interior: true, luces: [{ x: 530, y: 110, r: 90 }, { x: 935, y: 240, r: 70 }] }}
       extras={(k) => durmiendo ? <Zetas k={k} /> : null}
     />
   );
 }
 
-function Interior({ k, durmiendo }: { k: number; durmiendo: boolean }) {
+function Interior({ k, durmiendo: dormir }: { k: number; durmiendo: boolean }) {
+  // De noche (hora real) la pieza también se ve de noche, con luna en la ventana.
+  const momento = useMomento();
+  const durmiendo = dormir || momento === "noche";
   return (
     <>
       <Svg width={1100 * k} height={700 * k} viewBox="0 0 1100 700">
@@ -92,11 +97,11 @@ function Interior({ k, durmiendo }: { k: number; durmiendo: boolean }) {
           return <Polygon key={i} points={`${x - 10},${y} ${x + 10},${y} ${x},${y + 20}`} fill={["#FFCA28", "#4FC3F7", "#AB47BC", "#66BB6A"][i % 4]} />;
         })}
         {/* Ventana con cortinas */}
-        <Rect x="470" y="60" width="120" height="100" rx="8" fill={durmiendo ? "#1A237E" : "#E1F5FE"} stroke="#fff" strokeWidth="8" />
+        <Rect x="470" y="60" width="120" height="100" rx="8" fill={durmiendo ? "#1A237E" : momento === "dia" ? "#E1F5FE" : CIELO_VENTANA[momento]} stroke="#fff" strokeWidth="8" />
         {durmiendo ? (
           <G><Circle cx="550" cy="92" r="16" fill="#FFF9C4" /><Circle cx="557" cy="86" r="14" fill="#1A237E" />{[[490, 80], [515, 130], [575, 140]].map(([x, y]) => <Circle key={x} cx={x} cy={y} r="2" fill="#fff" />)}</G>
         ) : (
-          <G><Circle cx="550" cy="92" r="16" fill="#FFEB3B" /><Path d="M478 150 Q510 128 545 148 Q565 138 582 146 V156 H478 Z" fill="#81C784" /></G>
+          <G><Circle cx="550" cy="92" r="16" fill={ASTRO_VENTANA[momento]} /><Path d="M478 150 Q510 128 545 148 Q565 138 582 146 V156 H478 Z" fill="#81C784" /></G>
         )}
         <Path d="M530 64 V156 M474 110 H586" stroke="#fff" strokeWidth="5" />
         <Path d="M456 52 Q470 110 458 172 L478 172 Q486 110 476 52 Z" fill="#CE93D8" />

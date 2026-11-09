@@ -9,6 +9,7 @@ import { BotonCasa } from "../components/BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
 import { Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
+import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
 
 /**
  * Huerto de Don Pedro como escena para caminar (igual que el barrio): el niño
@@ -170,6 +171,7 @@ export default function Huerto() {
 
   return (
     <View style={estilos.fondo}>
+      <VeloPantalla />
       <View style={{ width: 1100 * k, height: 700 * k, alignSelf: "center" }}>
         <Pressable style={StyleSheet.absoluteFill} accessibilityLabel="Caminar"
           onPress={(e) => {
@@ -193,6 +195,7 @@ export default function Huerto() {
           <Abeja k={k} x={640} y={470} fase={2} radio={50} />
           <Abeja k={k} x={300} y={500} fase={4} radio={45} />
         </View>
+        <LuzDelDia k={k} ancho={1100} alto={700} cielo={180} suelo={{ yMin: 260, yMax: 660 }} zIndex={50} />
 
         {/* Don Pedro junto a su galpón: habla moviendo boca y manos */}
         <View pointerEvents="none" style={{ position: "absolute", left: 935 * k, top: 92 * k, alignItems: "center", zIndex: 5 }}>

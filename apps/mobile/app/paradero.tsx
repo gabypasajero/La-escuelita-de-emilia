@@ -9,6 +9,7 @@ import { EmiliaDibujo, Globo, TitoDibujo, useRespirar } from "../components/Pers
 import { AMIGOS, type Amigo, type AmigoId } from "../lib/amigos";
 import { useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar } from "../lib/voz";
+import { LuzDelDia } from "../components/LuzDelDia";
 
 /** Amigos que el niño ya conoció en esta sesión (la segunda vez es más corto). */
 const conocidos = new Set<AmigoId>();
@@ -104,7 +105,7 @@ export default function Paradero() {
     <Pantalla color="#B3E5FC">
       {/* Fondo a pantalla completa: cielo, barrio, vereda y calle */}
       <View pointerEvents="none" style={[estilos.mundo, { width, height }]}>
-        <Fondo ancho={width} />
+        <Fondo ancho={width} alto={height} />
         <View style={estilos.vereda} />
         <View style={estilos.calle}>
           {Array.from({ length: Math.ceil(width / 90) }, (_, i) => <View key={i} style={estilos.linea} />)}
@@ -156,7 +157,7 @@ export default function Paradero() {
 }
 
 /** Cielo con sol y nubes que pasan, pájaros, cerros, casitas y árboles del barrio. */
-function Fondo({ ancho }: { ancho: number }) {
+function Fondo({ ancho, alto }: { ancho: number; alto: number }) {
   const e = ancho / 1100;
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -193,6 +194,7 @@ function Fondo({ ancho }: { ancho: number }) {
       <Nube escala={e} ancho={1100} y={150} ms={95000} retraso={25000} tam={140} sombra={false} />
       <Nube escala={e} ancho={1100} y={90} ms={80000} retraso={50000} tam={120} sombra={false} />
       <Bandada escala={e} ancho={1100} y={200} ms={17000} retraso={5000} />
+      <LuzDelDia k={e} ancho={1100} alto={Math.ceil(alto / e)} cielo={300} suelo={{ yMin: 380, yMax: Math.ceil(alto / e) - 150 }} />
     </View>
   );
 }
