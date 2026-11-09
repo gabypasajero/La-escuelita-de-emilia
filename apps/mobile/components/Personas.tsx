@@ -1,6 +1,6 @@
 import { Animated, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
-import { angulo, CONTORNO, onda, Pieza, Sombreado, useCiclo, useParpadeo } from "./Articulados";
+import { angulo, CONTORNO, onda, Pieza, Sombreado, useSombreado, useCiclo, useParpadeo } from "./Articulados";
 
 /**
  * Adultos del barrio, articulados como Emilia: Don Pedro (granja y huerto),
@@ -152,6 +152,7 @@ const ESTILOS: Record<AdultoId, Estilo> = {
 };
 
 export function Adulto({ id, alto = 180, hablando = false, saludando = false }: { id: AdultoId; alto?: number; hablando?: boolean; saludando?: boolean }) {
+  const sh = useSombreado();
   const e = ESTILOS[id];
   const s = alto / 180;
   const calma = useCiclo(2800 + Math.random() * 600);
@@ -171,7 +172,7 @@ export function Adulto({ id, alto = 180, hablando = false, saludando = false }: 
     <Animated.View pointerEvents="none" style={{ width: 100 * s, height: 180 * s, transform: [{ translateY: bote as never }] }}>
       {/* Piernas y zapatos (o falda) */}
       <Svg width={100 * s} height={180 * s} viewBox="0 0 100 180" style={{ position: "absolute" }}>
-        <Sombreado />
+        <Sombreado suf={sh.suf} />
         {e.falda ? (
           <G>
             <Path d="M34 120 L66 120 L72 150 L28 150 Z" fill={e.camisa} />
@@ -187,13 +188,13 @@ export function Adulto({ id, alto = 180, hablando = false, saludando = false }: 
         {[42, 58].map((x) => (
           <G key={x}>
             <Ellipse cx={x} cy="172" rx="9" ry="5" fill={e.zapatos} />
-            <Ellipse cx={x} cy="172" rx="9" ry="5" fill="url(#vol)" {...CONTORNO} />
+            <Ellipse cx={x} cy="172" rx="9" ry="5" fill={sh.vol} {...CONTORNO} />
             <Path d={`M${x - 5} 169.5 Q${x - 1} 167.8 ${x + 3} 169`} stroke="#fff" strokeOpacity="0.45" strokeWidth="1.2" fill="none" strokeLinecap="round" />
           </G>
         ))}
         {/* Torso con volumen */}
         <Path d="M32 76 Q50 70 68 76 L70 124 L30 124 Z" fill={e.camisa} />
-        <Path d="M32 76 Q50 70 68 76 L70 124 L30 124 Z" fill="url(#volL)" {...CONTORNO} />
+        <Path d="M32 76 Q50 70 68 76 L70 124 L30 124 Z" fill={sh.volL} {...CONTORNO} />
         <Ellipse cx="50" cy="75" rx="10" ry="3.5" fill="#000" opacity="0.18" />
         {e.encima(s)}
       </Svg>
@@ -215,14 +216,14 @@ export function Adulto({ id, alto = 180, hablando = false, saludando = false }: 
       <Animated.View style={{ position: "absolute", left: ox * s, top: oy * s, width: C.w * s, height: C.h * s, transform: [{ rotate: cabeza as never }] }}>
         <View style={{ position: "absolute", left: (0 - ox) * s, top: (0 - oy) * s }}>
           <Svg width={100 * s} height={80 * s} viewBox="0 0 100 80">
-            <Sombreado />
+            <Sombreado suf={sh.suf} />
             {e.peloAtras}
             <Rect x="44" y="60" width="12" height="14" fill={e.piel} />
             <Rect x="44" y="60" width="12" height="8" fill="#000" opacity="0.15" />
             <Ellipse cx="25" cy="44" rx="4" ry="6" fill={e.piel} {...CONTORNO} />
             <Ellipse cx="75" cy="44" rx="4" ry="6" fill={e.piel} {...CONTORNO} />
             <Ellipse cx="50" cy="42" rx="25" ry="27" fill={e.piel} />
-            <Ellipse cx="50" cy="42" rx="25" ry="27" fill="url(#vol)" {...CONTORNO} />
+            <Ellipse cx="50" cy="42" rx="25" ry="27" fill={sh.vol} {...CONTORNO} />
             <Path d="M47 44 Q50 52 53 48" stroke="#00000033" strokeWidth="2" fill="none" strokeLinecap="round" />
             <Circle cx="35" cy="52" r="4" fill="#F48FB1" opacity="0.35" />
             <Circle cx="65" cy="52" r="4" fill="#F48FB1" opacity="0.35" />

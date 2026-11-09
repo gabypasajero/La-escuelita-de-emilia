@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
 import { Animated, Easing, View } from "react-native";
 import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 import { TINTE, useMomento } from "../lib/hora";
@@ -67,7 +67,7 @@ function Estrella({ k, x, y, fase }: { k: number; x: number; y: number; fase: nu
 
 /** Luz cálida y redonda de un farol, lámpara o ventana encendida. */
 export function Resplandor({ k, x, y, r, fuerte }: { k: number; x: number; y: number; r: number; fuerte: boolean }) {
-  const id = `luz${Math.round(x)}-${Math.round(y)}`;
+  const id = `luz${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   return (
     <View style={{ position: "absolute", left: (x - r) * k, top: (y - r) * k }}>
       <Svg width={r * 2 * k} height={r * 2 * k} viewBox={`0 0 ${r * 2} ${r * 2}`}>

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Animated, Easing, View } from "react-native";
-import Svg, { Circle, Ellipse, G, Path, Polygon, Rect } from "react-native-svg";
-import { angulo, onda, Pieza, useCiclo, useParpadeo } from "./Articulados";
+import Svg, { Circle, Defs, Ellipse, G, Mask, Path, Polygon, RadialGradient, Rect, Stop } from "react-native-svg";
+import { angulo, onda, Pieza, Sombreado, useCiclo, useParpadeo, useSombreado } from "./Articulados";
 
 /**
  * Animales "vivos" (no stickers): cada uno tiene patas que dan pasos, cabeza,
@@ -21,6 +21,32 @@ interface Props {
   nadando?: boolean;
 }
 
+/**
+ * Da volumen a una parte del animal sin redibujarla: usa su silueta como
+ * máscara y pinta encima la luz (arriba a la izquierda) y la sombra (abajo a
+ * la derecha). Sirve igual para animales claros u oscuros.
+ */
+function Volumen({ id, children, x = 0, y = 0, w = 120, h = 120, zona }: { id: string; children: ReactNode; x?: number; y?: number; w?: number; h?: number; zona?: [number, number, number, number] }) {
+  // La luz se reparte sobre la zona del cuerpo (no sobre todo el lienzo) para que se note.
+  const [zx, zy, zw, zh] = zona ?? [x + w * 0.12, y + h * 0.14, w * 0.76, h * 0.72];
+  const u = `${id}${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  return (
+    <G>
+      {children}
+      <Defs>
+        <RadialGradient id={`volA${u}`} gradientUnits="userSpaceOnUse" cx={zx + zw * 0.36} cy={zy + zh * 0.28} r={Math.max(zw, zh) * 0.78}>
+          <Stop offset="0" stopColor="#fff" stopOpacity="0.5" />
+          <Stop offset="0.38" stopColor="#fff" stopOpacity="0" />
+          <Stop offset="0.7" stopColor="#000" stopOpacity="0.08" />
+          <Stop offset="1" stopColor="#000" stopOpacity="0.3" />
+        </RadialGradient>
+        <Mask id={`m${u}`} maskType="alpha" x={x} y={y} width={w} height={h} maskUnits="userSpaceOnUse">{children}</Mask>
+      </Defs>
+      <Rect x={x} y={y} width={w} height={h} fill={`url(#volA${u})`} mask={`url(#m${u})`} />
+    </G>
+  );
+}
+
 /** Ojo que pestañea, ubicado en coordenadas del dibujo (dentro de una pieza o del cuerpo). */
 function Ojo({ s, x, y, r = 2.6, origen, color = "#2B2118", claro = false }: { s: number; x: number; y: number; r?: number; origen: { x: number; y: number }; color?: string; claro?: boolean }) {
   const parpadeo = useParpadeo(2600 + Math.random() * 1200);
@@ -30,18 +56,20 @@ function Ojo({ s, x, y, r = 2.6, origen, color = "#2B2118", claro = false }: { s
       <Svg width={t * s} height={t * s} viewBox={`${x - t / 2} ${y - t / 2} ${t} ${t}`}>
         {claro && <Circle cx={x} cy={y} r={r + 0.9} fill="#fff" />}
         <Circle cx={x} cy={y} r={r} fill={color} />
-        <Circle cx={x - r * 0.35} cy={y - r * 0.35} r={r * 0.35} fill="#fff" />
+        <Circle cx={x} cy={y + r * 0.15} r={r * 0.6} fill="#6D4C41" opacity="0.45" />
+        <Circle cx={x - r * 0.35} cy={y - r * 0.35} r={r * 0.38} fill="#fff" />
+        <Circle cx={x + r * 0.35} cy={y + r * 0.4} r={r * 0.16} fill="#fff" opacity="0.8" />
       </Svg>
     </Animated.View>
   );
 }
 
 /** Cabeza que gira desde el cuello, con su dibujo y su ojo. */
-function Cabeza({ s, px, py, w, h, rot, children, ojo }: { s: number; px: number; py: number; w: number; h: number; rot: Animated.AnimatedInterpolation<string | number>; children: ReactNode; ojo: { x: number; y: number; r?: number; claro?: boolean; color?: string } }) {
+function Cabeza({ s, px, py, w, h, rot, children, ojo, vid }: { s: number; px: number; py: number; w: number; h: number; rot: Animated.AnimatedInterpolation<string | number>; children: ReactNode; ojo: { x: number; y: number; r?: number; claro?: boolean; color?: string }; vid: string }) {
   const ox = px - w / 2, oy = py - h / 2;
   return (
     <Animated.View pointerEvents="none" style={{ position: "absolute", left: ox * s, top: oy * s, width: w * s, height: h * s, transform: [{ rotate: rot as never }] }}>
-      <Svg width={w * s} height={h * s} viewBox={`${ox} ${oy} ${w} ${h}`}>{children}</Svg>
+      <Svg width={w * s} height={h * s} viewBox={`${ox} ${oy} ${w} ${h}`}><Volumen id={vid} x={ox} y={oy} w={w} h={h}>{children}</Volumen></Svg>
       <Ojo s={s} x={ojo.x} y={ojo.y} r={ojo.r} claro={ojo.claro} color={ojo.color} origen={{ x: ox, y: oy }} />
     </Animated.View>
   );
@@ -61,7 +89,8 @@ interface Cuadrupedo {
   colaCalma?: number;
 }
 
-function Cuadrupedo({ d, alto, caminando, contento }: { d: Cuadrupedo; alto: number; caminando: boolean; contento: boolean }) {
+function Cuadrupedo({ d, alto, caminando, contento, nombre }: { d: Cuadrupedo; alto: number; caminando: boolean; contento: boolean; nombre: string }) {
+  const sh = useSombreado();
   const s = alto / d.altoLienzo;
   const paso = useCiclo(520, caminando);
   const calma = useCiclo(2400 + Math.random() * 800);
@@ -75,7 +104,9 @@ function Cuadrupedo({ d, alto, caminando, contento }: { d: Cuadrupedo; alto: num
   const { patas: p } = d;
   const Pata = ({ x, color, fase }: { x: number; color: string; fase: number }) => (
     <Pieza s={s} px={x} py={p.y} w={p.grosor * 3 + 8} h={p.largo * 2 + 6} rot={pata(fase)}>
+      <Sombreado suf={sh.suf} />
       <Rect x={x - p.grosor / 2} y={p.y - 2} width={p.grosor} height={p.largo + 2} rx={p.grosor / 2.4} fill={color} />
+      <Rect x={x - p.grosor / 2} y={p.y - 2} width={p.grosor} height={p.largo + 2} rx={p.grosor / 2.4} fill={sh.volL} />
       {p.pezuna && <Rect x={x - p.grosor / 2} y={p.y + p.largo - 4} width={p.grosor} height={5} rx={1.5} fill={p.pezuna} />}
     </Pieza>
   );
@@ -83,11 +114,11 @@ function Cuadrupedo({ d, alto, caminando, contento }: { d: Cuadrupedo; alto: num
     <Animated.View pointerEvents="none" style={{ width: d.ancho * s, height: d.altoLienzo * s, transform: [{ translateY: bote as never }] }}>
       <Pata x={p.xs[1]} color={p.colorAtras} fase={Math.PI} />
       <Pata x={p.xs[3]} color={p.colorAtras} fase={0} />
-      <Pieza s={s} px={d.cola.px} py={d.cola.py} w={d.cola.w} h={d.cola.h} rot={cola}>{d.cola.dibujo}</Pieza>
-      <Svg width={d.ancho * s} height={d.altoLienzo * s} viewBox={`0 0 ${d.ancho} ${d.altoLienzo}`} style={{ position: "absolute" }}>{d.cuerpo}</Svg>
+      <Pieza s={s} px={d.cola.px} py={d.cola.py} w={d.cola.w} h={d.cola.h} rot={cola}><Volumen id={`${nombre}-k`} x={d.cola.px - d.cola.w / 2} y={d.cola.py - d.cola.h / 2} w={d.cola.w} h={d.cola.h}>{d.cola.dibujo}</Volumen></Pieza>
+      <Svg width={d.ancho * s} height={d.altoLienzo * s} viewBox={`0 0 ${d.ancho} ${d.altoLienzo}`} style={{ position: "absolute" }}><Volumen id={`${nombre}-c`} w={d.ancho} h={d.altoLienzo} zona={[d.ancho * 0.24, d.altoLienzo * 0.2, d.ancho * 0.64, d.altoLienzo * 0.58]}>{d.cuerpo}</Volumen></Svg>
       <Pata x={p.xs[0]} color={p.color} fase={0} />
       <Pata x={p.xs[2]} color={p.color} fase={Math.PI} />
-      <Cabeza s={s} px={d.cabeza.px} py={d.cabeza.py} w={d.cabeza.w} h={d.cabeza.h} rot={cabeza} ojo={d.cabeza.ojo}>{d.cabeza.dibujo}</Cabeza>
+      <Cabeza s={s} px={d.cabeza.px} py={d.cabeza.py} w={d.cabeza.w} h={d.cabeza.h} rot={cabeza} ojo={d.cabeza.ojo} vid={`${nombre}-h`}>{d.cabeza.dibujo}</Cabeza>
     </Animated.View>
   );
 }
@@ -257,16 +288,16 @@ function Gallina({ alto, caminando, contento }: Required<Pick<Props, "alto">> & 
           <Path d={`M${l.x} 56 L${l.x} 74 M${l.x} 74 L${l.x - 6} 76 M${l.x} 74 L${l.x + 3} 77`} stroke={l.c} strokeWidth="2.6" strokeLinecap="round" />
         </Pieza>
       ))}
-      <Svg width={80 * s} height={80 * s} viewBox="0 0 80 80" style={{ position: "absolute" }}>
+      <Svg width={80 * s} height={80 * s} viewBox="0 0 80 80" style={{ position: "absolute" }}><Volumen id="gallina-c" x={0} y={0} w={80} h={80}>
         <Path d="M58 40 Q72 22 66 46 Q74 30 70 52 Z" fill="#8D6E63" />
         <Ellipse cx="44" cy="46" rx="20" ry="15" fill="#D7A26A" />
         <Ellipse cx="42" cy="54" rx="13" ry="5" fill="#E6BE8A" opacity="0.8" />
-      </Svg>
+      </Volumen></Svg>
       <Pieza s={s} px={46} py={40} w={36} h={30} rot={angulo(0, contento ? onda(ala, 28) : undefined)}>
         <Ellipse cx="50" cy="45" rx="12" ry="7.5" fill="#B9844A" />
         <Path d="M42 45 Q50 50 60 46" stroke="#8D6E63" strokeWidth="1.4" fill="none" />
       </Pieza>
-      <Cabeza s={s} px={32} py={38} w={40} h={40} rot={cabeza} ojo={{ x: 23, y: 25, r: 1.9 }}>
+      <Cabeza s={s} px={32} py={38} w={40} h={40} rot={cabeza} ojo={{ x: 23, y: 25, r: 1.9 }} vid="gallina-h">
         <Path d="M30 38 Q26 30 26 24" stroke="#D7A26A" strokeWidth="9" strokeLinecap="round" fill="none" />
         <Circle cx="25" cy="25" r="8" fill="#D7A26A" />
         {[[22, 16, 3], [26, 15, 3.4], [30, 17, 3]].map(([x, y, r]) => <Circle key={x} cx={x} cy={y} r={r} fill="#E53935" />)}
@@ -294,16 +325,16 @@ function Pato({ alto, caminando, contento, nadando }: Required<Pick<Props, "alto
           <Path d={`M${l.x - 6} 72 L${l.x + 3} 72 L${l.x} 68 Z`} fill="#FB8C00" />
         </Pieza>
       ))}
-      <Svg width={80 * s} height={80 * s} viewBox="0 0 80 80" style={{ position: "absolute" }}>
+      <Svg width={80 * s} height={80 * s} viewBox="0 0 80 80" style={{ position: "absolute" }}><Volumen id="pato-c" x={0} y={0} w={80} h={80}>
         <Path d="M60 44 Q70 34 68 46 Z" fill="#ECEFF1" />
         <Ellipse cx="44" cy="50" rx="21" ry="13" fill="#FAFAFA" />
         <Path d="M36 50 Q46 56 58 50" stroke="#CFD8DC" strokeWidth="2" fill="none" />
         {nadando && <Path d="M18 60 Q30 56 44 60 Q58 64 70 60" stroke="#81D4FA" strokeWidth="3" fill="none" strokeLinecap="round" />}
-      </Svg>
+      </Volumen></Svg>
       <Pieza s={s} px={48} py={46} w={34} h={26} rot={angulo(0, contento ? onda(ala, 30) : undefined)}>
         <Ellipse cx="50" cy="48" rx="11" ry="6" fill="#ECEFF1" />
       </Pieza>
-      <Cabeza s={s} px={32} py={44} w={40} h={44} rot={cabeza} ojo={{ x: 21, y: 29, r: 1.9 }}>
+      <Cabeza s={s} px={32} py={44} w={40} h={44} rot={cabeza} ojo={{ x: 21, y: 29, r: 1.9 }} vid="pato-h">
         <Path d="M32 44 Q26 38 26 32" stroke="#FAFAFA" strokeWidth="8" strokeLinecap="round" fill="none" />
         <Circle cx="24" cy="31" r="8" fill="#FAFAFA" />
         <Path d="M17 31 Q10 31 8 34 Q12 36 18 35 Z" fill="#FB8C00" />
@@ -323,23 +354,23 @@ function Conejo({ alto, caminando, contento }: Required<Pick<Props, "alto">> & P
   const ox = 30 - 25, oy = 40 - 25;
   return (
     <Animated.View pointerEvents="none" style={{ width: 80 * s, height: 80 * s, transform: [{ translateY: bote as never }, { rotate: cuerpo as never }] }}>
-      <Svg width={80 * s} height={80 * s} viewBox="0 0 80 80" style={{ position: "absolute" }}>
+      <Svg width={80 * s} height={80 * s} viewBox="0 0 80 80" style={{ position: "absolute" }}><Volumen id="conejo-c" x={0} y={0} w={80} h={80}>
         <Ellipse cx="54" cy="64" rx="11" ry="6" fill="#8D6E63" />
         <Ellipse cx="46" cy="52" rx="18" ry="14" fill="#A1887F" />
         <Circle cx="63" cy="46" r="5" fill="#FAFAFA" />
         <Ellipse cx="34" cy="64" rx="3" ry="5" fill="#8D6E63" />
         <Ellipse cx="44" cy="58" rx="10" ry="5" fill="#D7CCC8" opacity="0.6" />
-      </Svg>
+      </Volumen></Svg>
       <Animated.View pointerEvents="none" style={{ position: "absolute", left: ox * s, top: oy * s, width: 50 * s, height: 50 * s }}>
         <Pieza s={s} px={30 - ox} py={32 - oy} w={30} h={50} rot={orejas}>
           <Ellipse cx={30 - ox} cy={20 - oy} rx="3.8" ry="11" fill="#A1887F" transform={`rotate(-12 ${30 - ox} ${20 - oy})`} />
           <Ellipse cx={30 - ox} cy={20 - oy} rx="1.8" ry="8" fill="#F8BBD0" transform={`rotate(-12 ${30 - ox} ${20 - oy})`} />
           <Ellipse cx={35 - ox} cy={21 - oy} rx="3.8" ry="11" fill="#8D6E63" transform={`rotate(10 ${35 - ox} ${21 - oy})`} />
         </Pieza>
-        <Svg width={50 * s} height={50 * s} viewBox={`${ox} ${oy} 50 50`} style={{ position: "absolute" }}>
+        <Svg width={50 * s} height={50 * s} viewBox={`${ox} ${oy} 50 50`} style={{ position: "absolute" }}><Volumen id="conejo-h" x={ox} y={oy} w={50} h={50}>
           <Ellipse cx="28" cy="40" rx="10" ry="9" fill="#A1887F" />
           <Circle cx="30" cy="44" r="3" fill="#F8BBD0" opacity="0.5" />
-        </Svg>
+        </Volumen></Svg>
         <Animated.View style={{ position: "absolute", left: (17 - ox) * s, top: (39 - oy) * s, width: 6 * s, height: 6 * s, transform: [{ scale: nariz.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.25, 1] }) as never }] }}>
           <Svg width={6 * s} height={6 * s} viewBox="0 0 6 6"><Ellipse cx="3" cy="3" rx="2" ry="1.6" fill="#EC407A" /></Svg>
         </Animated.View>
@@ -357,14 +388,14 @@ function Mariposa({ alto }: { alto: number }) {
   return (
     <View pointerEvents="none" style={{ width: 40 * s, height: 40 * s }}>
       <Animated.View style={{ position: "absolute", left: 0, top: 0, width: 40 * s, height: 40 * s, transform: [{ scaleX: escala as never }] }}>
-        <Svg width={40 * s} height={40 * s} viewBox="0 0 40 40">
+        <Svg width={40 * s} height={40 * s} viewBox="0 0 40 40"><Volumen id="mariposa-a" x={0} y={0} w={40} h={40}>
           <Ellipse cx="11" cy="14" rx="9" ry="10" fill="#BA68C8" />
           <Ellipse cx="29" cy="14" rx="9" ry="10" fill="#BA68C8" />
           <Ellipse cx="13" cy="27" rx="6" ry="7" fill="#F06292" />
           <Ellipse cx="27" cy="27" rx="6" ry="7" fill="#F06292" />
           <Circle cx="11" cy="13" r="3" fill="#FFF59D" />
           <Circle cx="29" cy="13" r="3" fill="#FFF59D" />
-        </Svg>
+        </Volumen></Svg>
       </Animated.View>
       <Svg width={40 * s} height={40 * s} viewBox="0 0 40 40" style={{ position: "absolute" }}>
         <Ellipse cx="20" cy="21" rx="2" ry="10" fill="#4A148C" />
@@ -380,14 +411,14 @@ function Pajaro({ alto }: { alto: number }) {
   const aleteo = useCiclo(300);
   return (
     <View pointerEvents="none" style={{ width: 40 * s, height: 30 * s }}>
-      <Svg width={40 * s} height={30 * s} viewBox="0 0 40 30" style={{ position: "absolute" }}>
+      <Svg width={40 * s} height={30 * s} viewBox="0 0 40 30" style={{ position: "absolute" }}><Volumen id="pajaro-c" x={0} y={0} w={40} h={30}>
         <Ellipse cx="20" cy="17" rx="10" ry="5.5" fill="#455A64" />
         <Path d="M29 16 L37 13 L35 19 Z" fill="#37474F" />
         <Circle cx="11" cy="14" r="4.5" fill="#455A64" />
         <Polygon points="7,14 3,15 7,16" fill="#FFB300" />
         <Circle cx="10" cy="13" r="1" fill="#fff" />
         <Ellipse cx="19" cy="19" rx="6" ry="2.5" fill="#FFAB91" opacity="0.8" />
-      </Svg>
+      </Volumen></Svg>
       <Pieza s={s} px={20} py={15} w={30} h={30} rot={angulo(0, onda(aleteo, 45))}>
         <Path d="M20 15 Q24 4 32 6 Q26 12 20 15 Z" fill="#37474F" />
       </Pieza>
@@ -513,7 +544,7 @@ function Rana({ alto, caminando, contento }: Required<Pick<Props, "alto">> & Pro
   const bote = caminando || contento ? onda(salto, 9 * s, 0, true) : new Animated.Value(0);
   return (
     <Animated.View pointerEvents="none" style={{ width: 80 * s, height: 60 * s, transform: [{ translateY: bote as never }] }}>
-      <Svg width={80 * s} height={60 * s} viewBox="0 0 80 60" style={{ position: "absolute" }}>
+      <Svg width={80 * s} height={60 * s} viewBox="0 0 80 60" style={{ position: "absolute" }}><Volumen id="rana-c" x={0} y={0} w={80} h={60}>
         <Ellipse cx="22" cy="50" rx="12" ry="6" fill="#43A047" />
         <Ellipse cx="58" cy="50" rx="12" ry="6" fill="#43A047" />
         <Ellipse cx="40" cy="40" rx="22" ry="15" fill="#66BB6A" />
@@ -522,7 +553,7 @@ function Rana({ alto, caminando, contento }: Required<Pick<Props, "alto">> & Pro
         <Circle cx="50" cy="24" r="8" fill="#66BB6A" />
         <Path d="M30 36 Q40 42 50 36" stroke="#2E7D32" strokeWidth="2" fill="none" strokeLinecap="round" />
         <Circle cx="34" cy="38" r="1.5" fill="#F48FB1" opacity="0.7" />
-      </Svg>
+      </Volumen></Svg>
       <Animated.View style={{ position: "absolute", left: 33 * s, top: 41 * s, width: 14 * s, height: 8 * s, transform: [{ scale: garganta.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.8, 1.25, 0.8] }) as never }] }}>
         <Svg width={14 * s} height={8 * s} viewBox="0 0 14 8"><Ellipse cx="7" cy="4" rx="6" ry="3.5" fill="#DCEDC8" /></Svg>
       </Animated.View>
@@ -540,7 +571,7 @@ export const PROPORCION: Record<AnimalId, number> = { vaca: 120 / 90, oveja: 110
 /** Cualquier animal vivo por su id. */
 export function AnimalVivo({ id, alto = 80, caminando = false, contento = false, nadando = false }: Props & { id: AnimalId }) {
   const q = CUADRUPEDOS[id];
-  if (q) return <Cuadrupedo d={q} alto={alto} caminando={caminando} contento={contento} />;
+  if (q) return <Cuadrupedo d={q} alto={alto} caminando={caminando} contento={contento} nombre={id} />;
   if (id === "gallina") return <Gallina alto={alto} caminando={caminando} contento={contento} />;
   if (id === "pato") return <Pato alto={alto} caminando={caminando} contento={contento} nadando={nadando} />;
   if (id === "conejo") return <Conejo alto={alto} caminando={caminando} contento={contento} />;
