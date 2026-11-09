@@ -1,6 +1,6 @@
 import { Animated, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
-import { angulo, onda, Pieza, useCiclo, useParpadeo } from "./Articulados";
+import { angulo, CONTORNO, onda, Pieza, Sombreado, useCiclo, useParpadeo } from "./Articulados";
 
 /**
  * Adultos del barrio, articulados como Emilia: Don Pedro (granja y huerto),
@@ -171,6 +171,7 @@ export function Adulto({ id, alto = 180, hablando = false, saludando = false }: 
     <Animated.View pointerEvents="none" style={{ width: 100 * s, height: 180 * s, transform: [{ translateY: bote as never }] }}>
       {/* Piernas y zapatos (o falda) */}
       <Svg width={100 * s} height={180 * s} viewBox="0 0 100 180" style={{ position: "absolute" }}>
+        <Sombreado />
         {e.falda ? (
           <G>
             <Path d="M34 120 L66 120 L72 150 L28 150 Z" fill={e.camisa} />
@@ -183,30 +184,45 @@ export function Adulto({ id, alto = 180, hablando = false, saludando = false }: 
             <Rect x="52" y="120" width="11" height="50" rx="5" fill={e.piernas} />
           </G>
         )}
-        <Ellipse cx="42" cy="172" rx="9" ry="5" fill={e.zapatos} />
-        <Ellipse cx="58" cy="172" rx="9" ry="5" fill={e.zapatos} />
-        {/* Torso */}
+        {[42, 58].map((x) => (
+          <G key={x}>
+            <Ellipse cx={x} cy="172" rx="9" ry="5" fill={e.zapatos} />
+            <Ellipse cx={x} cy="172" rx="9" ry="5" fill="url(#vol)" {...CONTORNO} />
+            <Path d={`M${x - 5} 169.5 Q${x - 1} 167.8 ${x + 3} 169`} stroke="#fff" strokeOpacity="0.45" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          </G>
+        ))}
+        {/* Torso con volumen */}
         <Path d="M32 76 Q50 70 68 76 L70 124 L30 124 Z" fill={e.camisa} />
+        <Path d="M32 76 Q50 70 68 76 L70 124 L30 124 Z" fill="url(#volL)" {...CONTORNO} />
+        <Ellipse cx="50" cy="75" rx="10" ry="3.5" fill="#000" opacity="0.18" />
         {e.encima(s)}
       </Svg>
       {/* Brazos */}
       <Pieza s={s} px={33} py={80} w={84} h={84} rot={brazoIzq}>
+        <Path d="M33 80 Q24 98 26 116" stroke="#000" strokeOpacity="0.18" strokeWidth="11.6" strokeLinecap="round" fill="none" />
         <Path d="M33 80 Q24 98 26 116" stroke={e.camisa} strokeWidth="10" strokeLinecap="round" fill="none" />
-        <Circle cx="26" cy="119" r="5.5" fill={e.piel} />
+        <Path d="M31 84 Q24 98 25 112" stroke="#fff" strokeOpacity="0.25" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+        <Circle cx="26" cy="119" r="5.5" fill={e.piel} {...CONTORNO} />
+        <Circle cx="24.6" cy="117.6" r="2" fill="#fff" opacity="0.3" />
       </Pieza>
       <Pieza s={s} px={67} py={80} w={84} h={84} rot={brazoDer}>
+        <Path d="M67 80 Q76 98 74 116" stroke="#000" strokeOpacity="0.18" strokeWidth="11.6" strokeLinecap="round" fill="none" />
         <Path d="M67 80 Q76 98 74 116" stroke={id === "lucas" ? "#FAFAFA" : e.camisa} strokeWidth="10" strokeLinecap="round" fill="none" />
-        <Circle cx="74" cy="119" r="5.5" fill={e.piel} />
+        <Path d="M69 86 Q75 98 74.5 110" stroke="#000" strokeOpacity="0.1" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+        <Circle cx="74" cy="119" r="5.5" fill={e.piel} {...CONTORNO} />
       </Pieza>
       {/* Cabeza */}
       <Animated.View style={{ position: "absolute", left: ox * s, top: oy * s, width: C.w * s, height: C.h * s, transform: [{ rotate: cabeza as never }] }}>
         <View style={{ position: "absolute", left: (0 - ox) * s, top: (0 - oy) * s }}>
           <Svg width={100 * s} height={80 * s} viewBox="0 0 100 80">
+            <Sombreado />
             {e.peloAtras}
             <Rect x="44" y="60" width="12" height="14" fill={e.piel} />
+            <Rect x="44" y="60" width="12" height="8" fill="#000" opacity="0.15" />
+            <Ellipse cx="25" cy="44" rx="4" ry="6" fill={e.piel} {...CONTORNO} />
+            <Ellipse cx="75" cy="44" rx="4" ry="6" fill={e.piel} {...CONTORNO} />
             <Ellipse cx="50" cy="42" rx="25" ry="27" fill={e.piel} />
-            <Ellipse cx="25" cy="44" rx="4" ry="6" fill={e.piel} />
-            <Ellipse cx="75" cy="44" rx="4" ry="6" fill={e.piel} />
+            <Ellipse cx="50" cy="42" rx="25" ry="27" fill="url(#vol)" {...CONTORNO} />
             <Path d="M47 44 Q50 52 53 48" stroke="#00000033" strokeWidth="2" fill="none" strokeLinecap="round" />
             <Circle cx="35" cy="52" r="4" fill="#F48FB1" opacity="0.35" />
             <Circle cx="65" cy="52" r="4" fill="#F48FB1" opacity="0.35" />
