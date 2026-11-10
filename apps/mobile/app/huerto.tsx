@@ -12,39 +12,49 @@ import { hablar } from "../lib/voz";
 import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
 import { SombraContacto, VinetaPantalla } from "../components/AmbienteInterior";
 import { useVozActiva } from "../lib/habla";
-import { Icono, TextoIconos } from "../components/Iconos";
+import { dibujoEnSvg, Icono, TextoIconos } from "../components/Iconos";
+import { sonido } from "../lib/sonidos";
 
 /**
- * Huerto de Don Pedro como escena para caminar (igual que el barrio): el niño
- * camina a una parcela y sigue la secuencia real: pala → semilla → agua →
- * brota → agua → crece → cosechar. Las verduras son de las que se pueden
- * cultivar en casa, y Don Pedro cuenta qué parte de la planta comemos.
+ * Huerto de Don Pedro como escena para caminar. Cada planta se cuida como
+ * una de verdad: hoyito con la pala, semilla, agua y sol. La planta va
+ * pidiendo lo que le falta (una gota o un solcito), crece por etapas, da
+ * flores, luego su fruto, y se cosecha tocando la planta.
  */
 
-type Etapa = "tierra" | "hoyo" | "sembrada" | "regada" | "brote" | "creciendo" | "lista";
-type Herramienta = "pala" | "semilla" | "agua" | "canasta";
-interface Parcela { etapa: Etapa; verdura?: Verdura; listoEn?: number }
+type Etapa = "tierra" | "hoyo" | "sembrada" | "brote" | "creciendo" | "flor" | "lista";
+type Herramienta = "pala" | "semilla" | "agua" | "sol";
+interface Parcela { etapa: Etapa; verdura?: Verdura; mojada?: boolean; creceEn?: number }
 
-const NECESITA: Partial<Record<Etapa, Herramienta>> = { tierra: "pala", hoyo: "semilla", sembrada: "agua", brote: "agua", lista: "canasta" };
-const PISTA: Partial<Record<Etapa, string>> = {
-  tierra: "Primero hacemos un hoyito con la pala.",
-  hoyo: "El hoyito está listo. ¿Qué ponemos adentro? ¡Una semilla!",
-  sembrada: "La semilla tiene sed. ¡Hay que regarla!",
-  regada: "Con paciencia todo crece. Esperemos un ratito.",
-  brote: "¡Salió un brote! Un poquito más de agua.",
-  creciendo: "Está creciendo. Esperemos un poquito.",
-  lista: "¡Ya está lista! Tráela con la canasta.",
-};
+const CRECE: Etapa[] = ["sembrada", "brote", "creciendo"];
+const SIGUE: Partial<Record<Etapa, Etapa>> = { sembrada: "brote", brote: "creciendo", creciendo: "flor", flor: "lista" };
 const HERRAMIENTAS: Array<{ id: Herramienta; emoji: string; nombre: string }> = [
   { id: "pala", emoji: "⛏️", nombre: "Pala" },
   { id: "semilla", emoji: "🌱", nombre: "Semillas" },
   { id: "agua", emoji: "💧", nombre: "Regar" },
-  { id: "canasta", emoji: "🧺", nombre: "Cosechar" },
+  { id: "sol", emoji: "☀️", nombre: "Sol" },
 ];
+/** Qué necesita la planta ahora (lo muestra en su globito). */
+function necesita(p: Parcela): Herramienta | "cosechar" | null {
+  if (p.etapa === "tierra") return "pala";
+  if (p.etapa === "hoyo") return "semilla";
+  if (p.etapa === "lista") return "cosechar";
+  if (!CRECE.includes(p.etapa) || p.creceEn) return null;
+  return p.mojada ? "sol" : "agua";
+}
+function pista(p: Parcela): string {
+  const n = necesita(p);
+  if (n === "pala") return "Primero hacemos un hoyito con la pala.";
+  if (n === "semilla") return "El hoyito está listo. ¡Ponle una semilla!";
+  if (n === "agua") return p.etapa === "sembrada" ? "La semilla tiene sed. ¡Hay que regarla!" : "La plantita pide agua. ¡Tiene sed!";
+  if (n === "sol") return "Ya tomó agua. Ahora necesita un poco de sol.";
+  if (n === "cosechar") return "¡Ya está lista! Toca la planta para cosecharla.";
+  return p.etapa === "flor" ? "¡Le salieron flores! De ahí viene el fruto. Esperemos un poquito." : "Está creciendo con el sol. ¡Mira!";
+}
 
 // Escena en unidades de diseño de 1100×700.
 const PARCELAS_POS = [0, 1, 2, 3, 4, 5].map((i) => ({ x: 300 + (i % 3) * 230, y: 300 + Math.floor(i / 3) * 210 }));
-const ESPERA_MS = 5000;
+const CRECE_MS = 3800;
 
 // El huerto de cada niño se guarda mientras la app está abierta (al salir y volver, sigue creciendo).
 const HUERTOS = new Map<string, { parcelas: Parcela[]; canasta: Record<string, number> }>();
@@ -74,17 +84,19 @@ export default function Huerto() {
 
   useEffect(() => void hablar("¡Llegó mi ayudante! Camina hasta una parcela para sembrar verduras."), []);
 
-  // Las plantas regadas crecen solas con el tiempo.
+  // Con agua y sol, cada planta pasa a su etapa siguiente; de la flor sale el fruto.
   useEffect(() => {
     const t = setInterval(() => {
       const ahora = Date.now();
       const p = guardado.parcelas;
-      if (!p.some((x) => x.listoEn && x.listoEn <= ahora)) return;
+      if (!p.some((x) => x.creceEn && x.creceEn <= ahora)) return;
+      sonido.paso(8);
       setParcelas(p.map((x) => {
-        if (!x.listoEn || x.listoEn > ahora) return x;
-        return { ...x, etapa: x.etapa === "regada" ? "brote" : "lista", listoEn: undefined };
+        if (!x.creceEn || x.creceEn > ahora) return x;
+        const etapa = SIGUE[x.etapa] ?? x.etapa;
+        return { ...x, etapa, mojada: false, creceEn: etapa === "flor" ? ahora + CRECE_MS + 1200 : undefined };
       }));
-    }, 500);
+    }, 400);
     return () => clearInterval(t);
   }, [guardado]);
 
@@ -127,38 +139,50 @@ export default function Huerto() {
     });
   }
 
+  function cosechar(i: number) {
+    const p = guardado.parcelas[i]!;
+    if (p.etapa !== "lista" || !p.verdura) return;
+    const v = p.verdura;
+    setParcelas(guardado.parcelas.map((x, k2) => (k2 === i ? { etapa: "tierra" } : x)));
+    setCanasta({ ...guardado.canasta, [v.id]: (guardado.canasta[v.id] ?? 0) + 1 });
+    ganar(1);
+    decir(`¡Cosechaste ${v.id === "porotos" ? "porotos" : `${v.articulo === "la" ? "una" : "un"} ${v.nombre}`}! ${v.dato}`);
+  }
+
   function irAParcela(i: number) {
     const p = PARCELAS_POS[i]!;
+    // Si ya está al lado y la planta está lista, tocarla es cosecharla.
+    if (cerca === i && guardado.parcelas[i]!.etapa === "lista") return cosechar(i);
     setCerca(null);
     caminar(p.x - 70, p.y + 70, () => {
       setCerca(i);
       const parcela = guardado.parcelas[i]!;
-      decir(parcela.verdura && parcela.etapa !== "tierra" ? `Aquí hay ${parcela.verdura.articulo} ${parcela.verdura.nombre}. ${PISTA[parcela.etapa]}` : PISTA[parcela.etapa]!);
+      if (parcela.etapa === "lista") return cosechar(i);
+      decir(parcela.verdura && parcela.etapa !== "tierra" ? `Aquí hay ${parcela.verdura.id === "porotos" ? "porotos" : `${parcela.verdura.articulo} ${parcela.verdura.nombre}`}. ${pista(parcela)}` : pista(parcela));
     });
   }
 
   function usar(h: Herramienta) {
     if (cerca === null) return decir("Primero camina hasta una parcela.");
     const p = parcelas[cerca]!;
-    if (NECESITA[p.etapa] !== h) return decir(`Mmm, todavía no. ${PISTA[p.etapa]}`);
+    const n = necesita(p);
+    if (n !== h) return decir(n === "cosechar" || n === null ? pista(p) : `Mmm, todavía no. ${pista(p)}`);
     const cambiar = (nueva: Parcela) => setParcelas(parcelas.map((x, i) => (i === cerca ? nueva : x)));
     if (h === "pala") { cambiar({ etapa: "hoyo" }); decir("¡Un hoyito perfecto! Ahora elige qué semilla sembrar."); setEligiendoSemilla(true); }
     else if (h === "semilla") setEligiendoSemilla(true);
     else if (h === "agua") {
-      cambiar({ ...p, etapa: p.etapa === "sembrada" ? "regada" : "creciendo", listoEn: Date.now() + ESPERA_MS });
-      decir(p.etapa === "sembrada" ? "¡Glu, glu! Un poquito de agua. Ahora a esperar con paciencia." : "¡Más agüita para que crezca grande!");
-    } else if (h === "canasta" && p.verdura) {
-      const v = p.verdura;
-      cambiar({ etapa: "tierra" });
-      setCanasta({ ...canasta, [v.id]: (canasta[v.id] ?? 0) + 1 });
-      ganar(1);
-      decir(`¡Cosechaste ${v.articulo === "la" ? "una" : "un"} ${v.nombre}! ${v.dato}`);
+      cambiar({ ...p, mojada: true });
+      decir(p.etapa === "sembrada" ? "¡Glu, glu! La tierra quedó mojadita. Ahora necesita sol." : "¡Qué rica agüita! Ahora un poco de sol.");
+    } else if (h === "sol") {
+      cambiar({ ...p, creceEn: Date.now() + CRECE_MS });
+      decir(p.etapa === "sembrada" ? "El sol calienta la tierra… ¡la semilla está despertando!" : "Con agua y sol, ¡mira cómo crece!");
     }
   }
 
   function sembrar(v: Verdura) {
     if (cerca === null) return;
     setParcelas(parcelas.map((x, i) => (i === cerca ? { etapa: "sembrada", verdura: v } : x)));
+    sonido.toque();
     setEligiendoSemilla(false);
     decir(`¡Sembramos ${v.id === "porotos" ? "porotos" : `${v.articulo} ${v.nombre}`}! Ahora hay que regar.`);
   }
@@ -259,60 +283,140 @@ export default function Huerto() {
   );
 }
 
-function PlantaDe({ parcela: p, k }: { parcela: Parcela; k: number }) {
-  const humeda = p.etapa === "regada" || p.etapa === "creciendo";
-  const centro = { fontSize: 40 * k, textAlign: "center" as const };
+const FORMA: Record<string, "raiz" | "suelo" | "alta"> = {
+  zanahoria: "raiz", papa: "raiz", cebolla: "raiz",
+  lechuga: "suelo", zapallo: "suelo", frutilla: "suelo", pepino: "suelo", brocoli: "suelo",
+  tomate: "alta", pimenton: "alta", porotos: "alta", choclo: "alta",
+};
+const hoja = (x: number, y: number, dx: number, dy: number, color: string, k2: string) => (
+  <Path key={k2} d={`M${x} ${y} Q${x + dx * 0.4} ${y + dy - Math.abs(dx) * 0.35} ${x + dx} ${y + dy} Q${x + dx * 0.5} ${y + dy + Math.abs(dx) * 0.4} ${x} ${y} Z`} fill={color} />
+);
+
+/** La planta dibujada según su tipo y su etapa: brote, mata, flores y fruto. */
+function Planta({ p, k }: { p: Parcela; k: number }) {
+  const v = p.verdura!;
+  const forma = FORMA[v.id] ?? "alta";
+  const n = { sembrada: 0, brote: 1, creciendo: 2, flor: 3, lista: 4 }[p.etapa as "sembrada"] ?? 0;
+  const S = 92; // la línea de la tierra
+  const piezas: React.ReactNode[] = [];
+  if (n === 0) {
+    [[52, S - 2], [60, S + 1], [68, S - 2]].forEach(([x, y]) => piezas.push(<Ellipse key={`s${x}`} cx={x} cy={y} rx="3.6" ry="2.6" fill="#D7B98E" stroke="#8D6E63" strokeWidth="0.8" />));
+  } else if (n === 1) {
+    piezas.push(<Path key="t" d={`M60 ${S} Q59 ${S - 9} 60 ${S - 16}`} stroke="#558B2F" strokeWidth="3" fill="none" strokeLinecap="round" />, hoja(60, S - 15, -13, -6, "#8BC34A", "a"), hoja(60, S - 15, 13, -7, "#9CCC65", "b"));
+  } else if (forma === "alta") {
+    const alto = [0, 0, 44, 66, 66][n]!;
+    const choclo = v.id === "choclo";
+    piezas.push(<Path key="t" d={`M60 ${S} Q${choclo ? 60 : 57} ${S - alto / 2} 60 ${S - alto}`} stroke={choclo ? "#7CB342" : "#558B2F"} strokeWidth={choclo ? 5 : 3.5} fill="none" strokeLinecap="round" />);
+    for (let y = 12, i = 0; y < alto; y += 14, i++) {
+      const l = i % 2 ? 1 : -1, largo = choclo ? 30 : 20;
+      piezas.push(hoja(60, S - y, l * largo, choclo ? 6 : -4, i % 2 ? "#7CB342" : "#8BC34A", `h${i}`), hoja(60, S - y - 3, -l * (largo - 5), choclo ? 4 : -6, "#689F38", `g${i}`));
+    }
+    piezas.push(hoja(60, S - alto + 2, -9, -10, "#9CCC65", "p1"), hoja(60, S - alto + 2, 9, -10, "#8BC34A", "p2"));
+    const puntos: Array<[number, number]> = choclo ? [[72, S - 34], [48, S - 46]] : [[42, S - 26], [78, S - 34], [52, S - 50]];
+    if (n === 3) puntos.forEach(([x, y], i) => piezas.push(<G key={`f${i}`}>{[0, 1, 2, 3, 4].map((q) => <Circle key={q} cx={x + Math.cos(q * 1.257) * 3.4} cy={y + Math.sin(q * 1.257) * 3.4} r="2.6" fill={v.id === "porotos" ? "#F8BBD0" : "#FFF59D"} />)}<Circle cx={x} cy={y} r="2" fill="#FB8C00" /></G>));
+    if (n === 4) puntos.forEach(([x, y], i) => piezas.push(<G key={`r${i}`}><Path d={`M60 ${y - 6} Q${(60 + x) / 2} ${y - 12} ${x} ${y - 8}`} stroke="#558B2F" strokeWidth="1.6" fill="none" />{dibujoEnSvg(v.emoji, x, y + 2, choclo ? 30 : 24)}</G>));
+  } else if (forma === "suelo") {
+    const r = [0, 0, 20, 30, 30][n]!;
+    const rastrera = v.id === "zapallo" || v.id === "pepino";
+    if (v.id === "lechuga" || v.id === "brocoli") {
+      if (n === 4) piezas.push(<G key="c">{dibujoEnSvg(v.emoji, 60, S - 22, 58)}</G>);
+      else for (let i = 0; i < 7; i++) piezas.push(hoja(60, S, Math.cos((i / 6) * Math.PI) * r, -Math.sin((i / 6) * Math.PI) * r * 0.9 - 4, i % 2 ? "#8BC34A" : "#7CB342", `l${i}`));
+      if (n === 3) piezas.push(<Circle key="b" cx="60" cy={S - 14} r="9" fill={v.id === "brocoli" ? "#558B2F" : "#C5E1A5"} />);
+    } else {
+      if (rastrera) piezas.push(<Path key="g" d={`M60 ${S} Q40 ${S - 8} 30 ${S - 2} M60 ${S} Q84 ${S - 12} ${n >= 3 ? 104 : 90} ${S - 3}`} stroke="#558B2F" strokeWidth="3" fill="none" strokeLinecap="round" />);
+      for (let i = 0; i < 6; i++) piezas.push(hoja(60 + (rastrera ? (i - 2.5) * 7 : 0), S - 2, Math.cos((i / 5) * Math.PI) * r * (rastrera ? 0.7 : 1), -Math.sin((i / 5) * Math.PI) * r * 0.8 - 5, i % 2 ? "#7CB342" : "#689F38", `l${i}`));
+      const puntos: Array<[number, number, number]> = v.id === "zapallo" ? [[86, S - 14, 44]] : v.id === "pepino" ? [[36, S - 6, 26], [88, S - 8, 28]] : [[40, S - 6, 20], [60, S - 2, 20], [80, S - 7, 20]];
+      if (n === 3) puntos.forEach(([x, y], i) => piezas.push(<G key={`f${i}`}>{[0, 1, 2, 3, 4].map((q) => <Circle key={q} cx={x + Math.cos(q * 1.257) * 4} cy={y - 4 + Math.sin(q * 1.257) * 4} r="3" fill={v.id === "frutilla" ? "#FFFFFF" : "#FFD54F"} />)}<Circle cx={x} cy={y - 4} r="2.2" fill="#FB8C00" /></G>));
+      if (n === 4) puntos.forEach(([x, y, t], i) => piezas.push(<G key={`r${i}`}><Ellipse cx={x} cy={S + 1} rx={t * 0.42} ry="3" fill="#000" opacity="0.2" />{dibujoEnSvg(v.emoji, x, y, t)}</G>));
+    }
+  } else {
+    // Crece escondida: arriba solo se ve la mata; cuando está lista, asoma un poquito.
+    const alto = [0, 0, 22, 36, 36][n]!;
+    if (n === 4) piezas.push(<G key="v">{dibujoEnSvg(v.emoji, 60, S - 4, 40)}</G>, <Ellipse key="m" cx="60" cy={S + 13} rx="30" ry="12" fill="#6D4C41" />, <Ellipse key="m2" cx="60" cy={S + 6} rx="26" ry="4" fill="#5D4037" />);
+    for (let i = 0; i < 7; i++) {
+      const a = ((i - 3) / 3) * 0.9;
+      piezas.push(<Path key={`m${i}`} d={`M60 ${S - (n === 4 ? 16 : 0)} Q${60 + Math.sin(a) * alto * 0.5} ${S - alto * 0.7 - (n === 4 ? 16 : 0)} ${60 + Math.sin(a) * alto * 0.9} ${S - Math.cos(a) * alto - (n === 4 ? 16 : 0)}`} stroke={i % 2 ? "#7CB342" : "#558B2F"} strokeWidth={v.id === "cebolla" ? 3.4 : 2.6} fill="none" strokeLinecap="round" />);
+      if (v.id !== "cebolla") piezas.push(<Circle key={`c${i}`} cx={60 + Math.sin(a) * alto * 0.9} cy={S - Math.cos(a) * alto - (n === 4 ? 16 : 0)} r={v.id === "papa" ? 4.5 : 3.4} fill={i % 2 ? "#8BC34A" : "#689F38"} />);
+    }
+    if (n === 3 && v.id === "papa") [[48, S - 34], [70, S - 30]].forEach(([x, y]) => piezas.push(<Circle key={`fl${x}`} cx={x} cy={y} r="4" fill="#E1BEE7" />, <Circle key={`fc${x}`} cx={x} cy={y} r="1.6" fill="#FFB300" />));
+  }
+  return <Svg width={176 * k} height={161 * k} viewBox="0 0 120 110">{piezas}</Svg>;
+}
+
+/** Gotas que caen al regar y rayos al dar sol. */
+function Efecto({ tipo, k }: { tipo: "agua" | "sol"; k: number }) {
+  const a = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const ciclo = Animated.loop(Animated.timing(a, { toValue: 1, duration: tipo === "agua" ? 700 : 1400, easing: Easing.linear, useNativeDriver: true }));
+    ciclo.start();
+    return () => ciclo.stop();
+  }, [a, tipo]);
+  if (tipo === "sol") {
+    return (
+      <Animated.View pointerEvents="none" style={{ position: "absolute", top: -34 * k, alignSelf: "center", opacity: a.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.75, 1, 0.75] }), transform: [{ scale: a.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.92, 1.08, 0.92] }) }] }}>
+        <Svg width={190 * k} height={150 * k} viewBox="0 0 190 150">
+          <Path d="M95 18 L20 150 H170 Z" fill="#FFF176" opacity="0.38" />
+          {[-2, -1, 0, 1, 2].map((i) => <Path key={i} d={`M95 22 L${95 + i * 34} 146`} stroke="#FFEE58" strokeWidth="5" strokeLinecap="round" opacity="0.6" />)}
+          <Circle cx="95" cy="18" r="16" fill="#FFCA28" />
+        </Svg>
+      </Animated.View>
+    );
+  }
   return (
-    <View style={[estilos.tierra, humeda && estilos.tierraHumeda]}>
-      {[0, 1, 2].map((s) => <View key={s} style={[estilos.surco, { top: (22 + s * 32) * k }]} />)}
-      <View style={estilos.planta}>
-        {p.etapa === "hoyo" && <View style={{ width: 50 * k, height: 20 * k, borderRadius: 25 * k, backgroundColor: "#3E2723" }} />}
-        {p.etapa !== "hoyo" && p.etapa !== "lista" && <Etapa etapa={p.etapa} k={k} />}
-        {p.etapa === "lista" && p.verdura && <Icono e={p.verdura.emoji} tam={80 * k} />}
-      </View>
+    <View pointerEvents="none" style={{ position: "absolute", top: -20 * k, left: 0, right: 0, height: 90 * k, flexDirection: "row", justifyContent: "center", gap: 12 * k }}>
+      {[0, 1, 2, 3].map((i) => (
+        <Animated.View key={i} style={{ marginTop: (i % 2) * 14 * k, opacity: a.interpolate({ inputRange: [0, 0.8, 1], outputRange: [1, 1, 0] }), transform: [{ translateY: a.interpolate({ inputRange: [0, 1], outputRange: [0, 64 * k] }) }] }}>
+          <Icono e="💧" tam={22 * k} sinSombra />
+        </Animated.View>
+      ))}
     </View>
   );
 }
 
-/** Semillas, gotas, brote y planta dibujados (con volumen) según la etapa. */
-function Etapa({ etapa, k }: { etapa: Parcela["etapa"]; k: number }) {
+function PlantaDe({ parcela: p, k }: { parcela: Parcela; k: number }) {
+  const pide = necesita(p);
+  // Al cambiar de etapa la planta "estira" con un rebote; el globito de lo que pide late.
+  const crece = useRef(new Animated.Value(1)).current;
+  const late = useRef(new Animated.Value(0)).current;
+  const [regando, setRegando] = useState(false);
+  useEffect(() => {
+    crece.setValue(0.55);
+    Animated.spring(crece, { toValue: 1, friction: 4, tension: 70, useNativeDriver: true }).start();
+  }, [p.etapa, crece]);
+  useEffect(() => {
+    const ciclo = Animated.loop(Animated.sequence([
+      Animated.timing(late, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.timing(late, { toValue: 0, duration: 600, useNativeDriver: true }),
+    ]));
+    ciclo.start();
+    return () => ciclo.stop();
+  }, [late]);
+  useEffect(() => {
+    if (!p.mojada) return;
+    setRegando(true);
+    const t = setTimeout(() => setRegando(false), 1500);
+    return () => clearTimeout(t);
+  }, [p.mojada]);
+  const conPlanta = p.verdura && p.etapa !== "tierra" && p.etapa !== "hoyo";
   return (
-    <Svg width={80 * k} height={70 * k} viewBox="0 0 80 70">
-      {etapa === "sembrada" && (
-        <G>
-          <Ellipse cx="40" cy="52" rx="22" ry="7" fill="#3E2723" />
-          {[[32, 50], [40, 53], [48, 50]].map(([x, y]) => <G key={x}><Ellipse cx={x} cy={y} rx="3.4" ry="2.4" fill="#A1887F" /><Ellipse cx={x! - 1} cy={y! - 0.8} rx="1.2" ry="0.8" fill="#fff" opacity="0.5" /></G>)}
-        </G>
+    <View style={{ flex: 1 }}>
+      <View style={[estilos.tierra, p.mojada && estilos.tierraHumeda]}>
+        {[0, 1, 2].map((s) => <View key={s} style={[estilos.surco, { top: (22 + s * 32) * k }]} />)}
+        {p.etapa === "hoyo" && <View style={estilos.planta}><View style={{ width: 50 * k, height: 20 * k, borderRadius: 25 * k, backgroundColor: "#3E2723" }} /></View>}
+      </View>
+      {conPlanta && (
+        <Animated.View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom: 6 * k, alignItems: "center", transformOrigin: "bottom", transform: [{ scale: crece }, { translateY: p.etapa === "lista" ? late.interpolate({ inputRange: [0, 1], outputRange: [0, -4 * k] }) : 0 }] }}>
+          <Planta p={p} k={k} />
+        </Animated.View>
       )}
-      {etapa === "regada" && (
-        <G>
-          <Ellipse cx="40" cy="54" rx="26" ry="8" fill="#3E2723" />
-          <Ellipse cx="34" cy="52" rx="8" ry="2" fill="#90CAF9" opacity="0.5" />
-          {[[30, 24], [44, 16], [52, 30]].map(([x, y]) => (
-            <G key={x}>
-              <Path d={`M${x} ${y} Q${x! + 6} ${y! + 10} ${x} ${y! + 14} Q${x! - 6} ${y! + 10} ${x} ${y} Z`} fill="#29B6F6" />
-              <Ellipse cx={x! - 1.5} cy={y! + 9} rx="1.4" ry="2.4" fill="#fff" opacity="0.7" />
-            </G>
-          ))}
-        </G>
+      {regando && <Efecto tipo="agua" k={k} />}
+      {!!p.creceEn && p.etapa !== "flor" && <Efecto tipo="sol" k={k} />}
+      {conPlanta && pide && (
+        <Animated.View pointerEvents="none" style={[estilos.pide, { top: -30 * k, transform: [{ scale: late.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1.12] }) }] }]}>
+          <Icono e={pide === "agua" ? "💧" : pide === "sol" ? "☀️" : "🧺"} tam={30 * k} sinSombra />
+        </Animated.View>
       )}
-      {(etapa === "brote" || etapa === "creciendo") && (
-        <G>
-          <Ellipse cx="42" cy="60" rx="20" ry="5" fill="#000" opacity="0.2" />
-          <Path d="M40 60 Q39 46 40 34" stroke="#558B2F" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <Path d="M40 40 Q26 30 22 38 Q30 46 40 40 Z" fill="#7CB342" />
-          <Path d="M40 36 Q54 24 60 32 Q52 42 40 36 Z" fill="#8BC34A" />
-          <Path d="M40 40 Q30 36 24 38" stroke="#fff" strokeOpacity="0.4" strokeWidth="1" fill="none" />
-          {etapa === "creciendo" && (
-            <G>
-              <Path d="M40 50 Q22 46 16 56 Q28 62 40 50 Z" fill="#689F38" />
-              <Path d="M40 48 Q58 42 64 52 Q52 58 40 48 Z" fill="#7CB342" />
-              <Path d="M40 30 Q34 14 40 8 Q46 14 40 30 Z" fill="#9CCC65" />
-            </G>
-          )}
-        </G>
-      )}
-    </Svg>
+    </View>
   );
 }
 
@@ -387,6 +491,7 @@ function Fondo({ k }: { k: number }) {
 const estilos = StyleSheet.create({
   fondo: { flex: 1, backgroundColor: "#9CCC65", justifyContent: "center" },
   parcela: { position: "absolute", borderRadius: 18 },
+  pide: { position: "absolute", right: -6, backgroundColor: "#FFFFFF", borderRadius: 30, padding: 6, borderWidth: 3, borderColor: "#FFD54F", boxShadow: "0 3px 0 rgba(59,47,92,0.25)" },
   parcelaCerca: { borderWidth: 4, borderColor: "#FDD835" },
   tierra: { flex: 1, borderRadius: 16, backgroundColor: "#8D6E63", overflow: "hidden", borderWidth: 5, borderColor: "#795548", borderBottomWidth: 9, borderBottomColor: "#5D4037", shadowColor: "#1B3A12", shadowOpacity: 0.35, shadowRadius: 8, shadowOffset: { width: 6, height: 8 } },
   tierraHumeda: { backgroundColor: "#5D4037" },

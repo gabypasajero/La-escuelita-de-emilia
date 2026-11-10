@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, StyleSheet, Text, View } from "react-native";
+import { Rebote } from "../components/Rebote";
+import { sonido } from "../lib/sonidos";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
 import { Bandada, MariposaVolando, Nube, Sol } from "../components/Ambiente";
 import { Adulto } from "../components/Personas";
@@ -37,6 +39,10 @@ export default function Granja() {
   const [dicho, setDicho] = useState("¡Bienvenidos a la granja! Toca un animal para ir a verlo.");
   const [cerca, setCerca] = useState<(typeof ANIMALES)[number] | null>(null);
   const [felices, setFelices] = useState<string[]>([]);
+  // Los que ya comieron (quedan con su estrella) y las comidas que no eran (se apagan).
+  const [comidos, setComidos] = useState<string[]>([]);
+  const [malas, setMalas] = useState<string[]>([]);
+  const [bocado, setBocado] = useState<{ id: string; emoji: string } | null>(null);
   useEffect(() => void hablar("¡Bienvenidos a la granja! Los animales tienen hambre. ¿Me ayudas a darles comida?"), []);
 
   const decir = (t: string) => { setDicho(t); void hablar(t); };
@@ -53,12 +59,22 @@ export default function Granja() {
 
   function dar(comida: (typeof COMIDAS)[number]) {
     if (!cerca) return;
-    if (comida.id !== cerca.come) return decir(`Mmm, a ${cerca.nombre} no le gusta el ${comida.nombre}. ¡Prueba otra comida!`);
-    ganar(1);
-    setFelices((f) => [...f, cerca.id]);
-    setTimeout(() => setFelices((f) => f.filter((x) => x !== cerca.id)), 2500);
-    decir(`¡${cerca.sonido} ${cerca.nombre[0]!.toUpperCase()}${cerca.nombre.slice(1)} come ${comida.nombre}. ¡Gracias!`);
+    if (comida.id !== cerca.come) {
+      sonido.casi();
+      setMalas((m) => [...m, comida.id]);
+      return decir(`Mmm, a ${cerca.nombre} no le gusta eso. ¡Prueba otra comida!`);
+    }
+    const a = cerca;
+    const todos = comidos.includes(a.id) ? comidos : [...comidos, a.id];
+    const completo = todos.length === ANIMALES.length;
+    ganar(completo ? 2 : 1);
+    setBocado({ id: a.id, emoji: comida.emoji });
+    setFelices((f) => [...f, a.id]);
+    setTimeout(() => { setFelices((f) => f.filter((x) => x !== a.id)); setBocado(null); }, 3200);
+    setComidos(completo ? [] : todos);
+    decir(`¡Ñam, ñam! ${a.nombre[0]!.toUpperCase()}${a.nombre.slice(1)} come ${comida.nombre}. ${a.sonido} ${completo ? "¡Les diste de comer a todos! ¡Qué gran ayudante!" : "¡Gracias!"}`);
     setCerca(null);
+    setMalas([]);
   }
 
   const objetos: ObjetoEscena[] = [
@@ -68,9 +84,10 @@ export default function Granja() {
     ...ANIMALES.map((a): ObjetoEscena => ({
       id: a.id, x: a.x, y: a.y, ancho: 130 + a.paseo * 2, alto: 110, etiqueta: a.nombre,
       llegada: { x: a.x - 90, y: a.y + 10 },
-      dibujo: (k) => <AnimalDeGranja id={a.id as AnimalId} k={k} paseo={a.paseo} feliz={felices.includes(a.id)} />,
+      dibujo: (k) => <AnimalDeGranja id={a.id as AnimalId} k={k} paseo={a.paseo} feliz={felices.includes(a.id)} comio={comidos.includes(a.id)} bocado={bocado?.id === a.id ? bocado.emoji : undefined} />,
       alLlegar: () => {
         setCerca(a);
+        setMalas([]);
         decir(`${a.sonido} Es ${a.nombre}. ¿Qué come ${a.nombre}?`);
       },
     })),
@@ -90,10 +107,10 @@ export default function Granja() {
         <View style={estilos.barra}>
           <View style={[estilos.pregunta, { flexDirection: "row", alignItems: "center", gap: 6 }]}><Icono e={cerca.emoji} tam={44} sinSombra /><Text style={{ fontSize: 24, fontWeight: "900", color: "#3B2F5C" }}>¿Qué come?</Text></View>
           {COMIDAS.map((c) => (
-            <Pressable key={c.id} style={estilos.comida} onPress={() => dar(c)} accessibilityLabel={`Darle ${c.nombre}`}>
+            <Rebote key={c.id} mudo style={[estilos.comida, malas.includes(c.id) && { opacity: 0.35 }]} disabled={malas.includes(c.id)} onPress={() => dar(c)} accessibilityLabel={`Darle ${c.nombre}`}>
               <Icono e={c.emoji} tam={52} />
               <Text style={estilos.comidaNombre}>{c.nombre}</Text>
-            </Pressable>
+            </Rebote>
           ))}
         </View>
       )}
@@ -102,12 +119,40 @@ export default function Granja() {
 }
 
 /** Animal vivo (articulado) que pasea por su corral; salta y mueve la cola cuando está feliz. */
-function AnimalDeGranja({ id, k, paseo, feliz }: { id: AnimalId; k: number; paseo: number; feliz: boolean }) {
+function AnimalDeGranja({ id, k, paseo, feliz, comio, bocado }: { id: AnimalId; k: number; paseo: number; feliz: boolean; comio: boolean; bocado?: string }) {
   const grande = id === "vaca" || id === "caballo";
   const alto = (grande ? 100 : id === "oveja" || id === "cerdo" ? 82 : 70) * k;
+  // El globito de "tengo hambre" late; la comida baja hasta el animal cuando se la dan.
+  const late = useRef(new Animated.Value(0)).current;
+  const cae = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const ciclo = Animated.loop(Animated.sequence([
+      Animated.timing(late, { toValue: 1, duration: 650, useNativeDriver: true }),
+      Animated.timing(late, { toValue: 0, duration: 650, useNativeDriver: true }),
+    ]));
+    ciclo.start();
+    return () => ciclo.stop();
+  }, [late]);
+  useEffect(() => {
+    if (!bocado) return;
+    cae.setValue(0);
+    Animated.timing(cae, { toValue: 1, duration: 900, useNativeDriver: true }).start();
+  }, [bocado, cae]);
   return (
     <View style={{ alignItems: "center" }}>
-      {feliz && <TextoIconos estilo={{ fontSize: 26 * k }} texto={`💛`} />}
+      <View style={{ height: 34 * k, justifyContent: "flex-end" }}>
+        {bocado ? (
+          <Animated.View style={{ opacity: cae.interpolate({ inputRange: [0, 0.8, 1], outputRange: [1, 1, 0] }), transform: [{ translateY: cae.interpolate({ inputRange: [0, 1], outputRange: [-20 * k, alto * 0.6] }) }, { scale: cae.interpolate({ inputRange: [0, 1], outputRange: [1.2, 0.5] }) }] }}>
+            <Icono e={bocado} tam={34 * k} sinSombra />
+          </Animated.View>
+        ) : feliz ? (
+          <TextoIconos estilo={{ fontSize: 26 * k }} texto={`💛`} />
+        ) : (
+          <Animated.View style={[estilos.globito, { transform: [{ scale: comio ? 1 : late.interpolate({ inputRange: [0, 1], outputRange: [0.88, 1.1] }) }] }]}>
+            <Icono e={comio ? "⭐" : "🍽️"} tam={22 * k} sinSombra />
+          </Animated.View>
+        )}
+      </View>
       <AnimalPaseando id={id} alto={alto} paseo={paseo * k} contento={feliz} />
       <View style={{ width: alto * PROPORCION[id] * 0.6, height: 10 * k, borderRadius: 40, backgroundColor: "rgba(0,0,0,0.14)", marginTop: -8 * k }} />
     </View>
@@ -183,6 +228,7 @@ function Campo({ k }: { k: number }) {
 }
 
 const estilos = StyleSheet.create({
+  globito: { backgroundColor: "#FFFFFF", borderRadius: 20, padding: 4, borderWidth: 2, borderColor: "#FFD54F" },
   barra: { position: "absolute", bottom: 12, left: 0, right: 0, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 },
   pregunta: { fontSize: 24, fontWeight: "900", color: "#3B2F5C", backgroundColor: "#fff", borderRadius: 18, paddingHorizontal: 12, paddingVertical: 8 },
   comida: { width: 96, height: 96, borderRadius: 22, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },

@@ -42,14 +42,21 @@ export const LETRAS: Letra[] = datos.map(([letra, palabra, emoji, nombre, sonido
   esVocal: VOCALES.has(letra),
 }));
 
+/** El comienzo de una palabra hasta su primera vocal: "mo" de mono, "flo" de flor. */
+export function inicioDePalabra(palabra: string): string {
+  return (/^[^aeiouáéíóú]*[aeiouáéíóú]/i.exec(palabra)?.[0] ?? palabra.slice(0, 2)).toLowerCase();
+}
+
 /**
  * Lo que dice Emilia al presentar una letra, pensado para quien todavía no
- * lee: nombre, sonido y el inicio de la palabra alargado.
- * Ej.: "Eme. Suena mmm. Mmm… mono."
+ * lee y para que la voz del aparato lo diga bien: nunca una consonante sola
+ * (la voz la deletrea: "eme eme eme"), siempre con su vocal.
+ * Ej.: "Eme, de mono. Mo… mono."
  */
 export function presentarLetra(l: Letra): string {
   const nombre = l.nombre[0]!.toUpperCase() + l.nombre.slice(1);
-  if (!l.sonido) return `${nombre}. La hache no suena. ${l.palabra}.`;
-  const sonido = l.sonido[0]!.toUpperCase() + l.sonido.slice(1);
-  return `${nombre}. Suena ${l.sonido}. ${sonido}… ${l.palabra.toLowerCase()}.`;
+  const palabra = l.palabra.toLowerCase();
+  if (!l.sonido) return `${nombre}, de ${palabra}. La hache no suena. ${l.palabra}.`;
+  const inicio = inicioDePalabra(l.palabra);
+  return `${nombre}, de ${palabra}. ${inicio[0]!.toUpperCase() + inicio.slice(1)}… ${palabra}.`;
 }

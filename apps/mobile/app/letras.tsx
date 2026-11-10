@@ -11,7 +11,7 @@ import { Icono, TextoIconos } from "../components/Iconos";
 
 /**
  * Letras por sus sonidos, para quien todavía no lee. Conocer: Emilia dice el
- * nombre, el sonido y el inicio de la palabra alargado ("Eme. Suena mmm. Mmm… mono").
+ * nombre, el sonido y el inicio de la palabra alargado ("Eme, de mono. Mo… mono").
  * Jugar: "¿Cuál empieza con mmm?" y se elige entre dibujos, sin leer.
  */
 export default function Letras() {

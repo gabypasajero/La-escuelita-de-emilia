@@ -1,4 +1,6 @@
 import { ESTADO_INICIAL, PRODUCTOS, canastaCorrecta, pedidoTiendita, registrarRespuesta, type Producto } from "@escuelita/core";
+import { Rebote } from "../../components/Rebote";
+import { sonido } from "../../lib/sonidos";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Path, Rect, Text as SvgText } from "react-native-svg";
@@ -63,6 +65,7 @@ export default function Tiendita() {
     if (canasta.length >= 10) return decir("¡La canasta está llena! Llévala al mesón.");
     const nueva = [...canasta, p];
     setCanasta(nueva);
+    sonido.paso(nueva.length);
     // Contar en voz alta: correspondencia uno a uno.
     void hablar(`${nueva.length}. ${nueva.length === 1 ? p.nombre : p.plural}`);
   }
@@ -75,6 +78,7 @@ export default function Tiendita() {
     const siguiente = registrarRespuesta(dificultad, acierto);
     setDificultad(siguiente);
     if (!acierto) {
+      sonido.casi();
       const pedidos = canasta.filter((p) => p.id === pedido.producto.id).length;
       const t = canasta.some((p) => p.id !== pedido.producto.id)
         ? `Mmm, yo pedí ${pedido.producto.plural}. Revisemos la canasta.`
@@ -140,11 +144,21 @@ export default function Tiendita() {
         </>
       )}
     >
-      {/* La canasta del niño */}
-      <Pressable style={estilos.canasta} onPress={() => { setCanasta((c) => c.slice(0, -1)); }} accessibilityLabel="Sacar uno de la canasta">
+      {/* La canasta del niño: cada casillero del pedido se va llenando, uno por uno */}
+      <Rebote mudo style={estilos.canasta} onPress={() => { setCanasta((c) => c.slice(0, -1)); }} accessibilityLabel="Sacar uno de la canasta">
         <TextoIconos estilo={estilos.canastaIcono} texto={`🧺`} />
-        <Text style={estilos.canastaTexto}>{canasta.length ? canasta.map((p) => p.emoji).join("") : "vacía"}</Text>
-      </Pressable>
+        <View style={estilos.casilleros}>
+          {Array.from({ length: Math.max(pedido.cantidad, canasta.length) }, (_, i) => {
+            const puesto = canasta[i];
+            const sobra = i >= pedido.cantidad || (puesto && puesto.id !== pedido.producto.id);
+            return (
+              <View key={i} style={[estilos.casillero, puesto && !sobra && estilos.casilleroLleno, sobra && estilos.casilleroSobra]}>
+                <View style={{ opacity: puesto ? 1 : 0.22 }}><Icono e={(puesto ?? pedido.producto).emoji} tam={30} sinSombra /></View>
+              </View>
+            );
+          })}
+        </View>
+      </Rebote>
       <Pressable style={estilos.repetir} onPress={() => decir(pedido.enunciado)} accessibilityLabel="Repetir pedido">
         <TextoIconos estilo={estilos.repetirTexto} texto={`🔊 ${pedido.cantidad} × ${pedido.producto.emoji}`} />
       </Pressable>
@@ -206,6 +220,10 @@ function Almacen({ k }: { k: number }) {
 }
 
 const estilos = StyleSheet.create({
+  casilleros: { flexDirection: "row", flexWrap: "wrap", gap: 4, maxWidth: 230 },
+  casillero: { width: 40, height: 40, borderRadius: 10, borderWidth: 2, borderStyle: "dashed", borderColor: "#BCAAA4", alignItems: "center", justifyContent: "center" },
+  casilleroLleno: { borderStyle: "solid", borderColor: "#66BB6A", backgroundColor: "#E8F5E9" },
+  casilleroSobra: { borderStyle: "solid", borderColor: "#FFB74D", backgroundColor: "#FFF3E0" },
   pedido: { backgroundColor: "#fff", borderRadius: 18, paddingHorizontal: 12, paddingVertical: 4, borderWidth: 3, borderColor: "#3B2F5C" },
   pedidoTexto: { fontWeight: "900", color: "#3B2F5C" },
   canasta: { position: "absolute", bottom: 12, left: 12, backgroundColor: "#FFF8E1", borderRadius: 22, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 3, borderColor: "#A1887F", maxWidth: 520 },

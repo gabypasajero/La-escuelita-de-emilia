@@ -130,7 +130,7 @@ describe("letras por sonido", () => {
   });
 
   it("presenta la letra con nombre, sonido y palabra", () => {
-    expect(presentarLetra(LETRAS.find((l) => l.letra === "M")!)).toBe("Eme. Suena mmm. Mmm… mono.");
+    expect(presentarLetra(LETRAS.find((l) => l.letra === "M")!)).toBe("Eme, de mono. Mo… mono.");
     expect(presentarLetra(LETRAS.find((l) => l.letra === "H")!)).toContain("no suena");
   });
 

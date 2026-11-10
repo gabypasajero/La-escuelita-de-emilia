@@ -1,4 +1,4 @@
-import { rondaAnimalPorLetra } from "@escuelita/core";
+import { presentarLetra, rondaAnimalPorLetra } from "@escuelita/core";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { Pantalla } from "../components/Pantalla";
 import { Pregunta } from "../components/Pregunta";
@@ -13,7 +13,7 @@ export default function LetraAnimal() {
       <Pregunta
         generar={(nivel) => rondaAnimalPorLetra(nivel)}
         estimulo={(r) => (
-          <Pressable style={estilos.letra} onPress={() => void hablar(`${r.letra.nombre}. Suena ${r.letra.sonido}.`)} accessibilityLabel="Escuchar la letra">
+          <Pressable style={estilos.letra} onPress={() => void hablar(presentarLetra(r.letra))} accessibilityLabel="Escuchar la letra">
             <Text style={estilos.letraTexto}>{r.letra.letra} {r.letra.letra.toLowerCase()}</Text>
             <TextoIconos estilo={estilos.sonido} texto={`👂 ${r.letra.sonido}`} />
           </Pressable>

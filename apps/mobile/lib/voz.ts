@@ -172,7 +172,28 @@ function decirNativo(texto: string, idioma: Idioma): Promise<"fin" | "cortada"> 
   });
 }
 
-const decir = (texto: string, miTurno: number, idioma: Idioma = "es") => (esWeb ? decirWeb(texto, miTurno, idioma) : decirNativo(texto, idioma));
+/**
+ * Arregla lo que la voz del aparato pronuncia mal en español: los sonidos
+ * de animales y las letras repetidas, que si no se deletrean ("ge erre erre").
+ * En pantalla se sigue viendo el texto original; esto es solo para el oído.
+ */
+const COMO_SUENA: Array<[RegExp, string]> = [
+  [/gr+a+u+/gi, "grauuu"], [/gr{2,}\b/gi, "groar"], [/pr+u+/gi, "pruuu"], [/\bm{2,}h?\b/gi, "mmme"],
+  [/\bi{2,}h\b/gi, "hiiii"], [/oink/gi, "oinc"], [/\buh uh ah ah\b/gi, "u, u, a, a"], [/\buh uh\b/gi, "uu, uu"],
+  [/\bu{3,}h\b/gi, "uuuu"], [/\bbe{2,}\b/gi, "beeee"], [/\bmu{2,}\b/gi, "muuuu"], [/kikirik[ií]/gi, "quiquiriquí"],
+  [/croac/gi, "croac, croac"], [/cuac/gi, "cuac"], [/fiu+/gi, "fiuuu"], [/\bz{2,}\b/gi, ""], [/\bpip\b/gi, "pip, pip"],
+  [/\bs{3,}\b/gi, "se"], [/\bf{3,}\b/gi, "fe"], [/\br{3,}\b/gi, "erre"], [/\bl{3,}\b/gi, "le"], [/\bn{3,}\b/gi, "ne"],
+  // Cualquier otra letra repetida tres veces o más queda en dos (la voz no puede estirarla).
+  [/([bcdfghjklmnñpqrstvwxyz])\1{2,}/gi, "$1$1"],
+];
+export function fonetizar(texto: string): string {
+  return COMO_SUENA.reduce((t, [de, a]) => t.replace(de, a), texto).replace(/\s{2,}/g, " ");
+}
+
+const decir = (texto: string, miTurno: number, idioma: Idioma = "es") => {
+  const dicho = idioma === "es" ? fonetizar(texto) : texto;
+  return esWeb ? decirWeb(dicho, miTurno, idioma) : decirNativo(dicho, idioma);
+};
 
 /** Dice una frase (en español, o en inglés para los amigos de otros países). */
 export async function hablar(texto: string, idioma: Idioma = "es"): Promise<void> {
