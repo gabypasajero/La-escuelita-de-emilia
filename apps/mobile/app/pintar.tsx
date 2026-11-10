@@ -38,7 +38,36 @@ const LAPICES: Array<{ id: Lapiz; nombre: string; dice: string }> = [
   { id: "balde", nombre: "Balde", dice: "Balde de pintura. Toca una parte del dibujo y se llena de color" },
   { id: "borrador", nombre: "Borrador", dice: "Borrador" },
 ].filter((l) => l.id !== "balde" || Platform.OS === "web") as Array<{ id: Lapiz; nombre: string; dice: string }>;
-const SELLOS = ["⭐", "🌸", "☀️", "🍓", "🎃", "🥕", "🧺", "💧", "🏠", "🍦", "🧀", "🍇", "🌽", "🍅"].filter((e) => dibujoEnSvg(e, 0, 0, 1) !== null);
+// Timbres propios del taller, dibujados en una caja de 100 × 100.
+const N = { stroke: "#3B2F5C", strokeWidth: 3, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
+const carita = (cy: number) => <><Circle cx="42" cy={cy} r="2.6" fill="#3B2F5C" /><Circle cx="58" cy={cy} r="2.6" fill="#3B2F5C" /><Path d={`M43 ${cy + 8} Q50 ${cy + 14} 57 ${cy + 8}`} fill="none" {...N} strokeWidth={2.4} /><Circle cx="36" cy={cy + 6} r="3.4" fill="#F48FB1" opacity="0.7" /><Circle cx="64" cy={cy + 6} r="3.4" fill="#F48FB1" opacity="0.7" /></>;
+const TIMBRES: Record<string, ReactNode> = {
+  nube: <><Path d="M22 68 Q8 66 12 52 Q14 42 26 44 Q28 26 46 30 Q58 20 68 34 Q86 32 86 50 Q94 62 78 68 Z" fill="#FFFFFF" {...N} /><Path d="M30 58 Q40 62 50 58" fill="none" stroke="#B3E5FC" strokeWidth="3" strokeLinecap="round" /></>,
+  arcoiris: <>{["#E53935", "#FB8C00", "#FDD835", "#43A047", "#1E88E5", "#8E24AA"].map((c, i) => <Path key={c} d={`M${12 + i * 6} 74 A${38 - i * 6} ${38 - i * 6} 0 0 1 ${88 - i * 6} 74`} fill="none" stroke={c} strokeWidth="6.4" />)}<Circle cx="16" cy="76" r="10" fill="#fff" {...N} strokeWidth={2} /><Circle cx="84" cy="76" r="10" fill="#fff" {...N} strokeWidth={2} /></>,
+  luna: <Path d="M62 12 A40 40 0 1 0 88 62 A30 30 0 0 1 62 12 Z" fill="#FFF59D" {...N} />,
+  gato: <><Path d="M26 44 L22 16 L44 30 M74 44 L78 16 L56 30" fill="#FFB74D" {...N} /><Circle cx="50" cy="56" r="30" fill="#FFB74D" {...N} />{carita(52)}<Path d="M20 60 H32 M68 60 H80" {...N} strokeWidth={2} /></>,
+  perro: <><Circle cx="50" cy="54" r="30" fill="#D7A27A" {...N} /><Path d="M24 40 Q8 44 16 72 Q26 70 28 52 Z M76 40 Q92 44 84 72 Q74 70 72 52 Z" fill="#8D6E63" {...N} />{carita(50)}<Ellipse cx="50" cy="60" rx="5" ry="3.6" fill="#3B2F5C" /></>,
+  conejo: <><Ellipse cx="38" cy="26" rx="8" ry="22" fill="#FFFFFF" {...N} /><Ellipse cx="62" cy="26" rx="8" ry="22" fill="#FFFFFF" {...N} /><Ellipse cx="38" cy="28" rx="3.4" ry="14" fill="#F8BBD0" /><Ellipse cx="62" cy="28" rx="3.4" ry="14" fill="#F8BBD0" /><Circle cx="50" cy="62" r="28" fill="#FFFFFF" {...N} />{carita(58)}</>,
+  pajaro: <><Ellipse cx="48" cy="54" rx="30" ry="26" fill="#4FC3F7" {...N} /><Path d="M76 48 L94 52 L76 60 Z" fill="#FFB300" {...N} /><Path d="M34 56 Q46 44 58 60 Q46 70 34 56 Z" fill="#0288D1" {...N} /><Circle cx="62" cy="44" r="4" fill="#3B2F5C" /><Path d="M40 80 V92 M54 80 V92" {...N} /></>,
+  pez: <><Path d="M70 50 L94 30 V70 Z" fill="#FF8A65" {...N} /><Ellipse cx="44" cy="50" rx="32" ry="22" fill="#FFB74D" {...N} /><Circle cx="28" cy="44" r="4" fill="#3B2F5C" /><Path d="M46 34 Q54 50 46 66 M22 56 Q28 62 34 56" fill="none" {...N} strokeWidth={2.4} /></>,
+  mariposa: <><Circle cx="30" cy="38" r="20" fill="#F06292" {...N} /><Circle cx="70" cy="38" r="20" fill="#F06292" {...N} /><Circle cx="34" cy="68" r="14" fill="#BA68C8" {...N} /><Circle cx="66" cy="68" r="14" fill="#BA68C8" {...N} /><Circle cx="30" cy="38" r="7" fill="#FFF59D" /><Circle cx="70" cy="38" r="7" fill="#FFF59D" /><Ellipse cx="50" cy="54" rx="5" ry="24" fill="#5D4037" {...N} /></>,
+  tito: <><Ellipse cx="44" cy="62" rx="26" ry="17" fill="#A1673F" {...N} /><Circle cx="74" cy="40" r="15" fill="#A1673F" {...N} /><Path d="M66 28 L62 12 L74 26 M80 26 L88 14 L86 30" fill="#8D5524" {...N} /><Path d="M28 76 V92 M40 78 V92 M54 78 V92 M64 74 V92" {...N} strokeWidth={4} /><Circle cx="78" cy="38" r="2.6" fill="#3B2F5C" /><Circle cx="88" cy="44" r="2.4" fill="#3B2F5C" />{[[36, 56], [48, 62], [40, 68]].map(([x, y]) => <Circle key={`${x}`} cx={x} cy={y} r="2.6" fill="#FFE0B2" />)}</>,
+  nino: <><Path d="M32 96 V70 Q32 60 50 60 Q68 60 68 70 V96 Z" fill="#1E88E5" {...N} /><Circle cx="50" cy="36" r="24" fill="#F1C7A5" {...N} /><Path d="M27 32 Q30 10 50 11 Q70 10 73 32 Q62 20 50 24 Q38 20 27 32 Z" fill="#5D4037" {...N} />{carita(38)}</>,
+  nina: <><Path d="M28 96 L36 64 Q50 56 64 64 L72 96 Z" fill="#FDD835" {...N} /><Circle cx="20" cy="40" r="10" fill="#5D4037" {...N} /><Circle cx="80" cy="40" r="10" fill="#5D4037" {...N} /><Circle cx="50" cy="36" r="24" fill="#F1C7A5" {...N} /><Path d="M27 34 Q28 10 50 11 Q72 10 73 34 Q60 22 50 26 Q40 22 27 34 Z" fill="#5D4037" {...N} /><Circle cx="24" cy="30" r="4" fill="#EF5350" /><Circle cx="76" cy="30" r="4" fill="#EF5350" />{carita(38)}</>,
+  corazon: <Path d="M50 88 C14 62 8 36 26 24 C38 16 48 24 50 34 C52 24 62 16 74 24 C92 36 86 62 50 88 Z" fill="#EF5350" {...N} />,
+  globo: <><Path d="M50 66 Q46 80 52 96" fill="none" {...N} strokeWidth={2} /><Ellipse cx="50" cy="38" rx="26" ry="30" fill="#EF5350" {...N} /><Path d="M46 66 L54 66 L50 72 Z" fill="#C62828" {...N} strokeWidth={2} /><Ellipse cx="40" cy="26" rx="6" ry="9" fill="#fff" opacity="0.6" /></>,
+  pelota: <><Circle cx="50" cy="50" r="38" fill="#FFFFFF" {...N} /><Path d="M12 50 Q50 30 88 50 M50 12 Q30 50 50 88" fill="none" stroke="#1E88E5" strokeWidth="5" /><Path d="M50 12 A38 38 0 0 1 88 50 Q70 40 50 12 Z" fill="#EF5350" /><Circle cx="50" cy="50" r="38" fill="none" {...N} /></>,
+  auto: <><Path d="M8 70 V54 Q8 50 16 50 H24 L34 32 H64 L76 50 H86 Q94 50 94 58 V70 Z" fill="#EF5350" {...N} /><Path d="M38 37 H48 V50 H31 Z M53 37 H62 L70 50 H53 Z" fill="#B3E5FC" {...N} strokeWidth={2} /><Circle cx="28" cy="72" r="10" fill="#37474F" {...N} /><Circle cx="72" cy="72" r="10" fill="#37474F" {...N} /><Circle cx="28" cy="72" r="4" fill="#CFD8DC" /><Circle cx="72" cy="72" r="4" fill="#CFD8DC" /></>,
+  arbol: <><Rect x="43" y="60" width="14" height="34" fill="#8D6E63" {...N} /><Circle cx="32" cy="50" r="18" fill="#43A047" {...N} /><Circle cx="68" cy="50" r="18" fill="#43A047" {...N} /><Circle cx="50" cy="32" r="22" fill="#66BB6A" {...N} />{[[40, 30], [60, 42], [32, 54]].map(([x, y]) => <Circle key={`${x}`} cx={x} cy={y} r="4" fill="#EF5350" />)}</>,
+  regalo: <><Rect x="16" y="42" width="68" height="46" rx="4" fill="#AB47BC" {...N} /><Rect x="10" y="30" width="80" height="16" rx="4" fill="#CE93D8" {...N} /><Rect x="44" y="30" width="12" height="58" fill="#FDD835" {...N} strokeWidth={2} /><Path d="M50 30 Q32 6 26 22 Q28 30 50 30 Q72 30 74 22 Q68 6 50 30 Z" fill="#FDD835" {...N} /></>,
+  corona: <><Path d="M14 76 L10 34 L32 54 L50 22 L68 54 L90 34 L86 76 Z" fill="#FDD835" {...N} />{[[32, 66, "#EF5350"], [50, 66, "#1E88E5"], [68, 66, "#43A047"]].map(([x, y, c]) => <Circle key={`${x}`} cx={x} cy={y} r="5" fill={c as string} />)}</>,
+};
+const timbre = (e: string, x: number, y: number, tam: number) =>
+  TIMBRES[e] ? <G transform={`translate(${x - tam / 2} ${y - tam / 2}) scale(${tam / 100})`}>{TIMBRES[e]}</G> : dibujoEnSvg(e, x, y, tam);
+
+const SELLOS_DIBUJO = ["⭐", "🌸", "☀️", "🍓", "🎃", "🥕", "🧺", "💧", "🏠", "🍦", "🧀", "🍇", "🌽", "🍅"].filter((e) => dibujoEnSvg(e, 0, 0, 1) !== null);
+// Primero el cielo, las personas y los animales; después los objetos y la comida.
+const SELLOS = ["☀️", "nube", "arcoiris", "luna", "⭐", "nino", "nina", "tito", "gato", "perro", "conejo", "pajaro", "pez", "mariposa", "🌸", "arbol", "corazon", "globo", "pelota", "auto", "regalo", "corona", ...SELLOS_DIBUJO.filter((e) => !["☀️", "⭐", "🌸"].includes(e))].filter((e) => TIMBRES[e] || SELLOS_DIBUJO.includes(e));
 
 type Cosa =
   | { tipo: "trazo"; lapiz: Lapiz; d: string; color: string; grosor: number }
@@ -112,7 +141,7 @@ export default function Pintar() {
       if (mano.current.lapiz === "balde") return void volcarBalde(x, y);
       const m = mano.current, p = `${Math.round(x)},${Math.round(y)}`, g = conPresion(presion, esLapiz);
       let nueva: Cosa;
-      if (m.lapiz === "sello") { nueva = { tipo: "sello", e: m.sello, x, y, tam: 34 + m.grosor * 2.6 }; sonido.toque(); }
+      if (m.lapiz === "sello") { nueva = { tipo: "sello", e: m.sello, x, y, tam: 40 + m.grosor * 3.2 }; sonido.toque(); }
       else if (m.lapiz === "arcoiris") nueva = { tipo: "arcoiris", tramos: [{ d: `M${p} L${p}`, color: ARCOIRIS[0]! }], grosor: g, n: 0, ultimo: p };
       else if (m.lapiz === "brillos") nueva = { tipo: "brillos", puntos: [[x, y, 6 + m.grosor * 0.5]], color: m.color, ux: x, uy: y };
       else nueva = { tipo: "trazo", lapiz: m.lapiz, d: `M${p} L${p}`, color: m.color, grosor: g };
@@ -203,7 +232,7 @@ export default function Pintar() {
                 if (c.tipo === "arcoiris") return <G key={i}>{c.tramos.map((t, k) => <Path key={k} d={t.d} stroke={t.color} strokeWidth={c.grosor} strokeLinecap="round" strokeLinejoin="round" fill="none" />)}</G>;
                 if (c.tipo === "brillos") return <G key={i}>{c.puntos.map(([x, y, r], k) => <Path key={k} d={estrella(x, y, r)} fill={k % 3 === 2 ? "#FFF59D" : c.color} stroke="#FFFFFF" strokeWidth="1" />)}</G>;
                 if (c.tipo === "relleno") return <ImagenSvg key={i} href={c.href} x={0} y={0} width={c.w} height={c.h} />;
-                return <G key={i}>{dibujoEnSvg(c.e, c.x, c.y, c.tam)}</G>;
+                return <G key={i}>{timbre(c.e, c.x, c.y, c.tam)}</G>;
               })}
               {/* Para pintar, las líneas van encima: el color nunca las tapa. */}
               {!calcar && lineas}
@@ -232,7 +261,7 @@ export default function Pintar() {
       <ScrollView horizontal style={estilos.paleta} contentContainerStyle={estilos.paletaDentro} showsHorizontalScrollIndicator={false}>
         {lapiz === "sello"
           ? SELLOS.map((e) => (
-            <Rebote key={e} accessibilityLabel={`Sello ${e}`} onPress={() => setSello(e)} style={[estilos.color, estilos.selloBoton, e === sello && estilos.elegido]}><Icono e={e} tam={34} sinSombra /></Rebote>
+            <Rebote key={e} accessibilityLabel={`Sello ${e}`} onPress={() => setSello(e)} style={[estilos.color, estilos.selloBoton, e === sello && estilos.elegido]}><Svg width={38} height={38} viewBox="0 0 38 38">{timbre(e, 19, 19, 34)}</Svg></Rebote>
           ))
           : lapiz === "arcoiris"
             ? <View style={estilos.arcoiris}>{ARCOIRIS.map((c) => <View key={c} style={{ flex: 1, backgroundColor: c }} />)}</View>
@@ -277,7 +306,7 @@ function MuestraLapiz({ lapiz, color, sello }: { lapiz: Lapiz; color: string; se
     <Svg width={52} height={30} viewBox="0 0 52 30">
       {lapiz === "arcoiris" ? ARCOIRIS.map((c, i) => <Path key={c} d={`M${6 + i * 5.8} ${20 - Math.sin(i * 0.9) * 8} l6 ${-Math.cos(i * 0.9) * 5}`} stroke={c} strokeWidth="7" strokeLinecap="round" />)
         : lapiz === "brillos" ? [[10, 18, 6], [24, 9, 8], [38, 19, 6], [46, 8, 4]].map(([x, y, r]) => <Path key={x} d={estrella(x!, y!, r!)} fill={x === 24 ? "#FFF59D" : color} stroke="#F9A825" strokeWidth="0.8" />)
-          : lapiz === "sello" ? dibujoEnSvg(sello, 26, 15, 28)
+          : lapiz === "sello" ? timbre(sello, 26, 15, 28)
             : lapiz === "balde" ? <><Path d="M14 10 L38 10 L34 26 L18 26 Z" fill="#B0BEC5" stroke="#607D8B" strokeWidth="1.5" strokeLinejoin="round" /><Path d="M14 10 Q26 -2 38 10" fill="none" stroke="#607D8B" strokeWidth="1.8" /><Path d="M15 12 L37 12 L36 16 Q26 21 16 16 Z" fill={color === "#FFFFFF" ? "#90A4AE" : color} /><Path d="M40 16 q5 7 0 9 q-5 -2 0 -9 Z" fill={color === "#FFFFFF" ? "#90A4AE" : color} /></>
             : lapiz === "borrador" ? <><Rect x="12" y="8" width="28" height="15" rx="4" fill="#F48FB1" /><Rect x="12" y="8" width="10" height="15" rx="4" fill="#90CAF9" /></>
               : <Path d={d} fill="none" strokeLinecap="round" {...estiloDe(lapiz, color === "#FFFFFF" ? "#90A4AE" : color, lapiz === "grafito" ? 8 : lapiz === "destacador" ? 5 : lapiz === "pincel" ? 6 : 7)} />}
