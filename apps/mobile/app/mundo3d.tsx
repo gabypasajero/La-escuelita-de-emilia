@@ -1,6 +1,7 @@
 import { Redirect, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Rebote } from "../components/Rebote";
 import { FabricaIconos } from "../components/FabricaIconos";
 import { Icono } from "../components/Iconos";
 import { Globo } from "../components/Personajes";
@@ -103,10 +104,10 @@ export default function Mundo3D() {
           </View>
           <View style={estilos.fila}>
             {hud.pregunta.opciones.map((o) => (
-              <Pressable key={o.id} style={estilos.opcion} onPress={() => mundo.current?.accion(o.id)} accessibilityLabel={o.texto ?? o.id}>
+              <Rebote key={o.id} style={estilos.opcion} onPress={() => mundo.current?.accion(o.id)} accessibilityLabel={o.texto ?? o.id}>
                 <Icono e={o.icono} tam={58} sinSombra />
                 {!!o.texto && <Text style={estilos.opcionTexto}>{o.texto}</Text>}
-              </Pressable>
+              </Rebote>
             ))}
           </View>
         </View>
@@ -114,10 +115,10 @@ export default function Mundo3D() {
       {!!hud?.botones?.length && !hud.pregunta && (
         <View style={[estilos.pregunta, estilos.fila]} pointerEvents="box-none">
           {hud.botones.map((b) => (
-            <Pressable key={b.id} style={[estilos.opcion, b.apagado && estilos.apagado]} disabled={b.apagado} onPress={() => mundo.current?.accion(b.id)} accessibilityLabel={b.texto}>
+            <Rebote key={b.id} style={[estilos.opcion, b.apagado && estilos.apagado]} disabled={b.apagado} onPress={() => mundo.current?.accion(b.id)} accessibilityLabel={b.texto}>
               <Icono e={b.icono} tam={50} sinSombra />
               <Text style={estilos.opcionTexto}>{b.texto}</Text>
-            </Pressable>
+            </Rebote>
           ))}
         </View>
       )}

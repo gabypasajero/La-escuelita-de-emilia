@@ -1,8 +1,9 @@
 import { LETRAS, NUMEROS, NUMEROS_TRAZO, VOCALES_TRAZO, presentarLetra } from "@escuelita/core";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Pantalla } from "../components/Pantalla";
+import { Rebote } from "../components/Rebote";
 import { EmiliaDibujo, Globo } from "../components/Personajes";
 import { Trazado } from "../components/Trazado";
 import { useJuego } from "../lib/juego";
@@ -43,6 +44,10 @@ export default function Trazar() {
   const [intento, setIntento] = useState(0);
   const c = caracteres[indice];
   const [dicho, setDicho] = useState("¿Qué quieres aprender a escribir?");
+  const actualRef = useRef(c);
+  actualRef.current = c;
+  const listoRef = useRef(listo);
+  listoRef.current = listo;
 
   useEffect(() => {
     if (!c) return void hablar("¿Qué quieres aprender a escribir? ¿Vocales, letras o números?");
@@ -57,6 +62,9 @@ export default function Trazar() {
     const t = /\d/.test(c!) ? `¡Escribiste el ${NUMEROS[Number(c)]!.palabra}! ¡Muy bien!` : `¡Escribiste la ${c}! ¡Qué bonita te quedó!`;
     setDicho(t);
     await hablarYEsperar(t);
+    // Los más chicos no leen "Siguiente": después de un ratito se avanza solo.
+    const era = c;
+    setTimeout(() => { if (actualRef.current === era && listoRef.current) siguiente(); }, 2600);
   }
 
   function siguiente() {
@@ -74,10 +82,10 @@ export default function Trazar() {
         </View>
         <View style={estilos.series}>
           {(Object.keys(SERIES) as Serie[]).map((s) => (
-            <Pressable key={s} style={estilos.serie} onPress={() => { setSerie(s); setIndice(0); }} accessibilityLabel={SERIES[s].nombre}>
+            <Rebote key={s} style={estilos.serie} onPress={() => { setSerie(s); setIndice(0); }} accessibilityLabel={SERIES[s].nombre}>
               <Icono e={SERIES[s].emoji} tam={74} sinSombra />
               <Text style={estilos.serieNombre}>{SERIES[s].nombre}</Text>
-            </Pressable>
+            </Rebote>
           ))}
         </View>
       </Pantalla>

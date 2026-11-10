@@ -1,5 +1,6 @@
 import { router } from "expo-router";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Rebote } from "./Rebote";
 import { Icono } from "./Iconos";
 import { TOQUE_MINIMO } from "../lib/tema";
 import { useEnVentana } from "../lib/ventana";
@@ -18,13 +19,13 @@ export function BotonCasa() {
   return (
     <View style={estilos.fila} pointerEvents="box-none">
       {!ventana && (
-        <Pressable accessibilityLabel="Volver al inicio" onPress={() => router.replace("/")} style={estilos.boton}>
+        <Rebote accessibilityLabel="Volver al inicio" onPress={() => router.replace("/")} style={estilos.boton}>
           <Icono e="🏠" tam={50} sinSombra />
-        </Pressable>
+        </Rebote>
       )}
-      <Pressable accessibilityLabel="Volver atrás" onPress={volver} style={estilos.boton}>
+      <Rebote accessibilityLabel="Volver atrás" onPress={volver} style={estilos.boton}>
         <Icono e="⬅️" tam={50} sinSombra />
-      </Pressable>
+      </Rebote>
     </View>
   );
 }

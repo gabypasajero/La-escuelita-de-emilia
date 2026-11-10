@@ -41,6 +41,10 @@ export const sonido = {
   acierto: () => [523, 659, 784].forEach((f, i) => nota(f, i * 0.09, 0.22, 0.16, "triangle")),
   /** Casi: un "bup" suave, nunca feo. */
   casi: () => nota(330, 0, 0.2, 0.1, "sine", 250),
+  /** Voltear una carta. */
+  voltear: () => nota(300, 0, 0.08, 0.09, "triangle", 620),
+  /** Un pasito más (los puntitos al escribir): cada uno suena un poco más agudo. */
+  paso: (i: number) => nota(392 * Math.pow(2, Math.min(i, 14) / 12), 0, 0.1, 0.1, "sine"),
   /** Fiesta: completó sus estrellas. */
   fiesta: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => nota(f, i * 0.1, 0.28, 0.15, "triangle")),
 };

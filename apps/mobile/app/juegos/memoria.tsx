@@ -1,12 +1,67 @@
 import { NIVELES_MEMORIA, TEMAS_MEMORIA, tableroMemoria, type CartaMemoria, type TemaMemoria } from "@escuelita/core";
-import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Rebote } from "../../components/Rebote";
+import { sonido } from "../../lib/sonidos";
 import { Pantalla } from "../../components/Pantalla";
 import { Globo } from "../../components/Personajes";
 import { useJuego } from "../../lib/juego";
 import { COLORES } from "../../lib/tema";
 import { hablar, hablarYEsperar } from "../../lib/voz";
 import { Icono, tieneDibujo } from "../../components/Iconos";
+
+/**
+ * Una carta que se voltea de verdad: llega repartida con un saltito, gira
+ * al tocarla, brinca cuando se encuentra su pareja y tiembla si no era.
+ */
+function Carta({ lado, orden, visible, encontrada, fallo, alTocar, etiqueta, children }: { lado: number; orden: number; visible: boolean; encontrada: boolean; fallo: boolean; alTocar: () => void; etiqueta: string; children: ReactNode }) {
+  const giro = useRef(new Animated.Value(0)).current;
+  const llega = useRef(new Animated.Value(0)).current;
+  const brinco = useRef(new Animated.Value(0)).current;
+  const tiembla = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.spring(llega, { toValue: 1, delay: orden * 45, friction: 6, tension: 80, useNativeDriver: true }).start();
+  }, [llega, orden]);
+  useEffect(() => {
+    Animated.timing(giro, { toValue: visible ? 1 : 0, duration: 280, easing: Easing.inOut(Easing.quad), useNativeDriver: true }).start();
+  }, [visible, giro]);
+  useEffect(() => {
+    if (!encontrada) return;
+    Animated.sequence([
+      Animated.timing(brinco, { toValue: 1, duration: 200, easing: Easing.out(Easing.back(3)), useNativeDriver: true }),
+      Animated.spring(brinco, { toValue: 0, friction: 4, useNativeDriver: true }),
+    ]).start();
+  }, [encontrada, brinco]);
+  useEffect(() => {
+    if (!fallo) return;
+    Animated.sequence([-1, 1, -0.6, 0.6, 0].map((v) => Animated.timing(tiembla, { toValue: v, duration: 70, useNativeDriver: true }))).start();
+  }, [fallo, tiembla]);
+  const cara = { width: lado, height: lado, position: "absolute" as const, backfaceVisibility: "hidden" as const };
+  return (
+    <Animated.View
+      style={{
+        width: lado, height: lado,
+        opacity: llega.interpolate({ inputRange: [0, 0.3], outputRange: [0, 1], extrapolate: "clamp" }),
+        transform: [
+          { translateY: Animated.add(llega.interpolate({ inputRange: [0, 1], outputRange: [-60, 0] }), brinco.interpolate({ inputRange: [0, 1], outputRange: [0, -16] })) },
+          { translateX: tiembla.interpolate({ inputRange: [-1, 1], outputRange: [-9, 9] }) },
+          { scale: Animated.add(1, Animated.multiply(brinco, 0.14)) },
+        ],
+      }}
+    >
+      <Pressable onPress={alTocar} accessibilityLabel={etiqueta} style={{ width: lado, height: lado }}>
+        <Animated.View style={[estilos.carta, estilos.reverso, cara, { transform: [{ perspective: 800 }, { rotateY: giro.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "180deg"] }) }] }]}>
+          <View style={[estilos.reversoMarco, { borderRadius: lado * 0.12 }]}>
+            <Icono e="⭐" tam={lado * 0.46} sinSombra />
+          </View>
+        </Animated.View>
+        <Animated.View style={[estilos.carta, estilos.abierta, encontrada && estilos.encontrada, cara, { transform: [{ perspective: 800 }, { rotateY: giro.interpolate({ inputRange: [0, 1], outputRange: ["-180deg", "0deg"] }) }] }]}>
+          {children}
+        </Animated.View>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
 /**
  * Memoria con 5 temas (frutas, animales, letras, números y mezcla) y 6 niveles.
@@ -19,6 +74,9 @@ export default function Memoria() {
   const [abiertas, setAbiertas] = useState<number[]>([]);
   const [encontradas, setEncontradas] = useState<Set<string>>(new Set());
   const [dicho, setDicho] = useState("¿Con qué jugamos a la memoria?");
+  const [fallo, setFallo] = useState<number[]>([]);
+  const [mirando, setMirando] = useState(false);
+  const [ronda, setRonda] = useState(0);
   const { width, height } = useWindowDimensions();
   const { ganar } = useJuego();
 
@@ -30,13 +88,21 @@ export default function Memoria() {
     setCartas(tableroMemoria(n, t));
     setAbiertas([]);
     setEncontradas(new Set());
-    const frase = `Nivel ${n}. ¡Busca las parejas!`;
+    setRonda((r) => r + 1);
+    setFallo([]);
+    // En los primeros niveles se muestran todas un momento: así los más chicos entienden el juego.
+    const espiar = n <= 2;
+    const frase = espiar ? `Nivel ${n}. ¡Mira bien dónde están!` : `Nivel ${n}. ¡Busca las parejas!`;
     setDicho(frase);
     void hablar(frase);
+    setMirando(espiar);
+    if (espiar) setTimeout(() => { setMirando(false); setDicho("¡Ahora busca las parejas!"); }, 2600);
   }
 
   function tocar(carta: CartaMemoria) {
-    if (abiertas.length === 2 || abiertas.includes(carta.id) || encontradas.has(carta.par)) return;
+    if (mirando || abiertas.length === 2 || abiertas.includes(carta.id) || encontradas.has(carta.par)) return;
+    sonido.voltear();
+    setFallo([]);
     const nuevas = [...abiertas, carta.id];
     setAbiertas(nuevas);
     if (nuevas.length < 2) return;
@@ -44,9 +110,11 @@ export default function Memoria() {
     const [a, b] = nuevas.map((id) => cartas.find((c) => c.id === id)!);
     const pareja = a!.par === b!.par;
 
+    if (!pareja) setTimeout(() => { setFallo(nuevas); sonido.casi(); }, 420);
     setTimeout(async () => {
       setAbiertas([]);
       if (!pareja) return;
+      sonido.acierto();
       const total = new Set(encontradas).add(a!.par);
       setEncontradas(total);
       if (total.size * 2 < cartas.length) {
@@ -67,7 +135,7 @@ export default function Memoria() {
         setTema(null);
         setDicho("¿Jugamos con otro tema?");
       }
-    }, 800);
+    }, pareja ? 650 : 1100);
   }
 
   if (!tema) {
@@ -76,10 +144,10 @@ export default function Memoria() {
         <Globo texto={dicho} />
         <View style={estilos.temas}>
           {TEMAS_MEMORIA.map((t) => (
-            <Pressable key={t.id} style={estilos.tema} onPress={() => empezar(t.id)} accessibilityLabel={t.nombre}>
+            <Rebote key={t.id} style={estilos.tema} onPress={() => empezar(t.id)} accessibilityLabel={t.nombre}>
               <Icono e={t.emoji} tam={78} sinSombra />
               <Text style={estilos.temaNombre}>{t.nombre}</Text>
-            </Pressable>
+            </Rebote>
           ))}
         </View>
       </Pantalla>
@@ -106,31 +174,24 @@ export default function Memoria() {
       </View>
       <Globo texto={dicho} />
       <View style={[estilos.tablero, { maxWidth: columnas * (lado + 12) }]}>
-        {cartas.map((c) => {
-          const visible = abiertas.includes(c.id) || encontradas.has(c.par);
+        {cartas.map((c, i) => {
+          const hallada = encontradas.has(c.par);
+          const visible = mirando || abiertas.includes(c.id) || hallada;
           const larga = c.cara.length > 2 && !/^\d+$/.test(c.cara);
+          const piezas = Array.from(c.cara.replace(/\uFE0F/g, ""));
           return (
-            <Pressable
-              key={c.id}
-              onPress={() => tocar(c)}
-              accessibilityLabel={visible ? c.cara : "Carta"}
-              style={[estilos.carta, { width: lado, height: lado }, visible && estilos.abierta, encontradas.has(c.par) && estilos.encontrada]}
-            >
-              {visible && larga ? (
+            <Carta key={`${ronda}-${c.id}`} lado={lado} orden={i} visible={visible} encontrada={hallada} fallo={fallo.includes(c.id)} alTocar={() => tocar(c)} etiqueta={visible ? c.cara : "Carta"}>
+              {larga ? (
                 // Carta de cantidad: los objetos se ordenan en filas para que siempre quepan.
                 <View style={estilos.cantidad}>
-                  {Array.from(c.cara.replace(/\uFE0F/g, "")).map((e, k) => (
-                    <Icono key={k} e={e} tam={lado / (Array.from(c.cara.replace(/\uFE0F/g, "")).length > 4 ? 4.4 : 2.9)} sinSombra />
-                  ))}
+                  {piezas.map((e, k) => <Icono key={k} e={e} tam={lado / (piezas.length > 4 ? 4.4 : 2.9)} sinSombra />)}
                 </View>
-              ) : visible && tieneDibujo(c.cara) ? (
+              ) : tieneDibujo(c.cara) ? (
                 <Icono e={c.cara} tam={lado * 0.72} />
               ) : (
-                <Text style={[estilos.cara, { fontSize: lado * 0.5 }, /^[A-ZÑ\d]+$/.test(c.cara) && estilos.texto]}>
-                  {visible ? c.cara : "❓"}
-                </Text>
+                <Text style={[estilos.cara, { fontSize: lado * 0.5 }, /^[A-ZÑ\d]+$/.test(c.cara) && estilos.texto]}>{c.cara}</Text>
               )}
-            </Pressable>
+            </Carta>
           );
         })}
       </View>
@@ -150,9 +211,11 @@ const estilos = StyleSheet.create({
   nivel: { fontSize: 26, color: "#fff" },
   nivelHecho: { color: "#FDD835" },
   tablero: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 12 },
-  carta: { borderRadius: 18, backgroundColor: "#7B1FA2", alignItems: "center", justifyContent: "center", padding: 4 },
-  abierta: { backgroundColor: "#fff" },
-  encontrada: { backgroundColor: "#C8E6C9" },
+  carta: { borderRadius: 18, alignItems: "center", justifyContent: "center", padding: 4, boxShadow: "0 5px 0 rgba(59,47,92,0.25)" },
+  reverso: { backgroundColor: "#8E24AA", borderWidth: 4, borderColor: "#FFFFFF" },
+  reversoMarco: { width: "82%", height: "82%", backgroundColor: "#AB47BC", alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: "#CE93D8" },
+  abierta: { backgroundColor: "#fff", borderWidth: 4, borderColor: "#E1BEE7" },
+  encontrada: { backgroundColor: "#C8E6C9", borderColor: "#66BB6A" },
   cara: { textAlign: "center" },
   cantidad: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "center" },
   texto: { fontWeight: "800", color: "#3B2F5C" },

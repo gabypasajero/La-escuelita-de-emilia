@@ -1,8 +1,9 @@
 import { GLIFOS, avanzarTrazo, puntosDeControl, type Punto } from "@escuelita/core";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Path, Polyline, Text as SvgText } from "react-native-svg";
 import { useSuperficieDibujo } from "../lib/puntero";
+import { sonido } from "../lib/sonidos";
 import { hablar } from "../lib/voz";
 import { TextoIconos } from "./Iconos";
 
@@ -63,6 +64,7 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
     if (n === s.logrados) return;
     s.logrados = n;
     setLogrados(n);
+    sonido.paso(n);
     if (n < control.length) return;
     // Trazo completo: pasa al siguiente o termina.
     if (s.actual + 1 < controles.length) {
@@ -77,6 +79,14 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
       alCompletar();
     }
   }
+
+  // El puntito que sigue late para que se vea hacia dónde ir.
+  const [latido, setLatido] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setLatido((v) => (v + 1) % 2), 480);
+    return () => clearInterval(id);
+  }, []);
+  const proximo = controles[actual]?.[logrados];
 
   function reiniciar() {
     estado.current = { actual: 0, logrados: 0, ultimoAviso: 0, terminado: false };
@@ -108,6 +118,12 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
             {trazos.map((t, i) => (
               <Polyline key={`g${i}`} points={aTexto(t)} fill="none" stroke={i < actual ? "#A5D6A7" : "#ECEFF1"} strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" />
             ))}
+            {/* Tinta mágica: lo ya recorrido se pinta de color */}
+            {controles.map((ct, i) => {
+              const hasta = i < actual ? ct.length : i === actual ? logrados : 0;
+              return hasta > 1 ? <Polyline key={`m${i}`} points={aTexto(ct.slice(0, hasta))} fill="none" stroke={["#42A5F5", "#EC407A", "#FFB300", "#66BB6A"][i % 4]} strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" /> : null;
+            })}
+            {proximo && <Circle cx={proximo[0]} cy={proximo[1]} r={latido ? 8.5 : 6} fill="#FFEB3B" opacity={0.55} />}
             {/* Puntitos del trazo actual */}
             {controles[actual]?.map(([x, y], i) => (
               <Circle key={`p${i}`} cx={x} cy={y} r={i < logrados ? 3.2 : 2.2} fill={i < logrados ? "#43A047" : "#90A4AE"} />
@@ -125,7 +141,7 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
             )}
             {/* Lo que dibuja el niño */}
             {tinta.map((t, i) => (
-              <Polyline key={`t${i}`} points={aTexto(t)} fill="none" stroke={COLORES_TINTA[i % COLORES_TINTA.length]} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+              <Polyline key={`t${i}`} points={aTexto(t)} fill="none" stroke={COLORES_TINTA[i % COLORES_TINTA.length]} strokeWidth="3.5" opacity={0.55} strokeLinecap="round" strokeLinejoin="round" />
             ))}
           </Svg>
         </View>
