@@ -1,10 +1,12 @@
-import { Children, cloneElement, isValidElement, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
+import { Children, cloneElement, isValidElement, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
 import Svg, { Circle, Ellipse, G, Image as ImagenSvg, Path, Rect } from "react-native-svg";
 import { dibujoEnSvg, Icono } from "../components/Iconos";
 import { Pantalla } from "../components/Pantalla";
 import { Rebote } from "../components/Rebote";
-import { rellenar } from "../lib/balde";
+import { fotoDeHoja, rellenar } from "../lib/balde";
+import { guardar, leer } from "../lib/guardado";
+import { useJuego } from "../lib/juego";
 import { useSuperficieDibujo } from "../lib/puntero";
 import { sonido } from "../lib/sonidos";
 import { COLORES } from "../lib/tema";
@@ -139,6 +141,14 @@ const DIBUJOS: Array<{ id: string; nombre: string; piezas: ReactNode }> = [
 
 export default function Pintar() {
   const [cosas, setCosas] = useState<Cosa[]>([]);
+  // El trazo que se está haciendo va aparte: así no se redibuja toda la hoja con cada movimiento del dedo.
+  const [viva, setViva] = useState<Cosa | null>(null);
+  // Mis dibujos: la galería del niño, guardada en el aparato.
+  const { activoId } = useJuego();
+  const claveGaleria = `dibujos:${activoId ?? "invitado"}`;
+  const [galeria, setGaleria] = useState<Array<{ id: number; img: string }>>([]);
+  const [viendo, setViendo] = useState<{ id: number; img: string } | null>(null);
+  useEffect(() => { void leer<Array<{ id: number; img: string }>>(claveGaleria, []).then(setGaleria); }, [claveGaleria]);
   const [color, setColor] = useState(PALETA[0]!);
   const [grosor, setGrosor] = useState(GROSORES[1]!);
   const [lapiz, setLapiz] = useState<Lapiz>("plumon");
@@ -155,7 +165,7 @@ export default function Pintar() {
 
   const cambiar = (c: Cosa) => {
     actual.current = c;
-    setCosas((t) => [...t.slice(0, -1), c]);
+    setViva(c);
   };
   // Con lápiz óptico, apretar más hace el trazo más grueso.
   const conPresion = (presion: number, esLapiz: boolean) => (esLapiz ? Math.max(3, Math.round(mano.current.grosor * (0.4 + presion * 1.2))) : mano.current.grosor);
@@ -169,8 +179,8 @@ export default function Pintar() {
       else if (m.lapiz === "arcoiris") nueva = { tipo: "arcoiris", tramos: [{ d: `M${p} L${p}`, color: ARCOIRIS[0]! }], grosor: g, n: 0, ultimo: p };
       else if (m.lapiz === "brillos") nueva = { tipo: "brillos", puntos: [[x, y, 6 + m.grosor * 0.5]], color: m.color, ux: x, uy: y };
       else nueva = { tipo: "trazo", lapiz: m.lapiz, d: `M${p} L${p}`, color: m.color, grosor: g };
-      actual.current = nueva;
-      setCosas((t) => [...t, nueva]);
+      if (nueva.tipo === "sello") return setCosas((t) => [...t, nueva]);
+      cambiar(nueva);
     },
     seguir: ({ x, y }) => {
       const c = actual.current;
@@ -189,7 +199,12 @@ export default function Pintar() {
       const k = c.puntos.length;
       cambiar({ ...c, puntos: [...c.puntos, [x + Math.sin(k * 2.4) * 9, y + Math.cos(k * 1.7) * 9, (5 + mano.current.grosor * 0.45) * (0.6 + ((k * 37) % 10) / 12)]], ux: x, uy: y });
     },
-    terminar: () => { actual.current = null; },
+    terminar: () => {
+      const c = actual.current;
+      actual.current = null;
+      if (c) setCosas((t) => [...t, c]);
+      setViva(null);
+    },
   });
 
   // El balde: llena de color la zona cerrada que se tocó.
@@ -206,6 +221,34 @@ export default function Pintar() {
     if (!href) return void hablar("Aquí no pude pintar. Prueba en otra parte.");
     sonido.paso(6);
     setCosas((t) => [...t, { tipo: "relleno", href, w, h }]);
+  }
+
+  async function guardarDibujo() {
+    const svg = (lienzoRef.current as unknown as HTMLElement | null)?.querySelector?.("svg") as SVGSVGElement | null;
+    if (Platform.OS !== "web" || !svg || !tam.w) return;
+    if (!cosas.length) return void hablar("Primero dibuja algo y después lo guardamos.");
+    const foto = await fotoDeHoja(svg, tam.w, tam.h);
+    if (!foto) return;
+    // Se guardan los 12 más nuevos, en tamaño liviano.
+    const nueva = [{ id: Date.now(), img: foto.toDataURL("image/jpeg", 0.8) }, ...galeria].slice(0, 12);
+    if (!(await guardar(claveGaleria, nueva))) return void hablar("No queda espacio para guardar. Borra un dibujo antiguo.");
+    setGaleria(nueva);
+    sonido.fiesta();
+    void hablar("¡Guardado en tu galería! Qué lindo te quedó.");
+  }
+  function borrarDibujo(id: number) {
+    const nueva = galeria.filter((d) => d.id !== id);
+    setGaleria(nueva);
+    void guardar(claveGaleria, nueva);
+    setViendo(null);
+  }
+  function seguirPintando(d: { img: string }) {
+    setDibujo(null);
+    setCalcar(false);
+    setCosas([{ tipo: "relleno", href: d.img, w: tam.w, h: tam.h }]);
+    setViendo(null);
+    setEligiendo(false);
+    void hablar("¡Sigamos con este dibujo!");
   }
 
   const elegirLapiz = (l: (typeof LAPICES)[number]) => { setLapiz(l.id); void hablar(l.dice); };
@@ -230,6 +273,7 @@ export default function Pintar() {
       {plantilla}
     </G>
   );
+  const capa = useMemo(() => cosas.map(pintarCosa), [cosas]);
   const muestra = lapiz === "borrador" ? "#BDBDBD" : color;
 
   return (
@@ -251,13 +295,8 @@ export default function Pintar() {
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
             <Svg width="100%" height="100%">
               {calcar && lineas}
-              {cosas.map((c, i) => {
-                if (c.tipo === "trazo") return <Path key={i} d={c.d} strokeLinecap="round" strokeLinejoin="round" fill="none" {...estiloDe(c.lapiz, c.color, c.grosor)} />;
-                if (c.tipo === "arcoiris") return <G key={i}>{c.tramos.map((t, k) => <Path key={k} d={t.d} stroke={t.color} strokeWidth={c.grosor} strokeLinecap="round" strokeLinejoin="round" fill="none" />)}</G>;
-                if (c.tipo === "brillos") return <G key={i}>{c.puntos.map(([x, y, r], k) => <Path key={k} d={estrella(x, y, r)} fill={k % 3 === 2 ? "#FFF59D" : c.color} stroke="#FFFFFF" strokeWidth="1" />)}</G>;
-                if (c.tipo === "relleno") return <ImagenSvg key={i} href={c.href} x={0} y={0} width={c.w} height={c.h} />;
-                return <G key={i}>{timbre(c.e, c.x, c.y, c.tam, c.linea)}</G>;
-              })}
+              {capa}
+              {viva && pintarCosa(viva, -1)}
               {/* Para pintar, las líneas van encima: el color nunca las tapa. */}
               {!calcar && lineas}
             </Svg>
@@ -274,6 +313,7 @@ export default function Pintar() {
             ))}
             <Rebote onPress={() => setCosas((t) => t.slice(0, -1))} style={estilos.boton} accessibilityLabel="Deshacer"><Icono e="⬅️" tam={34} sinSombra /></Rebote>
             <Rebote onPress={hojaNueva} style={estilos.boton} accessibilityLabel="Hoja nueva"><Text style={estilos.icono}>📄</Text></Rebote>
+            {Platform.OS === "web" && <Rebote mudo onPress={() => void guardarDibujo()} style={[estilos.boton, { backgroundColor: "#C8E6C9" }]} accessibilityLabel="Guardar dibujo"><Text style={estilos.icono}>💾</Text></Rebote>}
             <Rebote onPress={() => { setEligiendo(true); void hablar("¿Qué dibujo quieres? Puedes pintarlo o calcarlo."); }} style={[estilos.boton, estilos.dibujos]} accessibilityLabel="Elegir dibujo">
               <Svg width={36} height={36} viewBox="0 0 100 100" fill="none" stroke="#3B2F5C" strokeWidth="6" strokeLinejoin="round">{DIBUJOS[1]!.piezas}</Svg>
             </Rebote>
@@ -307,6 +347,18 @@ export default function Pintar() {
           <View style={estilos.panel}>
             <Text style={estilos.titulo}>¿Qué quieres dibujar?</Text>
             <ScrollView contentContainerStyle={estilos.grilla}>
+              {!!galeria.length && (
+                <View style={estilos.galeria}>
+                  <Text style={estilos.tarjetaNombre}>Mis dibujos</Text>
+                  <ScrollView horizontal contentContainerStyle={{ gap: 10, padding: 4 }}>
+                    {galeria.map((d) => (
+                      <Rebote key={d.id} onPress={() => setViendo(d)} accessibilityLabel="Ver mi dibujo" style={estilos.cuadro}>
+                        <Image source={{ uri: d.img }} style={estilos.miniatura} resizeMode="cover" />
+                      </Rebote>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
               <Rebote style={estilos.tarjeta} onPress={() => elegirDibujo(null, false)} accessibilityLabel="Hoja en blanco">
                 <View style={estilos.blanca} />
                 <Text style={estilos.tarjetaNombre}>Hoja en blanco</Text>
@@ -326,8 +378,29 @@ export default function Pintar() {
           </View>
         </View>
       )}
+      {/* Un dibujo de la galería, en grande */}
+      {viendo && (
+        <View style={[estilos.velo, { zIndex: 50 }]}>
+          <View style={estilos.panel}>
+            <Image source={{ uri: viendo.img }} style={estilos.grande} resizeMode="contain" />
+            <View style={estilos.modos}>
+              <Rebote style={[estilos.modo, { backgroundColor: "#C8E6C9" }]} onPress={() => seguirPintando(viendo)} accessibilityLabel="Seguir pintando"><Text style={estilos.modoTexto}>Seguir pintando</Text></Rebote>
+              <Rebote style={[estilos.modo, { backgroundColor: "#FFCDD2" }]} onPress={() => borrarDibujo(viendo.id)} accessibilityLabel="Borrar dibujo"><Text style={estilos.modoTexto}>Borrar</Text></Rebote>
+              <Rebote style={[estilos.modo, { backgroundColor: "#fff" }]} onPress={() => setViendo(null)} accessibilityLabel="Cerrar dibujo"><Text style={estilos.modoTexto}>Cerrar</Text></Rebote>
+            </View>
+          </View>
+        </View>
+      )}
     </Pantalla>
   );
+}
+
+function pintarCosa(c: Cosa, i: number) {
+  if (c.tipo === "trazo") return <Path key={i} d={c.d} strokeLinecap="round" strokeLinejoin="round" fill="none" {...estiloDe(c.lapiz, c.color, c.grosor)} />;
+  if (c.tipo === "arcoiris") return <G key={i}>{c.tramos.map((t, k) => <Path key={k} d={t.d} stroke={t.color} strokeWidth={c.grosor} strokeLinecap="round" strokeLinejoin="round" fill="none" />)}</G>;
+  if (c.tipo === "brillos") return <G key={i}>{c.puntos.map(([x, y, r], k) => <Path key={k} d={estrella(x, y, r)} fill={k % 3 === 2 ? "#FFF59D" : c.color} stroke="#FFFFFF" strokeWidth="1" />)}</G>;
+  if (c.tipo === "relleno") return <ImagenSvg key={i} href={c.href} x={0} y={0} width={c.w} height={c.h} preserveAspectRatio="none" />;
+  return <G key={i}>{timbre(c.e, c.x, c.y, c.tam, c.linea)}</G>;
 }
 
 /** Una rayita de muestra hecha con cada lápiz, para reconocerlo sin leer. */
@@ -372,5 +445,9 @@ const estilos = StyleSheet.create({
   modos: { flexDirection: "row", gap: 6 },
   modo: { borderRadius: 14, paddingHorizontal: 10, paddingVertical: 6 },
   modoTexto: { fontSize: 14, fontWeight: "900", color: "#3B2F5C" },
+  galeria: { width: "100%", alignItems: "center", backgroundColor: "#fff", borderRadius: 20, padding: 8, borderWidth: 3, borderColor: "#C8E6C9" },
+  cuadro: { borderRadius: 12, borderWidth: 4, borderColor: "#D7A86E", overflow: "hidden" },
+  miniatura: { width: 132, height: 84, backgroundColor: "#fff" },
+  grande: { width: 640, maxWidth: "100%", height: 380, backgroundColor: "#fff", borderRadius: 16 },
   cerrar: { backgroundColor: "#fff", borderRadius: 18, paddingHorizontal: 18, paddingVertical: 10 },
 });

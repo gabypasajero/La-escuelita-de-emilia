@@ -3,7 +3,8 @@
  * cerrada que rodea al punto tocado y devuelve esa zona pintada como imagen
  * transparente, lista para ponerla encima del dibujo.
  */
-export async function rellenar(svg: SVGSVGElement, w: number, h: number, x: number, y: number, color: string): Promise<string | null> {
+/** Foto de la hoja (el SVG con todo lo dibujado) sobre fondo blanco. */
+export async function fotoDeHoja(svg: SVGSVGElement, w: number, h: number): Promise<HTMLCanvasElement | null> {
   const copia = svg.cloneNode(true) as SVGSVGElement;
   copia.setAttribute("width", String(w));
   copia.setAttribute("height", String(h));
@@ -12,16 +13,22 @@ export async function rellenar(svg: SVGSVGElement, w: number, h: number, x: numb
   const lista = new Promise<boolean>((r) => { img.onload = () => r(true); img.onerror = () => r(false); });
   img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(copia));
   if (!(await lista)) return null;
-
-  const W = Math.round(w), H = Math.round(h);
   const lienzo = document.createElement("canvas");
-  lienzo.width = W;
-  lienzo.height = H;
+  lienzo.width = Math.round(w);
+  lienzo.height = Math.round(h);
   const g = lienzo.getContext("2d", { willReadFrequently: true });
   if (!g) return null;
   g.fillStyle = "#FFFFFF";
-  g.fillRect(0, 0, W, H);
-  g.drawImage(img, 0, 0, W, H);
+  g.fillRect(0, 0, lienzo.width, lienzo.height);
+  g.drawImage(img, 0, 0, lienzo.width, lienzo.height);
+  return lienzo;
+}
+
+export async function rellenar(svg: SVGSVGElement, w: number, h: number, x: number, y: number, color: string): Promise<string | null> {
+  const lienzo = await fotoDeHoja(svg, w, h);
+  if (!lienzo) return null;
+  const W = lienzo.width, H = lienzo.height;
+  const g = lienzo.getContext("2d", { willReadFrequently: true })!;
   let px: Uint8ClampedArray;
   try { px = g.getImageData(0, 0, W, H).data; } catch { return null; }
 

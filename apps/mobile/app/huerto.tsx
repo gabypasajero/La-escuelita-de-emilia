@@ -9,6 +9,7 @@ import { BotonCasa } from "../components/BotonCasa";
 import { EmiliaDibujo, Globo, TitoDibujo } from "../components/Personajes";
 import { Monedas, useJuego } from "../lib/juego";
 import { hablar } from "../lib/voz";
+import { guardar, leer } from "../lib/guardado";
 import { LuzDelDia, VeloPantalla } from "../components/LuzDelDia";
 import { SombraContacto, VinetaPantalla } from "../components/AmbienteInterior";
 import { useVozActiva } from "../lib/habla";
@@ -57,7 +58,7 @@ const PARCELAS_POS = [0, 1, 2, 3, 4, 5].map((i) => ({ x: 300 + (i % 3) * 230, y:
 const CRECE_MS = 3800;
 
 // El huerto de cada niño se guarda mientras la app está abierta (al salir y volver, sigue creciendo).
-const HUERTOS = new Map<string, { parcelas: Parcela[]; canasta: Record<string, number> }>();
+const HUERTOS = new Map<string, { parcelas: Parcela[]; canasta: Record<string, number>; cargado?: boolean }>();
 
 export default function Huerto() {
   const { perfil, activoId, accesorioPuesto, ganar } = useJuego();
@@ -73,8 +74,23 @@ export default function Huerto() {
   const [dicho, setDicho] = useState("¡Llegó mi ayudante! Camina hasta una parcela para sembrar.");
   const [mira, setMira] = useState(1);
 
-  const setParcelas = (p: Parcela[]) => { guardado.parcelas = p; setParcelasEstado(p); };
-  const setCanasta = (c: Record<string, number>) => { guardado.canasta = c; setCanastaEstado(c); };
+  // El huerto queda guardado en el aparato: al volver otro día, las plantas siguen ahí (y siguieron creciendo).
+  const persistir = () => void guardar(`huerto:${clave}`, { parcelas: guardado.parcelas, canasta: guardado.canasta });
+  const setParcelas = (p: Parcela[]) => { guardado.parcelas = p; setParcelasEstado(p); persistir(); };
+  const setCanasta = (c: Record<string, number>) => { guardado.canasta = c; setCanastaEstado(c); persistir(); };
+  useEffect(() => {
+    if (guardado.cargado) return;
+    void leer<{ parcelas: Parcela[]; canasta: Record<string, number> } | null>(`huerto:${clave}`, null).then((d) => {
+      if (guardado.cargado) return;
+      guardado.cargado = true;
+      if (!d || d.parcelas?.length !== PARCELAS_POS.length) return;
+      guardado.parcelas = d.parcelas;
+      guardado.canasta = d.canasta ?? {};
+      setParcelasEstado(d.parcelas);
+      setCanastaEstado(guardado.canasta);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clave]);
 
   const pos = useRef(new Animated.ValueXY({ x: 140, y: 600 })).current;
   const emilia = useRef(new Animated.ValueXY({ x: 90, y: 610 })).current;

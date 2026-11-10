@@ -58,7 +58,11 @@ export default function Mundo3D() {
   }, [perfil?.nombre]);
 
   // Al volver de una ventana de juego (o de una pantalla 2D), el mundo retoma el control.
-  useFocusEffect(useCallback(() => { mundo.current?.cerrarVentana(); }, []));
+  useFocusEffect(useCallback(() => {
+    mundo.current?.pausar(false);
+    mundo.current?.cerrarVentana();
+    return () => mundo.current?.pausar(true);
+  }, []));
 
   // Cada moneda ganada en una ventana de juego se celebra también en el escenario.
   const monedasAntes = useRef(juego.monedas);

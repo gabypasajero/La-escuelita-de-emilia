@@ -137,6 +137,8 @@ export interface Mundo {
   escena: () => string;
   /** El niño ganó algo en un juego: los amigos lo celebran en el escenario. */
   celebrar: () => void;
+  /** El escenario quedó tapado (por un juego o por otra pantalla) o volvió a verse. */
+  pausar: (v: boolean) => void;
   /** Cuánto dibuja por cuadro (para revisar el rendimiento). */
   carga: () => { dibujos: number; triangulos: number };
 }
@@ -162,11 +164,15 @@ export function crearMundo(contenedor: HTMLElement, op: OpcionesMundo, catalogo:
   const noche = momento === "noche", luces = noche || momento === "tarde";
 
   // ---------- Dibujo ----------
-  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-  let pixeles = Math.min(window.devicePixelRatio || 1, 2);
+  // En tablets y teléfonos se parte liviano: menos pixeles y sombras más simples.
+  // (Una tablet tiene el doble de pixeles por lado que un computador: cuatro veces el trabajo.)
+  const tactil = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
+  const dpr = window.devicePixelRatio || 1;
+  const renderer = new THREE.WebGLRenderer({ antialias: !tactil || dpr < 2, powerPreference: "high-performance" });
+  let pixeles = Math.min(dpr, tactil ? 1.25 : 2);
   renderer.setPixelRatio(pixeles);
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = tactil ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1.02;
   const lienzoGl = renderer.domElement;
@@ -200,7 +206,7 @@ export function crearMundo(contenedor: HTMLElement, op: OpcionesMundo, catalogo:
   const hemi = new THREE.HemisphereLight(L.hemiA, L.hemiB, L.iHemi);
   const sol = new THREE.DirectionalLight(L.sol, L.iSol);
   sol.castShadow = true;
-  sol.shadow.mapSize.set(2048, 2048);
+  sol.shadow.mapSize.set(tactil ? 1024 : 2048, tactil ? 1024 : 2048);
   sol.shadow.bias = -0.0005;
   sol.shadow.normalBias = 0.035;
   sol.shadow.radius = 5;
@@ -752,8 +758,16 @@ export function crearMundo(contenedor: HTMLElement, op: OpcionesMundo, catalogo:
   // ---------- Bucle ----------
   let cuadro = 0;
   let cuenta = 0, acumulado = 0, nivelCalidad = 0;
+  let pausado = false, ultimoCuadro = 0;
   const animar = () => {
     cuadro = requestAnimationFrame(animar);
+    // Con un juego abierto encima, el escenario se mueve lento para dejarle la fuerza al juego;
+    // tapado por otra pantalla, descansa del todo.
+    if (pausado) {
+      const ahora = performance.now();
+      if (!enVentana || ahora - ultimoCuadro < 200) return;
+      ultimoCuadro = ahora;
+    }
     const dt = Math.min(0.05, reloj.getDelta());
     tiempo += dt;
     if (!actual) return;
@@ -814,21 +828,24 @@ export function crearMundo(contenedor: HTMLElement, op: OpcionesMundo, catalogo:
     // Calidad: si el aparato va lento, primero baja la nitidez y después las sombras.
     cuenta++;
     acumulado += dt;
-    if (cuenta === 90) {
+    if (cuenta === 50 && !pausado) {
       const ms = (acumulado / cuenta) * 1000;
-      if (ms > 30 && nivelCalidad === 0) {
-        nivelCalidad = 1;
-        pixeles = Math.min(pixeles, 1.25);
+      // Bajo 45 cuadros por segundo se va soltando lastre, de a un paso.
+      if (ms > 22 && nivelCalidad < 4) {
+        nivelCalidad++;
+        if (nivelCalidad === 1) pixeles = Math.min(pixeles, 1.25);
+        else if (nivelCalidad === 2) {
+          pixeles = 1;
+          sol.shadow.mapSize.set(512, 512);
+          sol.shadow.map?.dispose();
+          sol.shadow.map = null;
+        } else if (nivelCalidad === 3) {
+          // Sin sombras proyectadas (quedan las de contacto pintadas).
+          sol.castShadow = false;
+          op.alLento?.();
+        } else pixeles = 0.75;
         renderer.setPixelRatio(pixeles);
         ajustar();
-      } else if (ms > 38 && nivelCalidad === 1) {
-        nivelCalidad = 2;
-        renderer.setPixelRatio(1);
-        sol.shadow.mapSize.set(1024, 1024);
-        sol.shadow.map?.dispose();
-        sol.shadow.map = null;
-        ajustar();
-        op.alLento?.();
       }
       cuenta = 0;
       acumulado = 0;
@@ -872,6 +889,9 @@ export function crearMundo(contenedor: HTMLElement, op: OpcionesMundo, catalogo:
     refrescar: vestir,
     evento: (ev, dato) => actual?.alEvento?.(ev, dato),
     escena: () => actual?.id ?? "",
+    pausar(v: boolean) {
+      pausado = v;
+    },
     celebrar() {
       nino.celebrando = emilia.celebrando = true;
       tito.saltar();
