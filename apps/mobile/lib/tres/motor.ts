@@ -135,6 +135,8 @@ export interface Mundo {
   refrescar: () => void;
   evento: (evento: string, dato?: unknown) => void;
   escena: () => string;
+  /** Cuánto dibuja por cuadro (para revisar el rendimiento). */
+  carga: () => { dibujos: number; triangulos: number };
 }
 
 // ---------- Luz según la hora ----------
@@ -868,5 +870,6 @@ export function crearMundo(contenedor: HTMLElement, op: OpcionesMundo, catalogo:
     refrescar: vestir,
     evento: (ev, dato) => actual?.alEvento?.(ev, dato),
     escena: () => actual?.id ?? "",
+    carga: () => ({ dibujos: renderer.info.render.calls, triangulos: renderer.info.render.triangles }),
   };
 }

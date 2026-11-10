@@ -118,7 +118,7 @@ export default function Mundo3D() {
         <Pressable style={estilos.redondo} onPress={() => mundo.current?.volver()} accessibilityLabel="Volver">
           <Icono e="⬅️" tam={50} sinSombra />
         </Pressable>
-        {!!titulo && <View style={estilos.titulo} pointerEvents="none"><Text style={estilos.tituloTexto}>{titulo}</Text></View>}
+        {!!titulo && !dicho && <View style={estilos.titulo} pointerEvents="none"><Text style={estilos.tituloTexto}>{titulo}</Text></View>}
       </View>
     </View>
   );
