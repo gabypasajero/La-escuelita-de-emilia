@@ -7,6 +7,7 @@ import { alfombra, cuadro, estante, mesa, planta, salaConMural, silla, ventanal,
  * hasta ella y el juego se abre en una ventana sobre la sala.
  */
 const JUEGOS: Tarjeta[] = [
+  { ruta: "/mi-nombre", nombre: "Mi nombre", icono: "✍️", color: "#EF5350", frase: "¡Vamos a aprender a escribir tu nombre!" },
   { ruta: "/trazar", nombre: "Escribir", icono: "✏️", color: "#5C6BC0", frase: "¡Vamos a aprender a escribir con el dedo!" },
   { ruta: "/letras", nombre: "Letras", icono: "🔤", color: "#29B6F6", frase: "¡Vamos a jugar con las letras y sus sonidos!" },
   { ruta: "/numeros", nombre: "Números", icono: "🔢", color: "#66BB6A", frase: "¡A contar!" },
@@ -24,13 +25,13 @@ const JUEGOS: Tarjeta[] = [
 export const escuelita = salaConMural({
   id: "escuelita", titulo: "La Escuelita",
   ancho: 21, fondo: 9.5, alto: 6.6, pared: "#FFE9B8", piso: "#D9A066", franja: "#81D4FA",
-  tarjetas: JUEGOS, filas: 2, tam: [2.1, 1.85], yMural: 2.05,
+  tarjetas: JUEGOS, filas: 2, tam: [1.95, 1.75], yMural: 2.05,
   anfitrion: { quien: "tia", x: 8.6, z: 2.6, saludo: "¡Hola! Bienvenidos a la escuelita. Toca una tarjeta del diario mural para jugar." },
   decorar(fijo, raiz, c) {
     // Ventanas a los lados del mural
     for (const l of [-1, 1]) {
       const v = ventanal(c, 1.7, 2.3);
-      v.position.set(l * 9.1, 3.5, 0.05);
+      v.position.set(l * 9.5, 3.5, 0.05);
       raiz.add(v);
     }
     // Rincón de lectura (izquierda)
@@ -68,7 +69,7 @@ export const escuelita = salaConMural({
       b.scale.set(0.8, 1, 1);
       fijo.add(b);
     }
-    for (const [x, col] of [[-9.1, "#FFF59D"], [9.1, "#B3E5FC"]] as const) {
+    for (const [x, col] of [[-9.5, "#FFF59D"], [9.5, "#B3E5FC"]] as const) {
       const d = cuadro(1.2, 0.9, (g, w, h) => {
         g.fillStyle = col; g.fillRect(0, 0, w, h);
         g.fillStyle = "#FFB300"; g.beginPath(); g.arc(w * 0.75, h * 0.3, 26, 0, 7); g.fill();

@@ -13,6 +13,7 @@ import { dibujoEnSvg, Icono, TextoIconos } from "../components/Iconos";
 
 /** Todos los juegos (también se abren desde el botón «Todos los juegos»). */
 const SALAS: Array<{ ruta: Href; nombre: string; emoji: string; color: string; frase: string }> = [
+  { ruta: "/mi-nombre", nombre: "Mi nombre", emoji: "✍️", color: "#EF5350", frase: "¡Vamos a aprender a escribir tu nombre!" },
   { ruta: "/trazar", nombre: "Escribir", emoji: "✏️", color: "#5C6BC0", frase: "¡Vamos a aprender a escribir con el dedo!" },
   { ruta: "/letras", nombre: "Letras", emoji: "🔤", color: "#29B6F6", frase: "¡Vamos a jugar con las letras y sus sonidos!" },
   { ruta: "/numeros", nombre: "Números", emoji: "🔢", color: "#66BB6A", frase: "¡A contar!" },
@@ -61,9 +62,9 @@ export default function Escuelita() {
     // Pared del fondo
     { id: "letras", x: 110, y: 390, ancho: 150, alto: 210, etiqueta: "Letras", letrero: "Letras", dibujo: (k) => <EstanteLetras k={k} />, alLlegar: ir("Letras") },
     { id: "pizarra", x: 450, y: 380, ancho: 330, alto: 220, etiqueta: "Pizarra", letrero: "Escribir", dibujo: (k) => <Pizarra k={k} />, llegada: { x: 450, y: 430 }, alLlegar: ir("Escribir") },
-    { id: "tia", x: 700, y: 410, ancho: 100, alto: 190, etiqueta: "Tía de la escuelita", letrero: "La tía",
+    { id: "tia", x: 700, y: 410, ancho: 100, alto: 190, etiqueta: "Tía de la escuelita", letrero: "Mi nombre",
       dibujo: (k) => <Adulto id="tia" alto={180 * k} hablando={tiaHabla && voz} />, llegada: { x: 640, y: 450 },
-      alLlegar: () => decir("¡Qué bueno que viniste! Aquí aprendemos jugando. Prueba la pizarra, el ábaco o las mesitas.") },
+      alLlegar: ir("Mi nombre") },
     { id: "abaco", x: 860, y: 400, ancho: 130, alto: 170, etiqueta: "Ábaco", letrero: "Números", dibujo: (k) => <Abaco k={k} />, alLlegar: ir("Números") },
     { id: "radio", x: 1010, y: 400, ancho: 120, alto: 170, etiqueta: "Radio de los sonidos", letrero: "Sonidos", dibujo: (k) => <Radio k={k} />, alLlegar: ir("Sonidos") },
     // Mesitas del medio
