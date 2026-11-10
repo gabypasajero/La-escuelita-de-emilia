@@ -1,7 +1,8 @@
 import type { Constructor } from "../motor";
 import { barrio, CON_ESCENA } from "./barrio";
 import { escuelita } from "./escuelita";
-import { casa, disfraces, granja, huerto, paradero, plaza, taller, tiendita, veterinaria } from "./lugares";
+import { casa } from "./casa";
+import { disfraces, granja, huerto, paradero, plaza, taller, tiendita, veterinaria } from "./lugares";
 import { galeria } from "./galeria";
 
 /** Todos los escenarios del mundo 3D, por nombre. */

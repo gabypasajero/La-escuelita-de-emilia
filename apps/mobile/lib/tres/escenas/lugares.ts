@@ -88,46 +88,6 @@ export const taller = salaConMural({
   },
 });
 
-// ---------- Casa de Emilia ----------
-export const casa = salaConMural({
-  id: "casa", titulo: "Casa de Emilia",
-  ancho: 20, fondo: 9.2, alto: 6.4, pared: "#D7ECFF", piso: "#D2A679", franja: "#FFCC80",
-  filas: 1, tam: [2.25, 1.95], yMural: 2.5,
-  tarjetas: [
-    { ruta: "/casa/rutina?r=manos", nombre: "Lavar manos", icono: "🧼", color: "#29B6F6", frase: "¡Vamos a lavarnos las manos!" },
-    { ruta: "/casa/rutina?r=dientes", nombre: "Dientes", icono: "🪥", color: "#26A69A", frase: "¡A cepillarnos los dientes!" },
-    { ruta: "/casa/ropero", nombre: "Ropero", icono: "👕", color: "#AB47BC", frase: "Veamos qué ropa nos ponemos según el clima." },
-    { ruta: "/casa/plato", nombre: "A la mesa", icono: "🍽️", color: "#FF7043", frase: "¡A la mesa! Vamos a ver qué le hace bien a tu cuerpo." },
-    { ruta: "/casa/patio", nombre: "Patio de Tito", icono: "🦌", color: "#66BB6A", frase: "¡Vamos al patio a jugar con Tito!" },
-  ],
-  anfitrion: { quien: "nina", x: -7.8, z: 3.0, saludo: "¡Hola, mis niños! Pasen, esta es su casa. ¿Qué quieren hacer?" },
-  decorar(fijo, raiz, c): Extra {
-    ventanas(raiz, c, [-8.6, 8.6]);
-    // Sillón con cojines
-    fijo.add(caja("#7986CB", 3.0, 0.6, 1.2, [6.2, 0.45, 2.2], 0.2), caja("#5C6BC0", 3.0, 1.1, 0.4, [6.2, 1.0, 1.7], 0.18));
-    for (const l of [-1, 1]) fijo.add(caja("#5C6BC0", 0.4, 0.95, 1.2, [6.2 + l * 1.5, 0.6, 2.2], 0.16), esfera(l > 0 ? "#FFD54F" : "#F48FB1", 1, [6.2 + l * 0.8, 0.98, 2.15], [0.38, 0.34, 0.2], 1));
-    // Mesa de comedor con frutero
-    const m = mesa("#BC8F5F", 2.6, 1.5, 1.0);
-    m.position.set(-2.4, 0, 6.3);
-    fijo.add(m, cilindro("#FFFFFF", 0.4, 0.26, 0.16, [-2.4, 1.15, 6.3], 14));
-    for (const [dx, col] of [[-0.14, "#E53935"], [0.14, "#FDD835"], [0, "#FB8C00"]] as const) fijo.add(esfera(col, 0.15, [-2.4 + dx, 1.3, 6.3 + (dx ? 0 : 0.14)]));
-    for (const l of [-1, 1]) {
-      const si = silla("#8D6E63");
-      si.position.set(-2.4 + l * 0.8, 0, 5.25);
-      fijo.add(si);
-    }
-    // Lámpara de pie, alfombra, planta y cuadro familiar
-    fijo.add(cilindro("#5D4037", 0.3, 0.34, 0.08, [8.9, 0.04, 3.6], 12), cilindro("#5D4037", 0.04, 0.04, 2.6, [8.9, 1.3, 3.6], 6), cono(mat("#FFE082", c.luces ? { emis: "#FFCA28", emisI: 0.9 } : {}), 0.55, 0.7, [8.9, 2.85, 3.6], 16));
-    fijo.add(alfombra("#FFAB91", 2.2, [3.4, 0, 5.6]));
-    const p = planta(1.25);
-    p.position.set(-9.3, 0, 5.4);
-    fijo.add(p);
-    // Camita de Tito
-    fijo.add(toro("#8D6E63", 0.62, 0.2, [7.6, 0.2, 6.6]), cilindro("#FFCCBC", 0.6, 0.6, 0.16, [7.6, 0.1, 6.6], 16));
-    return { solidos: [{ x0: 4.4, x1: 8, z0: 1.3, z1: 2.9 }, { x0: -3.9, x1: -0.9, z0: 4.7, z1: 7.2 }, { x0: 6.8, x1: 8.4, z0: 5.9, z1: 7.3 }] };
-  },
-});
-
 // ---------- Almacén de Doña Rosa ----------
 export const tiendita = salaConMural({
   id: "tiendita", titulo: "Almacén",
