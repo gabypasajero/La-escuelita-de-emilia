@@ -361,7 +361,7 @@ function Mundo() {
       <Pressable style={estilos.miPersonaje} onPress={() => router.push("/personaje")} accessibilityLabel="Cambiar mi personaje">
         <TextoIconos estilo={estilos.botonTexto} texto={`✏️ Mi personaje`} />
       </Pressable>
-      <Pressable style={estilos.probar3d} onPress={() => router.push("/barrio3d")} accessibilityLabel="Probar barrio 3D">
+      <Pressable style={estilos.probar3d} onPress={() => router.push("/mundo3d")} accessibilityLabel="Probar barrio 3D">
         <TextoIconos estilo={estilos.botonTexto} texto={`🧊 Probar 3D`} />
       </Pressable>
       <Pressable style={estilos.cambiarJugador} onPress={() => { elegirJugador(null); router.replace("/quien-juega"); }} accessibilityLabel="Cambiar de jugador">

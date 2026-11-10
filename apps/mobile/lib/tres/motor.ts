@@ -87,6 +87,8 @@ export interface Ctx {
   decirYEsperar: (texto: string, quien?: Persona | null, idioma?: Idioma) => Promise<void>;
   irA: (escena: string, datos?: Record<string, unknown>) => void;
   ventana: (ruta: string, titulo: string) => void;
+  /** Abre una pantalla del mundo 2D (mientras ese lugar no exista en 3D). */
+  ruta2d: (ruta: string) => void;
   hud: (h: Hud | null) => void;
   ganar: (n: number) => void;
   estrellas: () => number;
@@ -114,6 +116,7 @@ export interface OpcionesMundo {
   alDecir: (texto: string) => void;
   alVentana: (v: { ruta: string; titulo: string } | null) => void;
   alHud: (h: Hud | null) => void;
+  alRuta?: (ruta: string) => void;
   alEscena: (id: string, titulo: string) => void;
   /** El niño salió del mundo 3D (volver desde el barrio). */
   alSalir: () => void;
@@ -343,6 +346,7 @@ export function crearMundo(contenedor: HTMLElement, op: OpcionesMundo, catalogo:
       teclas.clear();
       op.alVentana({ ruta, titulo });
     },
+    ruta2d: (ruta) => op.alRuta?.(ruta),
     hud: (h) => op.alHud(h),
     ganar: (n) => op.ganar(n),
     estrellas: () => op.estrellas(),

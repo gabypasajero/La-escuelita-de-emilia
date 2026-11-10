@@ -122,7 +122,7 @@ export function texturaOjos(o: OpCara): THREE.CanvasTexture {
 }
 
 function pintarBoca(g: CanvasRenderingContext2D, cx: number, cy: number, cuadro: CuadroBoca, o: OpCara) {
-  const k = o.adulto ? 0.82 : 1;
+  const k = o.adulto ? 1.05 : 1.25;
   const labio = "#8E3B46", lengua = "#F48FB1";
   // Mejillas difuminadas
   for (const lado of [-1, 1]) {

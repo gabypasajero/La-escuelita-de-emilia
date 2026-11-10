@@ -1,4 +1,4 @@
-import { Redirect, router, useLocalSearchParams } from "expo-router";
+import { Redirect, router, useLocalSearchParams, type Href } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icono } from "../components/Iconos";
@@ -39,6 +39,7 @@ export default function Mundo3D() {
         alDecir: setDicho,
         alVentana: () => undefined,
         alHud: setHud,
+        alRuta: (ruta) => router.push(ruta as Href),
         alEscena: (_id, t) => setTitulo(t),
         alSalir: () => (router.canGoBack() ? router.back() : router.replace("/")),
       }, ESCENAS);

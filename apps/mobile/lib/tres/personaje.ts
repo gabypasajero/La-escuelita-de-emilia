@@ -40,7 +40,7 @@ export interface Medidas {
   yCuello: number; yCabeza: number; fondo: number; mano: number; pie: number;
 }
 const NINO: Medidas = { R: 0.5, yCadera: 0.5, xCadera: 0.125, muslo: 0.21, pierna: 0.2, rPierna: 0.085, yHombro: 0.9, xHombro: 0.265, brazo: 0.2, antebrazo: 0.17, rBrazo: 0.07, yCuello: 0.98, yCabeza: 0.45, fondo: 0.2, mano: 0.085, pie: 0.16 };
-const ADULTO: Medidas = { R: 0.43, yCadera: 0.94, xCadera: 0.15, muslo: 0.43, pierna: 0.41, rPierna: 0.095, yHombro: 1.68, xHombro: 0.35, brazo: 0.36, antebrazo: 0.32, rBrazo: 0.082, yCuello: 1.8, yCabeza: 0.4, fondo: 0.25, mano: 0.095, pie: 0.2 };
+const ADULTO: Medidas = { R: 0.43, yCadera: 0.94, xCadera: 0.15, muslo: 0.43, pierna: 0.41, rPierna: 0.112, yHombro: 1.66, xHombro: 0.33, brazo: 0.36, antebrazo: 0.32, rBrazo: 0.095, yCuello: 1.8, yCabeza: 0.4, fondo: 0.25, mano: 0.095, pie: 0.2 };
 
 export interface Partes {
   raiz: THREE.Group; cuerpo: THREE.Group; torso: THREE.Group; cabeza: THREE.Group;
@@ -146,17 +146,17 @@ function peinar(cg: THREE.Group, R: number, d: DefPersona["pelo"], coletas: THRE
     [-54, -28, 0, 28, 54].forEach((az, i) => mechon(az, el + (liso ? 0 : i % 2 ? 2.5 : 0), liso ? 0.27 : 0.25, liso ? 0.2 : 0.19 + (i % 2) * 0.02, 0.12));
   const patillas = (largo = 0.3) => { for (const l of [-1, 1]) mechon(l * 84, 10, 0.2, largo, 0.1); };
   // Bolitas repartidas sobre la coronilla y la nuca (pelo crespo).
-  const racimo = (n: number, r: number, k: number, elMin: number, semilla: number) => {
+  const racimo = (n: number, r: number, k: number, elMin: number, semilla: number, elMax = 90) => {
     for (let i = 0; i < n; i++) {
       const el = 90 - ((i + 0.5) / n) * (90 - elMin), az = i * 137.5 + semilla;
-      if (Math.cos(az * GRADOS) > 0.2 && el < 42) continue; // la cara queda libre
+      if ((Math.cos(az * GRADOS) > 0.2 && el < 42) || el > elMax) continue; // la cara queda libre (y la coronilla, si lleva boina)
       cg.add(esfera(c, R * r * (0.85 + azar(i + semilla) * 0.3), enCabeza(R, az, el, k), [1, 1, 1], 1));
     }
   };
   const rulos = (r: number, el: number) => [-52, -26, 0, 26, 52].forEach((az) => cg.add(esfera(c, R * r, enCabeza(R, az, el, 1.02), [1, 1, 1], 1)));
   const coleta = (pos: V3, piezas: Array<{ r: number; p: V3; e: V3 }>) => {
     const p = pivote(pos);
-    if (d.adorno) p.add(esfera(d.adorno, R * 0.11, [0, 0, 0], [1, 1, 1], 0));
+    if (d.adorno && d.adorno.startsWith("#")) p.add(esfera(d.adorno, R * 0.11, [0, 0, 0], [1, 1, 1], 0));
     for (const x of piezas) p.add(esfera(c, R * x.r, [x.p[0] * R, x.p[1] * R, x.p[2] * R], x.e, 1));
     cg.add(p);
     coletas.push(p);
@@ -172,7 +172,7 @@ function peinar(cg: THREE.Group, R: number, d: DefPersona["pelo"], coletas: THRE
       cg.add(esfera(c, 1, [0, -R * 0.5, -R * 0.42], [R * 0.98, R * 0.95, R * 0.6], 2));
       for (const l of [-1, 1]) cg.add(capsula(c, R * 0.16, R * 0.6, [l * R * 0.86, -R * 0.55, R * 0.02]));
       break;
-    case "rizado": casco(0.585, 1.6, 1.02); racimo(28, 0.3, 0.98, -30, 7); rulos(0.2, 37); break;
+    case "rizado": casco(0.585, 1.6, 1.02); racimo(28, 0.3, 0.98, -30, 7, d.adorno === "boina" ? 48 : 90); rulos(0.2, 37); break;
     case "afro": casco(0.585, 1.6, 1.02); racimo(36, 0.42, 1.1, -38, 3); rulos(0.26, 40); break;
     case "crespo": casco(0.585, 1.6, 1.02); racimo(26, 0.27, 0.99, -22, 11); rulos(0.2, 38); break;
     case "melena":
@@ -239,6 +239,8 @@ export function crearPersona(def: DefPersona): Persona {
     if (def.abajo.tipo === "falda") falda(cB, M.xHombro * 0.8, M.xHombro * (def.adulto ? 1.2 : 1.45), Y(M.yCadera - M.muslo * (def.adulto ? 0.8 : 0.55)), Y(M.yCadera + altoT * 0.2));
     else torso.add(esfera(cB, 1, [0, Y(M.yCadera + altoT * 0.08), 0], [M.xHombro * 0.94, altoT * 0.34, M.fondo * 0.98], 1));
   }
+  // Hombros: una barra redondeada une el tronco con los brazos.
+  torso.add(girar(capsula(cA, M.rBrazo * 1.12, M.xHombro * 1.75, [0, Y(M.yHombro - M.rBrazo * 0.35), 0]), 0, 0, Math.PI / 2));
   torso.add(cilindro(def.piel, M.R * 0.2, M.R * 0.22, M.yCuello - M.yHombro + 0.1, [0, Y((M.yCuello + M.yHombro) / 2 + 0.02), 0], 14));
   if (def.arriba.cuello) torso.add(toro(def.arriba.cuello, M.R * 0.25, 0.03, [0, Y(M.yHombro + 0.045), 0]));
 
@@ -247,7 +249,7 @@ export function crearPersona(def: DefPersona): Persona {
     const hombro = pivote([lado * M.xHombro, Y(M.yHombro), 0]);
     const cArr = largas ? cA : def.piel;
     hombro.add(capsula(cArr, M.rBrazo, M.brazo - M.rBrazo, [0, -M.brazo / 2, 0]));
-    hombro.add(esfera(cA, M.rBrazo * (largas ? 1.35 : def.arriba.tipo === "vestido" ? 1.75 : 1.5), [0, -M.rBrazo * (largas ? 0.1 : 0.5), 0], [1, 0.95, 1], 1));
+    hombro.add(esfera(cA, M.rBrazo * (largas ? 1.12 : def.arriba.tipo === "vestido" ? 1.7 : 1.45), [0, -M.rBrazo * (largas ? 0.15 : 0.5), 0], [1, 0.95, 1], 1));
     const codo = pivote([0, -M.brazo, 0]);
     codo.add(capsula(cArr, M.rBrazo * 0.93, M.antebrazo - M.rBrazo, [0, -M.antebrazo / 2, 0]));
     if (largas) codo.add(cilindro(oscurecer(cA, 0.1), M.rBrazo * 1.02, M.rBrazo * 1.02, 0.04, [0, -M.antebrazo + 0.02, 0], 12));
@@ -504,7 +506,7 @@ export const ELENCO: Record<string, DefPersona> = {
   },
   // El profe Tomás: pelo crespo, boina roja y cotona manchada de pintura.
   artista: {
-    id: "artista", adulto: true, piel: "#C68B59", pelo: { color: "#212121", estilo: "rizado" },
+    id: "artista", adulto: true, piel: "#C68B59", pelo: { color: "#212121", estilo: "rizado", adorno: "boina" },
     arriba: { tipo: "largo", color: "#ECEFF1", cuello: "#FFB300" }, abajo: { tipo: "pantalon", color: "#455A64" }, zapatos: { color: "#3E2723" },
     extras: (p, m) => {
       ([[-22, 26, "#E53935"], [20, 10, "#1E88E5"], [-6, -14, "#43A047"], [26, -30, "#FDD835"], [-30, -34, "#8E24AA"], [4, 40, "#FB8C00"]] as const)
