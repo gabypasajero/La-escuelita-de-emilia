@@ -1,7 +1,7 @@
-import { GLIFOS, avanzarTrazo, puntosDeControl, type Punto } from "@escuelita/core";
+import { GLIFOS, marcarPuntos, puntosDeControl, type Punto } from "@escuelita/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
-import Svg, { Circle, Path, Polyline, Text as SvgText } from "react-native-svg";
+import Svg, { Circle, Path, Polyline } from "react-native-svg";
 import { useSuperficieDibujo } from "../lib/puntero";
 import { sonido } from "../lib/sonidos";
 import { hablar } from "../lib/voz";
@@ -19,18 +19,21 @@ interface Props {
 }
 
 /**
- * Escribir con el dedo sobre una guía: el niño sigue los puntitos desde el
- * punto verde, trazo por trazo. Es tolerante (puede saltarse un punto y
- * levantar el dedo sin perder lo avanzado). "Mírame" muestra cómo se escribe.
+ * Escribir con el dedo sobre una guía, con libertad: el niño pasa por los
+ * puntitos empezando por donde quiera y yendo hacia donde quiera; puede
+ * levantar el dedo cuantas veces necesite. Cuando pintó (casi) todos, la
+ * letra queda lista. "Mírame" muestra una forma de escribirla.
  */
 export function Trazado({ caracter, alto, alCompletar }: Props) {
   const trazos = GLIFOS[caracter] ?? [];
   const controles = useMemo(() => trazos.map((t) => puntosDeControl(t)), [trazos]);
   const ancho = (alto * VB.w) / VB.h;
-  const [actual, setActual] = useState(0);
-  const [logrados, setLogrados] = useState(0);
+  const total = useMemo(() => controles.reduce((n, c) => n + c.length, 0), [controles]);
+  // Qué puntitos de cada trazo ya se pintaron (en cualquier orden).
+  const hechos = useRef<boolean[][]>(controles.map((c) => c.map(() => false)));
+  const [pintados, setPintados] = useState(0);
   const [tinta, setTinta] = useState<Punto[][]>([]);
-  const estado = useRef({ actual: 0, logrados: 0, ultimoAviso: 0, terminado: false });
+  const estado = useRef({ pintados: 0, ultimoAviso: 0, terminado: false });
   const demo = useRef(new Animated.Value(0)).current;
   const [mostrandoDemo, setMostrandoDemo] = useState(false);
 
@@ -41,10 +44,10 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
       const p = aGlifo(x, y);
       setTinta((t) => [...t, [p]]);
       const s = estado.current;
-      const siguiente = controles[s.actual]?.[s.logrados];
-      if (siguiente && Math.hypot(siguiente[0] - p[0], siguiente[1] - p[1]) > 34 && Date.now() - s.ultimoAviso > 4000) {
+      const lejos = controles.every((c) => c.every((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) > 30));
+      if (lejos && !s.terminado && Date.now() - s.ultimoAviso > 5000) {
         s.ultimoAviso = Date.now();
-        void hablar(s.logrados === 0 ? "Empieza en el punto verde." : "Sigue por los puntitos.");
+        void hablar("Pasa el dedo por los puntitos, por donde tú quieras.");
       }
       mover(p);
     },
@@ -58,40 +61,33 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
   function mover(p: Punto) {
     const s = estado.current;
     if (s.terminado) return;
-    const control = controles[s.actual];
-    if (!control) return;
-    const n = avanzarTrazo(control, s.logrados, p);
-    if (n === s.logrados) return;
-    s.logrados = n;
-    setLogrados(n);
-    sonido.paso(n);
-    if (n < control.length) return;
-    // Trazo completo: pasa al siguiente o termina.
-    if (s.actual + 1 < controles.length) {
-      s.actual += 1;
-      s.logrados = 0;
-      setActual(s.actual);
-      setLogrados(0);
-      void hablar(`¡Muy bien! Ahora el trazo ${s.actual + 1}.`);
-    } else {
+    let nuevos = 0;
+    controles.forEach((c, i) => { nuevos += marcarPuntos(c, hechos.current[i]!, p); });
+    if (!nuevos) return;
+    s.pintados += nuevos;
+    setPintados(s.pintados);
+    sonido.paso(Math.round((s.pintados / total) * 14));
+    // Con casi todos basta: un puntito suelto no debe frustrar a nadie.
+    const faltan = total - s.pintados;
+    if (faltan <= Math.max(1, Math.floor(total * 0.06))) {
       s.terminado = true;
-      setActual(controles.length);
+      hechos.current = controles.map((c) => c.map(() => true));
+      setPintados(total);
       alCompletar();
     }
   }
 
-  // El puntito que sigue late para que se vea hacia dónde ir.
+  // Los puntitos que faltan laten para invitar a pasar por ellos.
   const [latido, setLatido] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setLatido((v) => (v + 1) % 2), 480);
+    const id = setInterval(() => setLatido((v) => (v + 1) % 2), 520);
     return () => clearInterval(id);
   }, []);
-  const proximo = controles[actual]?.[logrados];
 
   function reiniciar() {
-    estado.current = { actual: 0, logrados: 0, ultimoAviso: 0, terminado: false };
-    setActual(0);
-    setLogrados(0);
+    estado.current = { pintados: 0, ultimoAviso: 0, terminado: false };
+    hechos.current = controles.map((c) => c.map(() => false));
+    setPintados(0);
     setTinta([]);
   }
 
@@ -114,30 +110,24 @@ export function Trazado({ caracter, alto, alCompletar }: Props) {
           <Svg width={ancho} height={alto} viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`}>
             {/* Renglones como en un cuaderno */}
             {[10, 70, 130].map((y) => <Path key={y} d={`M-8 ${y} H108`} stroke={y === 70 ? "#BBDEFB" : "#90CAF9"} strokeWidth="0.8" strokeDasharray={y === 70 ? "3 3" : undefined} />)}
-            {/* Guía gris de cada trazo */}
+            {/* Guía gris de la letra */}
             {trazos.map((t, i) => (
-              <Polyline key={`g${i}`} points={aTexto(t)} fill="none" stroke={i < actual ? "#A5D6A7" : "#ECEFF1"} strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" />
+              <Polyline key={`g${i}`} points={aTexto(t)} fill="none" stroke="#ECEFF1" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" />
             ))}
-            {/* Tinta mágica: lo ya recorrido se pinta de color */}
-            {controles.map((ct, i) => {
-              const hasta = i < actual ? ct.length : i === actual ? logrados : 0;
-              return hasta > 1 ? <Polyline key={`m${i}`} points={aTexto(ct.slice(0, hasta))} fill="none" stroke={["#42A5F5", "#EC407A", "#FFB300", "#66BB6A"][i % 4]} strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" /> : null;
-            })}
-            {proximo && <Circle cx={proximo[0]} cy={proximo[1]} r={latido ? 8.5 : 6} fill="#FFEB3B" opacity={0.55} />}
-            {/* Puntitos del trazo actual */}
-            {controles[actual]?.map(([x, y], i) => (
-              <Circle key={`p${i}`} cx={x} cy={y} r={i < logrados ? 3.2 : 2.2} fill={i < logrados ? "#43A047" : "#90A4AE"} />
-            ))}
-            {/* Puntos de inicio numerados */}
-            {trazos.map((t, i) =>
-              i >= actual ? (
-                <Circle key={`i${i}`} cx={t[0]![0]} cy={t[0]![1]} r={i === actual ? 6.5 : 4.5} fill={i === actual ? "#43A047" : "#B0BEC5"} />
-              ) : null,
+            {/* Tinta mágica: cada tramo entre dos puntitos pintados se llena de color */}
+            {controles.map((ct, i) =>
+              ct.slice(1).map((q, k) =>
+                hechos.current[i]?.[k] && hechos.current[i]?.[k + 1] ? (
+                  <Path key={`m${i}-${k}`} d={`M${ct[k]![0]} ${ct[k]![1]} L${q[0]} ${q[1]}`} stroke={["#42A5F5", "#EC407A", "#FFB300", "#66BB6A"][i % 4]} strokeWidth="11" strokeLinecap="round" />
+                ) : null,
+              ),
             )}
-            {trazos.map((t, i) =>
-              i >= actual ? (
-                <SvgText key={`n${i}`} x={t[0]![0]} y={t[0]![1] + 2.8} fontSize="7" fontWeight="bold" fill="#fff" textAnchor="middle">{i + 1}</SvgText>
-              ) : null,
+            {/* Los puntitos: los pintados quedan verdes, los que faltan laten */}
+            {controles.map((ct, i) =>
+              ct.map(([x, y], k) => {
+                const ok = hechos.current[i]?.[k];
+                return <Circle key={`p${i}-${k}`} cx={x} cy={y} r={ok ? 3 : latido ? 3.4 : 2.6} fill={ok ? "#FFFFFF" : "#78909C"} opacity={ok ? 0.9 : 1} />;
+              }),
             )}
             {/* Lo que dibuja el niño */}
             {tinta.map((t, i) => (

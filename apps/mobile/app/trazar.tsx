@@ -1,4 +1,4 @@
-import { LETRAS, NUMEROS, NUMEROS_TRAZO, VOCALES_TRAZO, presentarLetra } from "@escuelita/core";
+import { ABECEDARIO_TRAZO, LETRAS, NUMEROS, NUMEROS_TRAZO, VOCALES_TRAZO, presentarLetra } from "@escuelita/core";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
@@ -13,9 +13,13 @@ import { Icono, TextoIconos } from "../components/Iconos";
 type Serie = "vocales" | "abecedario" | "numeros";
 const SERIES: Record<Serie, { nombre: string; emoji: string; caracteres: string[] }> = {
   vocales: { nombre: "Vocales", emoji: "🅰️", caracteres: VOCALES_TRAZO },
-  abecedario: { nombre: "Abecedario", emoji: "🔤", caracteres: LETRAS.map((l) => l.letra) },
+  abecedario: { nombre: "Abecedario", emoji: "🔤", caracteres: ABECEDARIO_TRAZO },
   numeros: { nombre: "Números", emoji: "🔢", caracteres: NUMEROS_TRAZO },
 };
+
+/** La doble ele no está entre las letras de los otros juegos: aquí tiene su propia ficha. */
+const DOBLE_ELE = { letra: "LL", palabra: "Llama", emoji: "🦙", nombre: "doble ele", sonido: "lla", esVocal: false };
+const letraDe = (c: string) => (c.toUpperCase() === "LL" ? DOBLE_ELE : LETRAS.find((l) => l.letra === c.toUpperCase())!);
 
 /** Lo que dice Emilia al presentar un carácter: sonido de la letra o nombre del número. */
 function presentar(c: string) {
@@ -23,7 +27,7 @@ function presentar(c: string) {
     const n = NUMEROS[Number(c)]!;
     return `El ${n.palabra}. ¡Vamos a escribirlo!`;
   }
-  const letra = LETRAS.find((l) => l.letra === c.toUpperCase())!;
+  const letra = letraDe(c);
   const tipo = c === c.toLowerCase() ? "minúscula" : "mayúscula";
   return `${presentarLetra(letra)} Esta es la ${letra.nombre} ${tipo}. ¡Vamos a escribirla!`;
 }
@@ -101,7 +105,7 @@ export default function Trazar() {
             <Text style={estilos.modelo}>{c}</Text>
             <TextoIconos estilo={estilos.escuchar} texto={`🔊 Escuchar`} />
           </Pressable>
-          {!/\d/.test(c!) && <Icono e={LETRAS.find((l) => l.letra === c!.toUpperCase())!.emoji} tam={84} />}
+          {!/\d/.test(c!) && <Icono e={letraDe(c!).emoji} tam={84} />}
           {/\d/.test(c!) && <TextoIconos estilo={estilos.cantidad} texto={"⭐".repeat(Number(c))} />}
         </View>
         <Trazado key={`${c}-${intento}`} caracter={c!} alto={alto} alCompletar={() => void completado()} />
@@ -136,7 +140,7 @@ const estilos = StyleSheet.create({
   serieNombre: { fontSize: 22, fontWeight: "900", color: "#3B2F5C" },
   cuerpo: { flexDirection: "row", alignItems: "center", gap: 20, flex: 1 },
   lado: { alignItems: "center", gap: 10, width: 200 },
-  modelo: { fontSize: 110, fontWeight: "900", color: "#3B2F5C", textAlign: "center" },
+  modelo: { fontSize: 100, fontWeight: "900", color: "#3B2F5C", textAlign: "center" },
   escuchar: { fontSize: 18, fontWeight: "800", color: "#1E88E5", textAlign: "center" },
   ejemplo: { fontSize: 70 },
   cantidad: { fontSize: 22, textAlign: "center", maxWidth: 160 },
