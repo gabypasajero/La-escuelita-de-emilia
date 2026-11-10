@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { aparte, caja, cilindro, disco, esfera, fusionar, grupo, lienzo, matTextura, plano, rectRedondo, type V3 } from "./base";
+import type { Idioma } from "../voz";
 import { imagenIcono } from "./iconos3d";
 import type { Constructor, Ctx, Escena, Interactivo } from "./motor";
 import { crearPersona, ELENCO, type Persona } from "./personaje";
@@ -11,7 +12,13 @@ import { arbol, arbusto, cerca, cerro, flor } from "./utileria";
  * su juego en una ventana flotante) y algunos muebles comunes.
  */
 
-export interface Tarjeta { ruta: string; nombre: string; icono: string; color: string; frase: string }
+export interface Tarjeta {
+  ruta: string; nombre: string; icono: string; color: string; frase: string;
+  /** Si lleva a otro escenario 3D en vez de abrir un juego. */
+  escena?: string;
+  /** Idioma en que se dice la frase (los amigos hablan el suyo). */
+  idioma?: Idioma;
+}
 
 const aclarar = (color: string, k: number) => "#" + new THREE.Color(color).lerp(new THREE.Color("#FFFFFF"), k).getHexString();
 const oscuro = (color: string, k: number) => "#" + new THREE.Color(color).multiplyScalar(1 - k).getHexString();
@@ -237,8 +244,10 @@ export function salaConMural(def: DefSala): Constructor {
         mira: { x, z: 0 },
         alLlegar: () => {
           c.enfocar([x, y, 0.2], 6.5);
-          void c.decirYEsperar(t.frase, anfitrion ?? undefined).then(() => {
-            if (c.vigente(def.id)) c.ventana(t.ruta, t.nombre);
+          void c.decirYEsperar(t.frase, anfitrion ?? undefined, t.idioma).then(() => {
+            if (!c.vigente(def.id)) return;
+            if (t.escena) c.irA(t.escena);
+            else c.ventana(t.ruta, t.nombre);
           });
         },
       });
@@ -363,8 +372,10 @@ export function patioConCarteles(def: DefPatio): Constructor {
         mira: { x: t.x, z: t.z },
         alLlegar: () => {
           c.enfocar([t.x, yc, t.z], 7);
-          void c.decirYEsperar(t.frase, anfitrion ?? undefined).then(() => {
-            if (c.vigente(def.id)) c.ventana(t.ruta, t.nombre);
+          void c.decirYEsperar(t.frase, anfitrion ?? undefined, t.idioma).then(() => {
+            if (!c.vigente(def.id)) return;
+            if (t.escena) c.irA(t.escena);
+            else c.ventana(t.ruta, t.nombre);
           });
         },
       });

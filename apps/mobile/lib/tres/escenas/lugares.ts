@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { accesorioDeVitrina } from "../accesorios";
 import { crearAnimal, crearPaseo, crearVuelo, type AnimalId3D } from "../animal";
-import { caja, cilindro, cono, esfera, girar, grupo, mat, toro } from "../base";
-import type { Ctx } from "../motor";
+import { caja, cilindro, cono, esfera, fusionar, girar, grupo, letrero, mat, toro } from "../base";
+import type { Ctx, Interactivo } from "../motor";
 import { alfombra, cuadro, estante, mesa, patioConCarteles, planta, salaConMural, silla, ventanal } from "../sala";
 import { arbusto, banca, cerca, techo } from "../utileria";
 
@@ -11,7 +11,23 @@ import { arbusto, banca, cerca, techo } from "../utileria";
  * decoración y las tarjetas de sus juegos (que se abren en ventana flotante).
  */
 
-type Extra = { actualizar?: (dt: number, t: number) => void; solidos?: Array<{ x0: number; x1: number; z0: number; z1: number }> };
+type Extra = { actualizar?: (dt: number, t: number) => void; solidos?: Array<{ x0: number; x1: number; z0: number; z1: number }>; interactivos?: Interactivo[] };
+
+/** Un mueble que se toca para jugar: el niño camina hasta él y el juego se abre en su ventana. */
+function usable(raiz: THREE.Group, c: Ctx, escena: string, piezas: THREE.Object3D[], pos: [number, number], cartel: string, alto: number, llegada: { x: number; z: number }, frase: string, ruta: string): Interactivo {
+  const g = grupo([fusionar(grupo(piezas), { ao: 0.1 })], [pos[0], 0, pos[1]]);
+  const l = letrero(cartel, { alto: 0.52, fondo: "#5C6BC0" });
+  l.position.set(0, alto, 0.3);
+  g.add(l);
+  raiz.add(g);
+  return {
+    objeto: g, llegada, mira: { x: pos[0], z: pos[1] },
+    alLlegar: () => {
+      c.enfocar([pos[0], 1.2, pos[1]], 7);
+      void c.decirYEsperar(frase).then(() => { if (c.vigente(escena)) c.ventana(ruta, cartel); });
+    },
+  };
+}
 
 /** Animales que pasean por el lugar. */
 function animales(raiz: THREE.Group, lista: Array<[AnimalId3D, number, number, number?]>): (dt: number, t: number) => void {
@@ -93,13 +109,16 @@ export const tiendita = salaConMural({
   id: "tiendita", titulo: "Almacén",
   ancho: 17, fondo: 8.6, alto: 6.2, pared: "#FFF3C4", piso: "#B0BEC5", baldosa: true, franja: "#EF5350",
   filas: 1, tam: [2.6, 2.2], yMural: 3.2,
-  tarjetas: [{ ruta: "/juegos/tiendita", nombre: "Ayudar a vender", icono: "🛒", color: "#EF5350", frase: "¡Qué bueno que llegaron! Ayúdenme a atender el almacén." }],
-  anfitrion: { quien: "rosa", x: 3.6, z: 2.3, saludo: "¡Buenas! Soy Doña Rosa. Toca la tarjeta y me ayudas a vender." },
+  tarjetas: [],
+  anfitrion: { quien: "rosa", x: 3.6, z: 2.3, saludo: "¡Buenas! Soy Doña Rosa. Ven al mesón y me ayudas a vender." },
   decorar(fijo, raiz, c): Extra {
     ventanas(raiz, c, [7.0], 3.6, 1.5, 2.0);
     // Mostrador con balanza y caja
-    fijo.add(caja("#A1887F", 6.5, 1.15, 1.0, [3.4, 0.58, 3.5], 0.08), caja("#EFEBE9", 6.7, 0.12, 1.2, [3.4, 1.2, 3.5], 0.05));
-    fijo.add(caja("#546E7A", 0.8, 0.5, 0.6, [5.7, 1.5, 3.5], 0.08), caja("#B0BEC5", 0.6, 0.3, 0.1, [5.7, 1.9, 3.3], 0.03), cilindro("#CFD8DC", 0.4, 0.3, 0.12, [1.4, 1.4, 3.5], 14));
+    const meson = usable(raiz, c, "tiendita", [
+      caja("#A1887F", 6.5, 1.15, 1.0, [0, 0.58, 0], 0.08), caja("#EFEBE9", 6.7, 0.12, 1.2, [0, 1.2, 0], 0.05),
+      caja("#546E7A", 0.8, 0.5, 0.6, [2.3, 1.5, 0], 0.08), caja("#B0BEC5", 0.6, 0.3, 0.1, [2.3, 1.9, -0.2], 0.03), cilindro("#CFD8DC", 0.4, 0.3, 0.12, [-2.0, 1.4, 0], 14),
+      caja("#FFFFFF", 1.0, 0.5, 0.05, [-0.4, 0.62, 0.53], 0.02), esfera("#EF5350", 0.14, [-0.6, 0.62, 0.57]), esfera("#FDD835", 0.14, [-0.2, 0.62, 0.57]),
+    ], [3.4, 3.5], "Atender el almacén", 2.6, { x: 3.4, z: 5.2 }, "¡Qué bueno que llegaron! Ayúdenme a atender el almacén.", "/juegos/tiendita");
     // Estantes con productos y cajones de fruta
     for (const x of [-6.4, -3.6]) {
       const e = estante(2.5, 3.2, "#C8A27A", 4);
@@ -115,7 +134,7 @@ export const tiendita = salaConMural({
     // Sacos y toldo
     for (const [x, col] of [[7.3, "#D7CCC8"], [6.4, "#BCAAA4"]] as const) fijo.add(esfera(col, 1, [x, 0.5, 6.2], [0.5, 0.6, 0.45], 1));
     for (let i = 0; i < 12; i++) fijo.add(caja(i % 2 ? "#FFFFFF" : "#EF5350", 0.56, 0.08, 1.3, [0.3 + i * 0.56, 4.9, 0.7], 0.02));
-    return { solidos: [{ x0: 0, x1: 6.8, z0: 1.3, z1: 4.1 }, { x0: -7.7, x1: -2.3, z0: 0, z1: 1.3 }, { x0: -7.4, x1: 0.2, z0: 5.0, z1: 6.2 }] };
+    return { interactivos: [meson], solidos: [{ x0: 0, x1: 6.8, z0: 1.3, z1: 4.1 }, { x0: -7.7, x1: -2.3, z0: 0, z1: 1.3 }, { x0: -7.4, x1: 0.2, z0: 5.0, z1: 6.2 }] };
   },
 });
 
@@ -157,13 +176,16 @@ export const veterinaria = salaConMural({
   id: "veterinaria", titulo: "Veterinaria",
   ancho: 17, fondo: 8.6, alto: 6.2, pared: "#D5F5EC", piso: "#CFD8DC", baldosa: true, franja: "#26A69A",
   filas: 1, tam: [2.6, 2.2], yMural: 3.2,
-  tarjetas: [{ ruta: "/veterinaria", nombre: "Cuidar animales", icono: "🩺", color: "#26A69A", frase: "¡Hay pacientes esperando! Vamos a cuidarlos." }],
-  anfitrion: { quien: "lucas", x: 3.4, z: 2.6, saludo: "¡Hola! Soy el doctor Lucas. ¿Me ayudas a cuidar a los animales?" },
+  tarjetas: [],
+  anfitrion: { quien: "lucas", x: 3.4, z: 2.6, saludo: "¡Hola! Soy el doctor Lucas. Ven a la camilla y me ayudas a cuidar a los animales." },
   decorar(fijo, raiz, c): Extra {
     ventanas(raiz, c, [-7.0, 7.0], 3.6, 1.5, 2.0);
     // Camilla
-    fijo.add(caja("#ECEFF1", 2.6, 0.14, 1.3, [-0.2, 1.05, 5.4], 0.06), caja("#80CBC4", 2.3, 0.1, 1.1, [-0.2, 1.15, 5.4], 0.05));
-    for (const x of [-1, 1]) for (const z of [-1, 1]) fijo.add(cilindro("#B0BEC5", 0.06, 0.06, 1.0, [-0.2 + x * 1.1, 0.5, 5.4 + z * 0.5], 8));
+    const camilla = usable(raiz, c, "veterinaria", [
+      caja("#ECEFF1", 2.6, 0.14, 1.3, [0, 1.05, 0], 0.06), caja("#80CBC4", 2.3, 0.1, 1.1, [0, 1.15, 0], 0.05),
+      ...[-1, 1].flatMap((x) => [-1, 1].map((z) => cilindro("#B0BEC5", 0.06, 0.06, 1.0, [x * 1.1, 0.5, z * 0.5], 8))),
+      caja("#FFFFFF", 0.5, 0.3, 0.36, [0.95, 1.36, -0.3], 0.06), caja("#EF5350", 0.22, 0.06, 0.02, [0.95, 1.4, -0.11], 0.01), caja("#EF5350", 0.06, 0.22, 0.02, [0.95, 1.4, -0.11], 0.01),
+    ], [-0.2, 5.4], "Cuidar animales", 2.9, { x: -0.2, z: 7.0 }, "¡Hay pacientes esperando! Vamos a cuidarlos.", "/veterinaria");
     // Botiquín y estante
     fijo.add(caja("#FFFFFF", 1.4, 1.2, 0.3, [-4.6, 3.4, 0.2], 0.08), caja("#EF5350", 0.5, 0.14, 0.04, [-4.6, 3.4, 0.37], 0.02), caja("#EF5350", 0.14, 0.5, 0.04, [-4.6, 3.4, 0.37], 0.02));
     const e = estante(2.2, 2.0, "#B0BEC5", 2);
@@ -179,7 +201,7 @@ export const veterinaria = salaConMural({
     fijo.add(p);
     const mover = animales(raiz, [["gato", -5.6, 5.6, 1.2], ["perro", 5.2, 6.2, 1.4], ["conejo", -0.2, 0, 0]]);
     raiz.children[raiz.children.length - 1]!.position.set(-0.2, 1.2, 5.4);
-    return { actualizar: mover, solidos: [{ x0: -1.6, x1: 1.2, z0: 4.6, z1: 6.2 }, { x0: 5.4, x1: 7.8, z0: 0, z1: 1.3 }] };
+    return { actualizar: mover, interactivos: [camilla], solidos: [{ x0: -1.6, x1: 1.2, z0: 4.6, z1: 6.2 }, { x0: 5.4, x1: 7.8, z0: 0, z1: 1.3 }] };
   },
 });
 
@@ -300,10 +322,10 @@ export const paradero = patioConCarteles({
   id: "paradero", titulo: "Paradero", ancho: 24, fondo: 10, suelo: "#9CCC65", claro: "#CFD8DC", sinCerca: true, tam: [2.4, 2.1],
   carteles: [
     { x: -9.6, z: 2.2, ruta: "/paradero", nombre: "Esperar el bus", icono: "🚌", color: "#FBC02D", frase: "¡Al paradero! Llega el bus con un amigo de otro país." },
-    { x: -5.2, z: 2.2, ruta: "/amigo/max", nombre: "Casa de Max", icono: "🇺🇸", color: "#1E88E5", frase: "Max habla inglés. ¡Vamos a su casa!" },
-    { x: -0.8, z: 2.2, ruta: "/amigo/bia", nombre: "Casa de Bia", icono: "🇧🇷", color: "#43A047", frase: "Bia habla portugués. ¡Vamos a su casa!" },
-    { x: 3.6, z: 2.2, ruta: "/amigo/lea", nombre: "Casa de Léa", icono: "🇫🇷", color: "#C62828", frase: "Léa habla francés. ¡Vamos a su casa!" },
-    { x: 8.0, z: 2.2, ruta: "/amigo/xiaolin", nombre: "Casa de Xiao Lin", icono: "🇨🇳", color: "#D32F2F", frase: "Xiao Lin habla chino. ¡Vamos a su casa!" },
+    { x: -5.2, z: 2.2, ruta: "/amigo/max", escena: "amigo-max", nombre: "Casa de Max", icono: "🇺🇸", color: "#1E88E5", frase: "Max habla inglés. ¡Vamos a su casa!" },
+    { x: -0.8, z: 2.2, ruta: "/amigo/bia", escena: "amigo-bia", nombre: "Casa de Bia", icono: "🇧🇷", color: "#43A047", frase: "Bia habla portugués. ¡Vamos a su casa!" },
+    { x: 3.6, z: 2.2, ruta: "/amigo/lea", escena: "amigo-lea", nombre: "Casa de Léa", icono: "🇫🇷", color: "#C62828", frase: "Léa habla francés. ¡Vamos a su casa!" },
+    { x: 8.0, z: 2.2, ruta: "/amigo/xiaolin", escena: "amigo-xiaolin", nombre: "Casa de Xiao Lin", icono: "🇨🇳", color: "#D32F2F", frase: "Xiao Lin habla chino. ¡Vamos a su casa!" },
   ],
   decorar(fijo, raiz, c): Extra {
     // La calle y el bus que llega y se va

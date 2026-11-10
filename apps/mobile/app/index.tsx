@@ -1,4 +1,5 @@
 import { Redirect, router, useFocusEffect, type Href } from "expo-router";
+import { useAmbiente } from "../lib/ambiente";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, RadialGradient, Rect, Stop } from "react-native-svg";
@@ -35,6 +36,7 @@ function saludo(nombre: string) {
 }
 
 export default function Barrio() {
+  useAmbiente("barrio");
   const juego = useJuego();
   if (!juego.cargado) return <View style={estilos.fondo} />;
   if (!juego.jugadores.length) return <Redirect href="/personaje" />;

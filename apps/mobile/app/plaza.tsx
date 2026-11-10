@@ -1,4 +1,5 @@
 import { Redirect, router } from "expo-router";
+import { useAmbiente } from "../lib/ambiente";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, RadialGradient, Rect, Stop } from "react-native-svg";
@@ -30,6 +31,7 @@ const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const animar = (a: Animated.CompositeAnimation) => new Promise<void>((r) => a.start(() => r()));
 
 export default function Plaza() {
+  useAmbiente("campo");
   const { perfil, accesorioPuesto, estrellas } = useJuego();
   const { width, height } = useWindowDimensions();
   const k = Math.min(width / 1100, height / 620);

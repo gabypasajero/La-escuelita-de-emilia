@@ -1,4 +1,5 @@
 import { VERDURAS, type Verdura } from "@escuelita/core";
+import { useAmbiente } from "../lib/ambiente";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Defs, LinearGradient, RadialGradient, Stop, Circle, Ellipse, G, Path, Rect } from "react-native-svg";
@@ -61,6 +62,7 @@ const CRECE_MS = 3800;
 const HUERTOS = new Map<string, { parcelas: Parcela[]; canasta: Record<string, number>; cargado?: boolean }>();
 
 export default function Huerto() {
+  useAmbiente("campo");
   const { perfil, activoId, accesorioPuesto, ganar } = useJuego();
   const { width, height } = useWindowDimensions();
   const k = Math.min(width / 1100, height / 700);

@@ -8,7 +8,7 @@ import { AnimalVivo, type AnimalId } from "../../components/AnimalesVivos";
 import { LamparaColgante, Reloj } from "../../components/Ambiente";
 import { EscenaRPG, type EscenaRPGRef, type ObjetoEscena } from "../../components/EscenaRPG";
 import { Adulto } from "../../components/Personas";
-import { useJuego } from "../../lib/juego";
+import { nivelPorEdad, useEdad, useJuego } from "../../lib/juego";
 import { hablar, hablarYEsperar } from "../../lib/voz";
 import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../../lib/hora";
 import { useVozActiva } from "../../lib/habla";
@@ -26,8 +26,9 @@ const MESON = { x: 900, y: 560 };
  */
 export default function Tiendita() {
   const { ganar } = useJuego();
-  const [dificultad, setDificultad] = useState(ESTADO_INICIAL);
-  const [pedido, setPedido] = useState(() => pedidoTiendita(ESTADO_INICIAL.nivel));
+  const edad = useEdad();
+  const [dificultad, setDificultad] = useState(() => ({ ...ESTADO_INICIAL, nivel: nivelPorEdad(edad) }));
+  const [pedido, setPedido] = useState(() => pedidoTiendita(nivelPorEdad(edad)));
   const [cliente, setCliente] = useState(CLIENTES[0]!);
   const [canasta, setCanasta] = useState<Producto[]>([]);
   const [feliz, setFeliz] = useState(false);

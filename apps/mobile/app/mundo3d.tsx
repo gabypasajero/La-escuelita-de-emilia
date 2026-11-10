@@ -7,6 +7,9 @@ import { Icono } from "../components/Iconos";
 import { Globo } from "../components/Personajes";
 import { Monedas, useJuego } from "../lib/juego";
 import { conVentana } from "../lib/ventana";
+import { ponerAmbiente, useMusica, type Entorno } from "../lib/ambiente";
+
+const AMBIENTE: Record<string, Entorno> = { barrio: "barrio", plaza: "campo", huerto: "campo", granja: "campo", paradero: "campo", taller: "taller", casa: "casa" };
 import type { Hud, Mundo } from "../lib/tres/motor";
 
 /**
@@ -26,6 +29,7 @@ export default function Mundo3D() {
   const [dicho, setDicho] = useState("");
   const [hud, setHud] = useState<Hud | null>(null);
   const [titulo, setTitulo] = useState("");
+  const [musica, alternarMusica] = useMusica();
 
   useEffect(() => {
     if (Platform.OS !== "web" || !perfil || !contenedor.current) return;
@@ -43,7 +47,7 @@ export default function Mundo3D() {
         alVentana: (v) => { if (v) router.push(conVentana(v.ruta) as Href); },
         alHud: setHud,
         alRuta: (ruta) => router.push(ruta as Href),
-        alEscena: (_id, t) => setTitulo(t),
+        alEscena: (id, t) => { setTitulo(t); ponerAmbiente(AMBIENTE[id] ?? "sala"); },
         alSalir: () => (router.canGoBack() ? router.back() : router.replace("/")),
       }, ESCENAS);
       (globalThis as unknown as { __mundo3d?: Mundo }).__mundo3d = mundo.current;
@@ -60,6 +64,8 @@ export default function Mundo3D() {
   // Al volver de una ventana de juego (o de una pantalla 2D), el mundo retoma el control.
   useFocusEffect(useCallback(() => {
     mundo.current?.pausar(false);
+    const donde = mundo.current?.escena();
+    if (donde) ponerAmbiente(AMBIENTE[donde] ?? "sala");
     mundo.current?.cerrarVentana();
     return () => mundo.current?.pausar(true);
   }, []));
@@ -129,6 +135,9 @@ export default function Mundo3D() {
       <View style={estilos.botones} pointerEvents="box-none">
         <Pressable style={estilos.redondo} onPress={() => mundo.current?.volver()} accessibilityLabel="Volver">
           <Icono e="⬅️" tam={50} sinSombra />
+        </Pressable>
+        <Pressable style={[estilos.redondo, { width: 48, height: 48, opacity: musica ? 1 : 0.5 }]} onPress={alternarMusica} accessibilityLabel={musica ? "Apagar la música" : "Encender la música"}>
+          <Text style={{ fontSize: 22 }}>{musica ? "🎵" : "🔇"}</Text>
         </Pressable>
         {!!titulo && !dicho && <View style={estilos.titulo} pointerEvents="none"><Text style={estilos.tituloTexto}>{titulo}</Text></View>}
       </View>

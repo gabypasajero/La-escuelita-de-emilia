@@ -2,7 +2,7 @@ import { ESTADO_INICIAL, registrarRespuesta, type Nivel, type Ronda } from "@esc
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Animated, Easing, Pressable, StyleSheet, View } from "react-native";
 import { COLORES, TOQUE_MINIMO } from "../lib/tema";
-import { useJuego } from "../lib/juego";
+import { nivelPorEdad, useEdad, useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar, type Idioma } from "../lib/voz";
 import { sonido } from "../lib/sonidos";
 import { Icono, TextoIconos } from "./Iconos";
@@ -92,8 +92,10 @@ function BotonOpcion({ orden, estado, pista, alTocar, children }: { orden: numbe
  * El error nunca penaliza: Emilia anima y se puede volver a intentar.
  */
 export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion, alAcertar, idioma = "es", alFallar = "¡Casi! Intenta otra vez", ayuda }: Props<R>) {
-  const [dificultad, setDificultad] = useState(ESTADO_INICIAL);
-  const [ronda, setRonda] = useState(() => generar(ESTADO_INICIAL.nivel));
+  // Parte en el nivel que corresponde a la edad del niño; después se adapta solo.
+  const edad = useEdad();
+  const [dificultad, setDificultad] = useState(() => ({ ...ESTADO_INICIAL, nivel: nivelPorEdad(edad) }));
+  const [ronda, setRonda] = useState(() => generar(nivelPorEdad(edad)));
   const [celebrando, setCelebrando] = useState(false);
   const [numero, setNumero] = useState(0);
   const [falladas, setFalladas] = useState<number[]>([]);
@@ -133,7 +135,7 @@ export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion,
     });
   }
   // Después de dos intentos, la respuesta correcta late suavecito para ayudar.
-  const pista = falladas.length >= 2;
+  const pista = falladas.length >= (edad <= 3 ? 1 : 2); // a los 3 años, la ayuda llega antes
 
   return (
     <View style={estilos.contenedor}>

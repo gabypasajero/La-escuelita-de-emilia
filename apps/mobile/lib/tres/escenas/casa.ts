@@ -147,7 +147,7 @@ export const casa: Constructor = (c) => {
       { id: "plato", icono: "🍽️", texto: "A la mesa", x: 5.6, z: 7.2, mira: 5.6, hacer: abrir("¡A la mesa! Vamos a ver qué le hace bien a tu cuerpo.", "/casa/plato", "A la mesa", nina) },
     ],
     entrada: [
-      { id: "patio", icono: "🦌", texto: "Patio de Tito", x: 10.8, z: 1.7, mira: 10.8, hacer: abrir("¡Vamos al patio a jugar con Tito!", "/casa/patio", "Patio de Tito") },
+      { id: "patio", icono: "🦌", texto: "Patio de Tito", x: 10.8, z: 1.7, mira: 10.8, hacer: () => { void c.decirYEsperar("¡Vamos al patio a jugar con Tito!").then(() => { if (c.vigente("casa")) c.irA("patio"); }); } },
     ],
   };
   const todas = Object.values(ACCIONES).flat();

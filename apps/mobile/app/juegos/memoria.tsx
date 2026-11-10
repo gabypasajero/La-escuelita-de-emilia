@@ -5,7 +5,7 @@ import { Rebote } from "../../components/Rebote";
 import { sonido } from "../../lib/sonidos";
 import { Pantalla } from "../../components/Pantalla";
 import { Globo } from "../../components/Personajes";
-import { useJuego } from "../../lib/juego";
+import { nivelPorEdad, useEdad, useJuego } from "../../lib/juego";
 import { COLORES } from "../../lib/tema";
 import { hablar, hablarYEsperar } from "../../lib/voz";
 import { Icono, tieneDibujo } from "../../components/Iconos";
@@ -79,6 +79,7 @@ export default function Memoria() {
   const [ronda, setRonda] = useState(0);
   const { width, height } = useWindowDimensions();
   const { ganar } = useJuego();
+  const edad = useEdad();
 
   useEffect(() => void hablar("¿Con qué jugamos a la memoria?"), []);
 
@@ -91,7 +92,7 @@ export default function Memoria() {
     setRonda((r) => r + 1);
     setFallo([]);
     // En los primeros niveles se muestran todas un momento: así los más chicos entienden el juego.
-    const espiar = n <= 2;
+    const espiar = n <= (edad <= 3 ? 3 : 2);
     const frase = espiar ? `Nivel ${n}. ¡Mira bien dónde están!` : `Nivel ${n}. ¡Busca las parejas!`;
     setDicho(frase);
     void hablar(frase);
@@ -144,7 +145,7 @@ export default function Memoria() {
         <Globo texto={dicho} />
         <View style={estilos.temas}>
           {TEMAS_MEMORIA.map((t) => (
-            <Rebote key={t.id} style={estilos.tema} onPress={() => empezar(t.id)} accessibilityLabel={t.nombre}>
+            <Rebote key={t.id} style={estilos.tema} onPress={() => empezar(t.id, nivelPorEdad(edad))} accessibilityLabel={t.nombre}>
               <Icono e={t.emoji} tam={78} sinSombra />
               <Text style={estilos.temaNombre}>{t.nombre}</Text>
             </Rebote>

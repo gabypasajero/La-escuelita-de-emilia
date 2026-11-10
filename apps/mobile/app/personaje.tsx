@@ -15,6 +15,7 @@ export default function Personaje() {
   const { perfil, guardarPerfil } = useJuego();
   const [nombre, setNombre] = useState(perfil?.nombre ?? "");
   const [a, setA] = useState<Apariencia>(perfil?.apariencia ?? APARIENCIA_INICIAL);
+  const [edad, setEdad] = useState(perfil?.edad ?? 4);
   const nuevo = !perfil;
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function Personaje() {
       void hablar("¿Cómo te llamas? Escríbelo arriba con un adulto.");
       return;
     }
-    guardarPerfil({ nombre: n, apariencia: a });
+    guardarPerfil({ nombre: n, apariencia: a, edad });
     void hablar(`¡Te ves increíble, ${n}! Ya eres parte del barrio.`);
     // Vuelve al barrio sin dejar pantallas viejas apiladas ("¿Quién juega?", "Personaje").
     if (router.canDismiss()) router.dismissAll();
@@ -58,6 +59,13 @@ export default function Personaje() {
           </View>
 
           <View style={estilos.opciones}>
+            <Fila titulo="Edad">
+              {[3, 4, 5, 6].map((e) => (
+                <Pressable key={e} onPress={() => { setEdad(e); void hablar(`${e} años`); }} accessibilityLabel={`${e} años`} style={[estilos.edad, edad === e && estilos.elegido]}>
+                  <Text style={estilos.edadTexto}>{e}</Text>
+                </Pressable>
+              ))}
+            </Fila>
             <Fila titulo="Piel">
               {PIELES.map((c) => <Color key={c} color={c} elegido={a.piel === c} alTocar={() => cambiar({ piel: c })} />)}
             </Fila>
@@ -99,6 +107,8 @@ function Color({ color, elegido, alTocar }: { color: string; elegido: boolean; a
 }
 
 const estilos = StyleSheet.create({
+  edad: { width: 52, height: 52, borderRadius: 26, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: "#CE93D8" },
+  edadTexto: { fontSize: 24, fontWeight: "900", color: "#3B2F5C" },
   fondo: { flex: 1, backgroundColor: "#FFF3E0" },
   contenido: { padding: 16, alignItems: "center", gap: 12 },
   cabecera: { flexDirection: "row", alignItems: "center", gap: 8 },

@@ -1,4 +1,5 @@
 import { Redirect } from "expo-router";
+import { useAmbiente } from "../lib/ambiente";
 import { forwardRef, useImperativeHandle, useRef, useState, type ReactNode } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useJuego } from "../lib/juego";
@@ -62,6 +63,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
   ref,
 ) {
   const { perfil, accesorioPuesto, cargado, jugadores, activoId } = useJuego();
+  useAmbiente(luz.interior ? "sala" : "campo");
   const { width, height } = useWindowDimensions();
   const k = Math.min(width / diseno.ancho, height / diseno.alto);
   const pos = useRef(new Animated.ValueXY(inicio)).current;

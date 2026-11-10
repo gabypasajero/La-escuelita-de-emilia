@@ -16,6 +16,8 @@ export interface Apariencia {
 
 export interface Perfil {
   nombre: string;
+  /** Años del niño (3 a 6): define con qué dificultad parten los juegos. */
+  edad?: number;
   apariencia: Apariencia;
 }
 
@@ -86,6 +88,19 @@ interface Juego extends Estado {
 const CLAVE = "escuelita:jugadores:v2";
 const CLAVE_ANTIGUA = "escuelita:juego:v1";
 const VACIO: Estado = { perfil: null, monedas: 0, estrellas: 0, comprados: [], puestos: {} };
+
+/**
+ * La dificultad con que parte cada juego según la edad: los de 3 y 4 años
+ * empiezan en lo más simple, los de 5 en el nivel medio y los de 6 en el alto.
+ * Después el juego se sigue adaptando solo, como siempre.
+ */
+export function nivelPorEdad(edad?: number): 1 | 2 | 3 {
+  return !edad || edad <= 4 ? 1 : edad === 5 ? 2 : 3;
+}
+/** La edad del niño que juega ahora (4 si no se ha dicho). */
+export function useEdad(): number {
+  return useJuego().perfil?.edad ?? 4;
+}
 
 /** Lugares que se abren al juntar estrellas. */
 export const DESBLOQUEOS = { arenero: 10, veterinaria: 20 } as const;

@@ -1,6 +1,7 @@
 import type { Constructor } from "../motor";
 import { barrio, CON_ESCENA } from "./barrio";
 import { escuelita } from "./escuelita";
+import { AMIGOS_3D, patio } from "./amigos";
 import { casa } from "./casa";
 import { disfraces, granja, huerto, paradero, plaza, taller, tiendita, veterinaria } from "./lugares";
 import { galeria } from "./galeria";
@@ -9,6 +10,7 @@ import { galeria } from "./galeria";
 export const ESCENAS: Record<string, Constructor> = {
   barrio,
   galeria,
+  patio, ...AMIGOS_3D,
   escuelita, taller, tiendita, disfraces, casa, plaza, huerto, granja, veterinaria, paradero,
 };
 

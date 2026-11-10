@@ -1,9 +1,10 @@
 import { router } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Rebote } from "./Rebote";
 import { Icono } from "./Iconos";
 import { TOQUE_MINIMO } from "../lib/tema";
 import { useEnVentana } from "../lib/ventana";
+import { useMusica } from "../lib/ambiente";
 
 /**
  * Botones fijos arriba a la izquierda, en cada pantalla:
@@ -12,6 +13,7 @@ import { useEnVentana } from "../lib/ventana";
  */
 export function BotonCasa() {
   const ventana = useEnVentana();
+  const [musica, alternar] = useMusica();
   const volver = () => {
     if (router.canGoBack()) router.back();
     else router.replace("/");
@@ -25,6 +27,9 @@ export function BotonCasa() {
       )}
       <Rebote accessibilityLabel="Volver atrás" onPress={volver} style={estilos.boton}>
         <Icono e="⬅️" tam={50} sinSombra />
+      </Rebote>
+      <Rebote accessibilityLabel={musica ? "Apagar la música" : "Encender la música"} onPress={alternar} style={[estilos.boton, estilos.musica, !musica && { opacity: 0.5 }]}>
+        <Text style={estilos.nota}>{musica ? "🎵" : "🔇"}</Text>
       </Rebote>
     </View>
   );
@@ -42,4 +47,6 @@ const estilos = StyleSheet.create({
     elevation: 4,
   },
   icono: { fontSize: 40 },
+  musica: { width: 48, height: 48, borderRadius: 24, alignSelf: "center" },
+  nota: { fontSize: 22 },
 });
