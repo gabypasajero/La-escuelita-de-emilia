@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
-import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
+import Svg, { Circle, Ellipse, G, Image as ImagenSvg, Path, Rect } from "react-native-svg";
 import { dibujoEnSvg, Icono } from "../components/Iconos";
 import { Pantalla } from "../components/Pantalla";
 import { Rebote } from "../components/Rebote";
+import { rellenar } from "../lib/balde";
 import { useSuperficieDibujo } from "../lib/puntero";
 import { sonido } from "../lib/sonidos";
 import { COLORES } from "../lib/tema";
@@ -24,7 +25,7 @@ const PALETA = [
 const ARCOIRIS = ["#E53935", "#FB8C00", "#FDD835", "#43A047", "#1E88E5", "#3949AB", "#8E24AA"];
 const GROSORES = [7, 15, 28];
 
-type Lapiz = "plumon" | "grafito" | "pincel" | "crayon" | "destacador" | "arcoiris" | "brillos" | "sello" | "borrador";
+type Lapiz = "balde" | "plumon" | "grafito" | "pincel" | "crayon" | "destacador" | "arcoiris" | "brillos" | "sello" | "borrador";
 const LAPICES: Array<{ id: Lapiz; nombre: string; dice: string }> = [
   { id: "plumon", nombre: "Plumón", dice: "Plumón" },
   { id: "grafito", nombre: "Lápiz", dice: "Lápiz grafito, para dibujar finito" },
@@ -34,15 +35,17 @@ const LAPICES: Array<{ id: Lapiz; nombre: string; dice: string }> = [
   { id: "arcoiris", nombre: "Arcoíris", dice: "¡Lápiz arcoíris! Pinta con todos los colores" },
   { id: "brillos", nombre: "Brillitos", dice: "¡Brillitos! Deja un camino de estrellas" },
   { id: "sello", nombre: "Sellos", dice: "Sellos. Elige uno y toca la hoja" },
+  { id: "balde", nombre: "Balde", dice: "Balde de pintura. Toca una parte del dibujo y se llena de color" },
   { id: "borrador", nombre: "Borrador", dice: "Borrador" },
-];
+].filter((l) => l.id !== "balde" || Platform.OS === "web") as Array<{ id: Lapiz; nombre: string; dice: string }>;
 const SELLOS = ["⭐", "🌸", "☀️", "🍓", "🎃", "🥕", "🧺", "💧", "🏠", "🍦", "🧀", "🍇", "🌽", "🍅"].filter((e) => dibujoEnSvg(e, 0, 0, 1) !== null);
 
 type Cosa =
   | { tipo: "trazo"; lapiz: Lapiz; d: string; color: string; grosor: number }
   | { tipo: "arcoiris"; tramos: Array<{ d: string; color: string }>; grosor: number; n: number; ultimo: string }
   | { tipo: "brillos"; puntos: Array<[number, number, number]>; color: string; ux: number; uy: number }
-  | { tipo: "sello"; e: string; x: number; y: number; tam: number };
+  | { tipo: "sello"; e: string; x: number; y: number; tam: number }
+  | { tipo: "relleno"; href: string; w: number; h: number };
 
 const estrella = (x: number, y: number, r: number) =>
   "M" + Array.from({ length: 10 }, (_, i) => {
@@ -106,6 +109,7 @@ export default function Pintar() {
 
   const { ref: lienzoRef, props: lienzoProps, estilo: lienzoEstilo } = useSuperficieDibujo({
     empezar: ({ x, y, presion, lapiz: esLapiz }) => {
+      if (mano.current.lapiz === "balde") return void volcarBalde(x, y);
       const m = mano.current, p = `${Math.round(x)},${Math.round(y)}`, g = conPresion(presion, esLapiz);
       let nueva: Cosa;
       if (m.lapiz === "sello") { nueva = { tipo: "sello", e: m.sello, x, y, tam: 34 + m.grosor * 2.6 }; sonido.toque(); }
@@ -117,7 +121,7 @@ export default function Pintar() {
     },
     seguir: ({ x, y }) => {
       const c = actual.current;
-      if (!c || c.tipo === "sello") return;
+      if (!c || c.tipo === "sello" || c.tipo === "relleno") return;
       const p = `${Math.round(x)},${Math.round(y)}`;
       if (c.tipo === "trazo") return cambiar({ ...c, d: `${c.d} L${p}` });
       if (c.tipo === "arcoiris") {
@@ -134,6 +138,22 @@ export default function Pintar() {
     },
     terminar: () => { actual.current = null; },
   });
+
+  // El balde: llena de color la zona cerrada que se tocó.
+  const llenando = useRef(false);
+  const tamRef = useRef(tam);
+  tamRef.current = tam;
+  async function volcarBalde(x: number, y: number) {
+    const svg = (lienzoRef.current as unknown as HTMLElement | null)?.querySelector?.("svg") as SVGSVGElement | null;
+    const { w, h } = tamRef.current;
+    if (!svg || !w || llenando.current) return;
+    llenando.current = true;
+    const href = await rellenar(svg, w, h, x, y, mano.current.color);
+    llenando.current = false;
+    if (!href) return void hablar("Aquí no pude pintar. Prueba en otra parte.");
+    sonido.paso(6);
+    setCosas((t) => [...t, { tipo: "relleno", href, w, h }]);
+  }
 
   const elegirLapiz = (l: (typeof LAPICES)[number]) => { setLapiz(l.id); void hablar(l.dice); };
   function hojaNueva() {
@@ -182,6 +202,7 @@ export default function Pintar() {
                 if (c.tipo === "trazo") return <Path key={i} d={c.d} strokeLinecap="round" strokeLinejoin="round" fill="none" {...estiloDe(c.lapiz, c.color, c.grosor)} />;
                 if (c.tipo === "arcoiris") return <G key={i}>{c.tramos.map((t, k) => <Path key={k} d={t.d} stroke={t.color} strokeWidth={c.grosor} strokeLinecap="round" strokeLinejoin="round" fill="none" />)}</G>;
                 if (c.tipo === "brillos") return <G key={i}>{c.puntos.map(([x, y, r], k) => <Path key={k} d={estrella(x, y, r)} fill={k % 3 === 2 ? "#FFF59D" : c.color} stroke="#FFFFFF" strokeWidth="1" />)}</G>;
+                if (c.tipo === "relleno") return <ImagenSvg key={i} href={c.href} x={0} y={0} width={c.w} height={c.h} />;
                 return <G key={i}>{dibujoEnSvg(c.e, c.x, c.y, c.tam)}</G>;
               })}
               {/* Para pintar, las líneas van encima: el color nunca las tapa. */}
@@ -257,6 +278,7 @@ function MuestraLapiz({ lapiz, color, sello }: { lapiz: Lapiz; color: string; se
       {lapiz === "arcoiris" ? ARCOIRIS.map((c, i) => <Path key={c} d={`M${6 + i * 5.8} ${20 - Math.sin(i * 0.9) * 8} l6 ${-Math.cos(i * 0.9) * 5}`} stroke={c} strokeWidth="7" strokeLinecap="round" />)
         : lapiz === "brillos" ? [[10, 18, 6], [24, 9, 8], [38, 19, 6], [46, 8, 4]].map(([x, y, r]) => <Path key={x} d={estrella(x!, y!, r!)} fill={x === 24 ? "#FFF59D" : color} stroke="#F9A825" strokeWidth="0.8" />)
           : lapiz === "sello" ? dibujoEnSvg(sello, 26, 15, 28)
+            : lapiz === "balde" ? <><Path d="M14 10 L38 10 L34 26 L18 26 Z" fill="#B0BEC5" stroke="#607D8B" strokeWidth="1.5" strokeLinejoin="round" /><Path d="M14 10 Q26 -2 38 10" fill="none" stroke="#607D8B" strokeWidth="1.8" /><Path d="M15 12 L37 12 L36 16 Q26 21 16 16 Z" fill={color === "#FFFFFF" ? "#90A4AE" : color} /><Path d="M40 16 q5 7 0 9 q-5 -2 0 -9 Z" fill={color === "#FFFFFF" ? "#90A4AE" : color} /></>
             : lapiz === "borrador" ? <><Rect x="12" y="8" width="28" height="15" rx="4" fill="#F48FB1" /><Rect x="12" y="8" width="10" height="15" rx="4" fill="#90CAF9" /></>
               : <Path d={d} fill="none" strokeLinecap="round" {...estiloDe(lapiz, color === "#FFFFFF" ? "#90A4AE" : color, lapiz === "grafito" ? 8 : lapiz === "destacador" ? 5 : lapiz === "pincel" ? 6 : 7)} />}
     </Svg>
