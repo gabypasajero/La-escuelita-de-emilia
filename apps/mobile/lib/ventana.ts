@@ -10,6 +10,14 @@ export function conVentana(ruta: string): string {
   return ruta + (ruta.includes("?") ? "&" : "?") + "ventana=1";
 }
 
+/**
+ * Abre un juego como ventana flotante sobre el lugar donde se está (igual
+ * en el mundo 2D que en el 3D): el escenario queda asomado por los bordes.
+ */
+export function abrirVentana(ruta: unknown) {
+  router.push(conVentana(String(ruta)) as Href);
+}
+
 /** ¿Esta pantalla se está mostrando como ventana flotante? */
 export function useEnVentana(): boolean {
   return useLocalSearchParams<{ ventana?: string }>().ventana === "1";

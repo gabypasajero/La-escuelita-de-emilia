@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { abrirVentana } from "../../lib/ventana";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Line, Path, Polygon, Rect, Text as SvgText } from "react-native-svg";
@@ -32,7 +33,8 @@ export default function Casa() {
   };
   const ir = (t: string, ruta: Parameters<typeof router.push>[0]) => () => {
     decir(t);
-    despuesDeHablar(() => router.push(ruta));
+    // Los juegos de la casa flotan sobre la sala; el patio es otro lugar y se entra de verdad.
+    despuesDeHablar(() => (String(ruta).startsWith("/casa/patio") ? router.push(ruta) : abrirVentana(ruta)));
   };
 
   const objetos: ObjetoEscena[] = [
@@ -52,7 +54,7 @@ export default function Casa() {
       dibujo: (k) => <Adulto id="nina" alto={180 * k} hablando={ninaHabla && voz} />, llegada: { x: 980, y: 430 },
       alLlegar: () => diceNina("¡Hola, mi tesoro! Estoy cocinando una sopita. Siéntate en la mesa, que vamos a ver qué es lo más sano.") },
     { id: "mesa", x: 870, y: 520, ancho: 220, alto: 120, etiqueta: "Mesa de la cocina", letrero: "¿Qué es sano?", dibujo: (k) => <Mesa k={k} />,
-      alLlegar: () => { diceNina("¡A la mesa! Vamos a ver qué le hace bien a tu cuerpo."); despuesDeHablar(() => router.push("/casa/plato")); } },
+      alLlegar: () => { diceNina("¡A la mesa! Vamos a ver qué le hace bien a tu cuerpo."); despuesDeHablar(() => abrirVentana("/casa/plato")); } },
     { id: "puerta", x: 1040, y: 690, ancho: 110, alto: 150, etiqueta: "Puerta al patio", letrero: "Patio de Tito", dibujo: (k) => <Puerta k={k} />,
       llegada: { x: 990, y: 680 }, alLlegar: ir("¡Vamos al patio a jugar con Tito!", "/casa/patio") },
   ];

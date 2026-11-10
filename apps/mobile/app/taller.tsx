@@ -1,4 +1,5 @@
-import { router, type Href } from "expo-router";
+import { type Href } from "expo-router";
+import { abrirVentana } from "../lib/ventana";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing } from "react-native";
 import Svg, { Circle, Ellipse, G, Line, Path, Polygon, Rect } from "react-native-svg";
@@ -50,7 +51,7 @@ export default function Taller() {
   const ir = (nombre: string) => () => {
     const j = JUEGOS[nombre]!;
     decir(j.frase);
-    despuesDeHablar(() => router.push(j.ruta));
+    despuesDeHablar(() => abrirVentana(j.ruta));
   };
 
   const objetos: ObjetoEscena[] = [

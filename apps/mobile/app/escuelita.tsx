@@ -1,4 +1,5 @@
-import { router, type Href } from "expo-router";
+import { type Href } from "expo-router";
+import { abrirVentana } from "../lib/ventana";
 import { useEffect, useRef, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Ellipse, G, Line, Path, Polygon, Rect, Text as SvgText } from "react-native-svg";
@@ -53,7 +54,7 @@ export default function Escuelita() {
   const ir = (nombre: string) => () => {
     const s = SALAS.find((x) => x.nombre === nombre)!;
     decir(s.frase);
-    despuesDeHablar(() => router.push(s.ruta));
+    despuesDeHablar(() => abrirVentana(s.ruta));
   };
 
   const objetos: ObjetoEscena[] = [
@@ -89,7 +90,7 @@ export default function Escuelita() {
       luz={{ interior: true, luces: [{ x: 305, y: 140, r: 80 }], muro: 400, ventana: { x: 250, y: 90, w: 110, h: 100 } }}
     >
       <Pressable style={estilos.todos} onPress={() => setTodos(true)} accessibilityLabel="Todos los juegos">
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Icono e="📋" tam={28} sinSombra /><Text style={estilos.todosTexto}>Todos los juegos</Text></View>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Icono e="📋" tam={28} sinSombra /><Text style={estilos.todosTexto}>Diario mural</Text></View>
       </Pressable>
       <Modal visible={todos} transparent animationType="fade" onRequestClose={() => setTodos(false)}>
         <View style={estilos.velo}>
@@ -97,7 +98,7 @@ export default function Escuelita() {
             <ScrollView contentContainerStyle={estilos.salas}>
               {SALAS.map((s) => (
                 <Pressable key={s.nombre} accessibilityLabel={s.nombre} style={[estilos.puerta, { backgroundColor: s.color }]}
-                  onPress={() => { setTodos(false); void hablar(s.frase); router.push(s.ruta); }}>
+                  onPress={() => { setTodos(false); void hablar(s.frase); abrirVentana(s.ruta); }}>
                   <Icono e={s.emoji} tam={70} sinSombra />
                   <Text style={estilos.nombre}>{s.nombre}</Text>
                 </Pressable>

@@ -1,6 +1,7 @@
 import { Redirect } from "expo-router";
 import { useAmbiente } from "../lib/ambiente";
-import { forwardRef, useImperativeHandle, useRef, useState, type ReactNode } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactNode } from "react";
+import { Icono } from "./Iconos";
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useJuego } from "../lib/juego";
 import { Avatar } from "./Avatar";
@@ -62,7 +63,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
   { fondo, objetos, inicio, piso, dialogo, colorFondo = "#FFF3E0", children, diseno = { ancho: 1100, alto: 700 }, extras, luz = { interior: true } },
   ref,
 ) {
-  const { perfil, accesorioPuesto, cargado, jugadores, activoId } = useJuego();
+  const { perfil, accesorioPuesto, cargado, jugadores, activoId, monedas } = useJuego();
   useAmbiente(luz.interior ? "sala" : "campo");
   const { width, height } = useWindowDimensions();
   const k = Math.min(width / diseno.ancho, height / diseno.alto);
@@ -70,6 +71,20 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
   const emilia = useRef(new Animated.ValueXY({ x: inicio.x - 70, y: inicio.y + 6 })).current;
   const tito = useRef(new Animated.ValueXY({ x: inicio.x - 115, y: inicio.y + 18 })).current;
   const salto = useRef(new Animated.Value(0)).current;
+  // Igual que en el mundo 3D: cuando se gana algo en un juego, el niño, Emilia y Tito brincan de alegría.
+  const festejo = useRef(new Animated.Value(0)).current;
+  const [festejando, setFestejando] = useState(false);
+  const monedasAntes = useRef(monedas);
+  useEffect(() => {
+    if (monedas > monedasAntes.current) {
+      setFestejando(true);
+      Animated.sequence([0, 1, 2].flatMap(() => [
+        Animated.timing(festejo, { toValue: -26, duration: 190, useNativeDriver: false }),
+        Animated.timing(festejo, { toValue: 0, duration: 210, useNativeDriver: false }),
+      ])).start(() => setFestejando(false));
+    }
+    monedasAntes.current = monedas;
+  }, [monedas, festejo]);
   const actual = useRef({ ...inicio });
   const [mira, setMira] = useState(1);
   const [caminando, setCaminando] = useState(false);
@@ -123,7 +138,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
     position: "absolute" as const,
     transform: [
       { translateX: Animated.add(Animated.multiply(v.x, k), -w / 2) },
-      { translateY: conSalto ? Animated.add(Animated.add(Animated.multiply(v.y, k), -h), salto) : Animated.add(Animated.multiply(v.y, k), -h) },
+      { translateY: Animated.add(conSalto ? Animated.add(Animated.add(Animated.multiply(v.y, k), -h), salto) : Animated.add(Animated.multiply(v.y, k), -h), Animated.multiply(festejo, k)) },
     ],
   });
 
@@ -183,6 +198,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
         </Animated.View>
         <Animated.View pointerEvents="none" style={[coloca(pos, avW, avH, true), { zIndex: Math.round(profundidad) + 2 }]}>
           <SombraContacto ancho={avW * 0.8} />
+          {festejando && <View style={{ position: "absolute", top: -34 * k, alignSelf: "center" }}><Icono e="⭐" tam={34 * k} sinSombra /></View>}
           <View style={{ transform: [{ scaleX: mira }] }}>
             <Avatar apariencia={perfil.apariencia} alto={avH} accesorios={{ cabeza: accesorioPuesto("cabeza"), cara: accesorioPuesto("cara"), cuello: accesorioPuesto("cuello"), mano: accesorioPuesto("mano") }} />
           </View>
