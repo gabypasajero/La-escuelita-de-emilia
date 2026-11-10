@@ -48,6 +48,8 @@ interface Props {
   piso: { xMin: number; xMax: number; yMin: number; yMax: number };
   dialogo: string;
   colorFondo?: string;
+  /** Avisa hacia dónde camina el niño (para saber en qué parte del lugar está). */
+  alMover?: (x: number, y: number) => void;
   /** Interfaz extra encima de la escena (botones, canasta, etc.). */
   children?: ReactNode;
   diseno?: { ancho: number; alto: number };
@@ -60,7 +62,7 @@ interface Props {
 }
 
 export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
-  { fondo, objetos, inicio, piso, dialogo, colorFondo = "#FFF3E0", children, diseno = { ancho: 1100, alto: 700 }, extras, luz = { interior: true } },
+  { fondo, objetos, inicio, piso, dialogo, colorFondo = "#FFF3E0", children, diseno = { ancho: 1100, alto: 700 }, extras, luz = { interior: true }, alMover },
   ref,
 ) {
   const { perfil, accesorioPuesto, cargado, jugadores, activoId, monedas } = useJuego();
@@ -104,6 +106,7 @@ export const EscenaRPG = forwardRef<EscenaRPGRef, Props>(function EscenaRPG(
       alLlegar?.();
       return;
     }
+    alMover?.(x, y);
     const ms = Math.max(250, (Math.hypot(x - desde.x, y - desde.y) / 260) * 1000);
     if (Math.abs(x - desde.x) > 4) setMira(x < desde.x ? -1 : 1);
     actual.current = { x, y };

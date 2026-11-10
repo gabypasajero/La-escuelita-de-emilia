@@ -1,7 +1,9 @@
 import { router } from "expo-router";
 import { abrirVentana } from "../../lib/ventana";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, View } from "react-native";
+import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { Icono } from "../../components/Iconos";
+import { Rebote } from "../../components/Rebote";
 import Svg, { Circle, Ellipse, G, Line, Path, Polygon, Rect, Text as SvgText } from "react-native-svg";
 import { Reloj } from "../../components/Ambiente";
 import { AnimalVivo } from "../../components/AnimalesVivos";
@@ -12,9 +14,13 @@ import { ASTRO_VENTANA, CIELO_VENTANA, useMomento } from "../../lib/hora";
 import { useVozActiva } from "../../lib/habla";
 
 /**
- * Casa de Emilia para recorrer (como el barrio): baño, dormitorio y cocina en
- * una sola escena. Cada objeto lleva a una actividad de la vida diaria.
+ * Casa de Emilia para recorrer, igual que en el mundo 3D: baño, dormitorio,
+ * cocina y la entrada con la puerta al patio. Al entrar a cada pieza aparecen
+ * abajo las cosas que se pueden hacer ahí; también se puede tocar el mueble.
  */
+type Pieza = "bano" | "pieza" | "cocina" | "entrada";
+const NOMBRE: Record<Pieza, string> = { bano: "el baño", pieza: "el dormitorio", cocina: "la cocina", entrada: "la puerta del patio" };
+const piezaDe = (x: number, y: number): Pieza => (x > 900 && y > 590 ? "entrada" : x < 357 ? "bano" : x < 747 ? "pieza" : "cocina");
 export default function Casa() {
   const [dicho, setDicho] = useState("¡Bienvenidos a mi casa! Toca algo para ir hasta allá.");
   const [durmiendo, setDurmiendo] = useState(false);
@@ -22,6 +28,8 @@ export default function Casa() {
   const silencio = useRef<ReturnType<typeof setTimeout> | null>(null);
   const escena = useRef<EscenaRPGRef>(null);
   const voz = useVozActiva();
+  const [pieza, setPieza] = useState<Pieza>("pieza");
+  const piezaRef = useRef<Pieza>("pieza");
   useEffect(() => void hablar("¡Bienvenidos a mi casa! Aquí está el baño, mi pieza y la cocina de la abuela Nina."), []);
 
   const decir = (t: string) => { setDicho(t); void hablar(t); };
@@ -59,6 +67,28 @@ export default function Casa() {
       llegada: { x: 990, y: 680 }, alLlegar: ir("¡Vamos al patio a jugar con Tito!", "/casa/patio") },
   ];
 
+  // Lo que se puede hacer en cada pieza (los mismos botones que en la casa 3D).
+  const hacer = (id: string) => objetos.find((o) => o.id === id)!.alLlegar!;
+  const ACCIONES: Record<Pieza, Array<{ id: string; icono: string; texto: string; x: number; y: number }>> = {
+    bano: [
+      { id: "lavamanos", icono: "🧼", texto: "Lavar manos", x: 150, y: 430 },
+      { id: "cepillo", icono: "🪥", texto: "Dientes", x: 290, y: 430 },
+    ],
+    pieza: [
+      { id: "ropero", icono: "👕", texto: "Ropero", x: 690, y: 450 },
+      { id: "cama", icono: "🛏️", texto: "Dormir", x: 500, y: 570 },
+    ],
+    cocina: [{ id: "mesa", icono: "🍽️", texto: "A la mesa", x: 870, y: 600 }],
+    entrada: [{ id: "puerta", icono: "🦌", texto: "Patio de Tito", x: 990, y: 680 }],
+  };
+  const alMover = (x: number, y: number) => {
+    const p = piezaDe(x, y);
+    if (p === piezaRef.current) return;
+    piezaRef.current = p;
+    setPieza(p);
+    decir(`Estamos en ${NOMBRE[p]}. ¿Qué hacemos?`);
+  };
+
   return (
     <EscenaRPG
       ref={escena}
@@ -70,9 +100,25 @@ export default function Casa() {
       colorFondo="#FFE0B2"
       luz={{ interior: true, luces: [{ x: 530, y: 110, r: 90 }, { x: 935, y: 240, r: 70 }], muro: 300, ventana: { x: 470, y: 60, w: 120, h: 100 } }}
       extras={(k) => durmiendo ? <Zetas k={k} /> : null}
-    />
+      alMover={alMover}
+    >
+      <View style={estilos.barra} pointerEvents="box-none">
+        {ACCIONES[pieza].map((a) => (
+          <Rebote key={a.id} style={estilos.accion} accessibilityLabel={a.texto} onPress={() => escena.current?.caminarA(a.x, a.y, hacer(a.id))}>
+            <Icono e={a.icono} tam={50} sinSombra />
+            <Text style={estilos.accionTexto}>{a.texto}</Text>
+          </Rebote>
+        ))}
+      </View>
+    </EscenaRPG>
   );
 }
+
+const estilos = StyleSheet.create({
+  barra: { position: "absolute", left: 12, right: 12, bottom: 12, flexDirection: "row", justifyContent: "center", gap: 12 },
+  accion: { minWidth: 92, minHeight: 92, borderRadius: 26, backgroundColor: "#fff", borderWidth: 4, borderColor: "#FFD54F", alignItems: "center", justifyContent: "center", paddingHorizontal: 10, paddingVertical: 6, boxShadow: "0 5px 0 rgba(59,47,92,0.25)" },
+  accionTexto: { fontSize: 16, fontWeight: "800", color: "#3B2F5C", textAlign: "center" },
+});
 
 function Interior({ k, durmiendo: dormir }: { k: number; durmiendo: boolean }) {
   // De noche (hora real) la pieza también se ve de noche, con luna en la ventana.
@@ -143,6 +189,16 @@ function Interior({ k, durmiendo: dormir }: { k: number; durmiendo: boolean }) {
         <Rect x="0" y="300" width="1100" height="400" fill="#D7A86E" />
         {Array.from({ length: 9 }, (_, i) => <Path key={i} d={`M0 ${330 + i * 42} H1100`} stroke="#C49358" strokeWidth="3" />)}
         {Array.from({ length: 18 }, (_, i) => <Path key={`t${i}`} d={`M${(i * 137) % 1100} ${330 + (i % 9) * 42} v42`} stroke="#C49358" strokeWidth="2" />)}
+        {/* Cada pieza con su piso: baldosas celestes en el baño y crema en la cocina */}
+        {Array.from({ length: 6 }, (_, i) => Array.from({ length: 7 }, (_, j) => (i + j) % 2 ? <Rect key={`b${i}-${j}`} x={i * 59.5} y={300 + j * 57.2} width="59.5" height="57.2" fill="#E1F5FE" /> : <Rect key={`b${i}-${j}`} x={i * 59.5} y={300 + j * 57.2} width="59.5" height="57.2" fill="#FFFFFF" />))}
+        {Array.from({ length: 6 }, (_, i) => Array.from({ length: 7 }, (_, j) => <Rect key={`c${i}-${j}`} x={753 + i * 57.8} y={300 + j * 57.2} width="57.8" height="57.2" fill={(i + j) % 2 ? "#F3E3C8" : "#FFF8E1"} />))}
+        {/* Los tabiques siguen un poco por el piso, como en una casa de muñecas */}
+        <Path d="M354 300 H366 L372 372 H352 Z M744 300 H756 L762 372 H742 Z" fill="#EFEBE9" stroke="#D7CCC8" strokeWidth="2" />
+        {/* La entrada: piso verde y felpudo frente a la puerta del patio */}
+        <Path d="M900 590 H1100 V700 H900 Z" fill="#C8E6C9" />
+        <Path d="M900 590 H1100" stroke="#A5D6A7" strokeWidth="4" />
+        <Rect x="930" y="640" width="90" height="44" rx="10" fill="#8D6E63" />
+        <Rect x="938" y="647" width="74" height="30" rx="7" fill="none" stroke="#D7CCC8" strokeWidth="3" strokeDasharray="6 5" />
         {/* Alfombras: del baño y de la pieza */}
         <Rect x="70" y="372" width="110" height="34" rx="16" fill="#80DEEA" />
         <Rect x="80" y="380" width="90" height="18" rx="9" fill="none" stroke="#fff" strokeWidth="3" strokeDasharray="6 5" />
