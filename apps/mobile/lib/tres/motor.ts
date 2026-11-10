@@ -135,6 +135,8 @@ export interface Mundo {
   refrescar: () => void;
   evento: (evento: string, dato?: unknown) => void;
   escena: () => string;
+  /** El niño ganó algo en un juego: los amigos lo celebran en el escenario. */
+  celebrar: () => void;
   /** Cuánto dibuja por cuadro (para revisar el rendimiento). */
   carga: () => { dibujos: number; triangulos: number };
 }
@@ -870,6 +872,12 @@ export function crearMundo(contenedor: HTMLElement, op: OpcionesMundo, catalogo:
     refrescar: vestir,
     evento: (ev, dato) => actual?.alEvento?.(ev, dato),
     escena: () => actual?.id ?? "",
+    celebrar() {
+      nino.celebrando = emilia.celebrando = true;
+      tito.saltar();
+      efecto("estrellas", [nino.raiz.position.x, 2.4, nino.raiz.position.z]);
+      setTimeout(() => { nino.celebrando = emilia.celebrando = false; }, 1800);
+    },
     carga: () => ({ dibujos: renderer.info.render.calls, triangulos: renderer.info.render.triangles }),
   };
 }

@@ -2,7 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Animated, Easing, StyleSheet, Text, View } from "react-native";
 import { anunciarDespues } from "./voz";
+import { Festejo } from "../components/Festejo";
 import { TextoIconos } from "../components/Iconos";
+import { sonido } from "./sonidos";
 
 /** Cómo se ve el personaje del niño. */
 export interface Apariencia {
@@ -148,6 +150,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
     if (nuevo) setAviso(`¡${j.perfil.nombre}, ya tienes suficientes monedas para comprarte: ${nuevo.nombre}! Vamos a la tienda de disfraces.`);
     actualizar((x) => ({ ...x, monedas: x.monedas + n, estrellas: x.estrellas + 1 }));
     setPremio({ n, clave: Date.now() });
+    if (n >= 2) sonido.fiesta(); else sonido.acierto();
     anunciarDespues(fraseMoneda(j.perfil.nombre, n));
   }, [actualizar]);
 
@@ -156,6 +159,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
   const ganarPara = useCallback((id: string, n: number, anunciar = true) => {
     setJugadores((js) => js.map((j) => (j.id === id ? { ...j, monedas: j.monedas + n, estrellas: j.estrellas + 1 } : j)));
     setPremio({ n, clave: Date.now() });
+    if (n >= 2) sonido.fiesta(); else sonido.acierto();
     const j = jugadoresRef.current.find((x) => x.id === id);
     if (anunciar && j) anunciarDespues(fraseMoneda(j.perfil.nombre, n));
   }, []);
@@ -197,6 +201,8 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
     <Contexto.Provider value={valor}>
       {children}
       {premio && <Premio key={premio.clave} n={premio.n} />}
+      {/* Cada premio, en cualquier juego, se festeja con papel picado. */}
+      <Festejo clave={premio?.clave ?? 0} grande={(premio?.n ?? 0) >= 2} />
       {aviso && <AvisoVisual texto={aviso} />}
     </Contexto.Provider>
   );
