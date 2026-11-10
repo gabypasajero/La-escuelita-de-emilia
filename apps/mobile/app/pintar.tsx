@@ -304,8 +304,7 @@ export default function Pintar() {
         </View>
 
         {/* Grosor, deshacer, hoja nueva y dibujos */}
-        <View style={estilos.columna}>
-          <View style={estilos.columnaDentro}>
+        <ScrollView style={estilos.columna} contentContainerStyle={estilos.columnaDentro} showsVerticalScrollIndicator={false}>
             {GROSORES.map((g) => (
               <Rebote key={g} accessibilityLabel={`Grosor ${g}`} onPress={() => setGrosor(g)} style={[estilos.boton, g === grosor && estilos.elegido]}>
                 <View style={{ width: g + 4, height: g + 4, borderRadius: g, backgroundColor: muestra, borderWidth: 1, borderColor: "#B0BEC5" }} />
@@ -317,8 +316,7 @@ export default function Pintar() {
             <Rebote onPress={() => { setEligiendo(true); void hablar("¿Qué dibujo quieres? Puedes pintarlo o calcarlo."); }} style={[estilos.boton, estilos.dibujos]} accessibilityLabel="Elegir dibujo">
               <Svg width={36} height={36} viewBox="0 0 100 100" fill="none" stroke="#3B2F5C" strokeWidth="6" strokeLinejoin="round">{DIBUJOS[1]!.piezas}</Svg>
             </Rebote>
-          </View>
-        </View>
+        </ScrollView>
       </View>
 
       {/* Colores (o sellos) */}

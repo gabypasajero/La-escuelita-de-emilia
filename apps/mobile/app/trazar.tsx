@@ -96,20 +96,22 @@ export default function Trazar() {
     );
   }
 
-  const alto = Math.min(height - 300, 460);
+  // En un celular acostado la hoja usa casi todo el alto.
+  const compacto = height < 520;
+  const alto = compacto ? Math.max(170, height - 136) : Math.min(height - 300, 460);
   return (
     <Pantalla color="#E3F2FD" fondo="aula">
       <View style={estilos.cuerpo}>
-        <View style={estilos.lado}>
+        <View style={[estilos.lado, compacto && { width: 130 }]}>
           <Pressable onPress={() => void hablar(presentar(c!))} accessibilityLabel="Escuchar">
-            <Text style={estilos.modelo}>{c}</Text>
+            <Text style={[estilos.modelo, compacto && { fontSize: 56 }]}>{c}</Text>
             <TextoIconos estilo={estilos.escuchar} texto={`🔊 Escuchar`} />
           </Pressable>
           {!/\d/.test(c!) && <Icono e={letraDe(c!).emoji} tam={84} />}
           {/\d/.test(c!) && <TextoIconos estilo={estilos.cantidad} texto={"⭐".repeat(Number(c))} />}
         </View>
         <Trazado key={`${c}-${intento}`} caracter={c!} alto={alto} alCompletar={() => void completado()} />
-        <View style={estilos.lado}>
+        <View style={[estilos.lado, compacto && { width: 170 }]}>
           <Globo texto={dicho} />
           {listo && (
             <Pressable style={estilos.siguiente} onPress={siguiente} accessibilityLabel="Siguiente">
@@ -118,7 +120,8 @@ export default function Trazar() {
           )}
         </View>
       </View>
-      <ScrollView horizontal contentContainerStyle={estilos.tira} style={estilos.tiraCont}>
+      {/* En un celular acostado no cabe la fila de letras: se avanza solo o con "Siguiente". */}
+      {!compacto && <ScrollView horizontal contentContainerStyle={estilos.tira} style={estilos.tiraCont}>
         {caracteres.map((x, i) => (
           <Pressable key={x} onPress={() => { setListo(false); setIntento((n) => n + 1); setIndice(i); }} style={[estilos.chip, i === indice && estilos.chipActivo]} accessibilityLabel={`Escribir ${x}`}>
             <Text style={estilos.chipTexto}>{x}</Text>
@@ -127,7 +130,7 @@ export default function Trazar() {
         <Pressable onPress={() => { setSerie(null); router.setParams({ serie: undefined }); }} style={estilos.chip} accessibilityLabel="Cambiar serie">
           <Text style={estilos.chipTexto}>↩️</Text>
         </Pressable>
-      </ScrollView>
+      </ScrollView>}
     </Pantalla>
   );
 }

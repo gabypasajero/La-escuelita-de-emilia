@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { GiraElTelefono } from "../components/GiraElTelefono";
 import { TocarParaEmpezar } from "../components/TocarParaEmpezar";
 import { ProveedorJuego } from "../lib/juego";
 
@@ -31,6 +32,7 @@ export default function Layout() {
           }
         />
         <TocarParaEmpezar />
+        <GiraElTelefono />
       </ProveedorJuego>
     </SafeAreaProvider>
   );

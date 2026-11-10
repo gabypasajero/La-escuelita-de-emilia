@@ -159,7 +159,7 @@ export default function Memoria() {
   const n = cartas.length;
   const columnas = n <= 4 ? 2 : n <= 6 ? 3 : n <= 8 ? 4 : n <= 12 ? 6 : n <= 16 ? 8 : 7;
   const filas = Math.ceil(cartas.length / columnas);
-  const lado = Math.max(64, Math.min(130, (width - 64) / columnas - 12, (height - 260) / filas - 12));
+  const lado = Math.max(height < 520 ? 44 : 64, Math.min(130, (width - 64) / columnas - 12, (height - (height < 520 ? 215 : 260)) / filas - 12));
 
   return (
     <Pantalla color={COLORES.juegos} fondo="aula">

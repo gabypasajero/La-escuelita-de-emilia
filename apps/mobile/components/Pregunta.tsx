@@ -1,6 +1,7 @@
 import { ESTADO_INICIAL, registrarRespuesta, type Nivel, type Ronda } from "@escuelita/core";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Animated, Easing, Pressable, StyleSheet, View } from "react-native";
+import { Animated, Easing, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { usePantalla } from "../lib/pantalla";
 import { COLORES, TOQUE_MINIMO } from "../lib/tema";
 import { nivelPorEdad, useEdad, useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar, type Idioma } from "../lib/voz";
@@ -94,6 +95,7 @@ function BotonOpcion({ orden, estado, pista, alTocar, children }: { orden: numbe
 export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion, alAcertar, idioma = "es", alFallar = "¡Casi! Intenta otra vez", ayuda }: Props<R>) {
   // Parte en el nivel que corresponde a la edad del niño; después se adapta solo.
   const edad = useEdad();
+  const { compacto } = usePantalla();
   const [dificultad, setDificultad] = useState(() => ({ ...ESTADO_INICIAL, nivel: nivelPorEdad(edad) }));
   const [ronda, setRonda] = useState(() => generar(nivelPorEdad(edad)));
   const [celebrando, setCelebrando] = useState(false);
@@ -138,10 +140,10 @@ export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion,
   const pista = falladas.length >= (edad <= 3 ? 1 : 2); // a los 3 años, la ayuda llega antes
 
   return (
-    <View style={estilos.contenedor}>
+    <ScrollView style={estilos.rollo} contentContainerStyle={[estilos.contenedor, compacto && { gap: 10 }]} showsVerticalScrollIndicator={false}>
       <View style={estilos.cabecera}>
         <Pressable onPress={() => hablar(ronda.enunciado, idioma)} accessibilityLabel="Repetir pregunta">
-          <TextoIconos estilo={estilos.enunciado} texto={`🔊 ${ronda.enunciado}`} />
+          <TextoIconos estilo={[estilos.enunciado, compacto && { fontSize: 22 }]} texto={`🔊 ${ronda.enunciado}`} />
         </Pressable>
         {ayuda && (
           <Pressable onPress={() => hablar(ayuda(ronda))} accessibilityLabel="Ayuda de Emilia" style={estilos.ayuda}>
@@ -170,12 +172,13 @@ export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion,
           </View>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const estilos = StyleSheet.create({
-  contenedor: { flex: 1, width: "100%", alignItems: "center", gap: 24 },
+  rollo: { flex: 1, width: "100%" },
+  contenedor: { flexGrow: 1, alignItems: "center", gap: 24, paddingBottom: 14 },
   cabecera: { flexDirection: "row", alignItems: "center", gap: 16, flexWrap: "wrap", justifyContent: "center" },
   ayuda: { backgroundColor: "#FFF3E0", borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 2, borderColor: "#FFB74D" },
   ayudaTexto: { fontSize: 18, fontWeight: "800", color: "#E65100" },

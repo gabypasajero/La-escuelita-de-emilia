@@ -7,6 +7,7 @@ import { Icono } from "../components/Iconos";
 import { Globo } from "../components/Personajes";
 import { Monedas, useJuego } from "../lib/juego";
 import { conVentana } from "../lib/ventana";
+import { usePantalla } from "../lib/pantalla";
 import { ponerAmbiente, useMusica, type Entorno } from "../lib/ambiente";
 
 const AMBIENTE: Record<string, Entorno> = { barrio: "barrio", plaza: "campo", huerto: "campo", granja: "campo", paradero: "campo", taller: "taller", casa: "casa" };
@@ -29,6 +30,7 @@ export default function Mundo3D() {
   const [dicho, setDicho] = useState("");
   const [hud, setHud] = useState<Hud | null>(null);
   const [titulo, setTitulo] = useState("");
+  const { compacto } = usePantalla();
   const [musica, alternarMusica] = useMusica();
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export default function Mundo3D() {
     <View style={estilos.fondo}>
       <FabricaIconos />
       <View ref={contenedor} style={StyleSheet.absoluteFill} />
-      {!!dicho && <View style={estilos.dialogo} pointerEvents="none"><Globo texto={dicho} /></View>}
+      {!!dicho && <View style={[estilos.dialogo, compacto && { top: 2, transform: [{ scale: 0.74 }], transformOrigin: "top" }]} pointerEvents="none"><Globo texto={dicho} /></View>}
       <Monedas />
       {!!hud?.fichas?.length && (
         <View style={estilos.fichas} pointerEvents="none">
