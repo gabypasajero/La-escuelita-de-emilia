@@ -40,7 +40,9 @@ describe("ropero y comida sana", () => {
   it("la prenda correcta va con el clima y solo hay un alimento sano por ronda", () => {
     for (let i = 0; i < 150; i++) for (const n of [1, 2, 3] as const) {
       const r = rondaRopa(n);
-      expect(r.correcta.id).toBe(r.clima.necesita);
+      expect(r.clima.sirven).toContain(r.correcta.id);
+      expect(r.opciones.filter((p) => r.clima.sirven.includes(p.id))).toEqual([r.correcta]);
+      expect(r.clima.porque[r.correcta.id]).toBeTruthy();
       expect(r.opciones).toContain(r.correcta);
       const s = rondaSaludable(n);
       expect(s.opciones.filter((a) => a.sano)).toEqual([s.correcta]);

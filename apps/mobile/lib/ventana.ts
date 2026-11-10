@@ -14,7 +14,11 @@ export function conVentana(ruta: string): string {
  * Abre un juego como ventana flotante sobre el lugar donde se está (igual
  * en el mundo 2D que en el 3D): el escenario queda asomado por los bordes.
  */
+let ultima = 0;
 export function abrirVentana(ruta: unknown) {
+  // Un doble toque no debe abrir dos veces el mismo juego (el de atrás seguiría hablando).
+  if (Date.now() - ultima < 1200) return;
+  ultima = Date.now();
   router.push(conVentana(String(ruta)) as Href);
 }
 

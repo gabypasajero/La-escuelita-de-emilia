@@ -115,27 +115,44 @@ export function rondaVeterinaria(nivel: Nivel, azar: Aleatorio = Math.random): R
   return { enunciado: `${paciente.problema} ¿Qué necesita?`, paciente, opciones: opcionesCon(correcta, CUIDADOS, OPCIONES_POR_NIVEL[nivel] + 1, azar), correcta };
 }
 
-/** Ropero: "¿Qué me pongo?" según el clima. */
+/**
+ * Ropero: "¿Qué me pongo?" según el clima. Cada clima tiene varias prendas
+ * que sirven, pero en cada ronda aparece una sola de ellas: así nunca hay
+ * dos respuestas buenas a la vez (con nieve sirven guantes, bufanda y parka).
+ */
 export interface Prenda { id: string; nombre: string; emoji: string }
 export const PRENDAS: Prenda[] = [
   { id: "paraguas", nombre: "paraguas", emoji: "☂️" },
-  { id: "gorro", nombre: "gorro para el sol", emoji: "🧢" },
+  { id: "botas", nombre: "botas de agua", emoji: "🥾" },
+  { id: "gorro", nombre: "gorro de sol", emoji: "🧢" },
+  { id: "lentes", nombre: "lentes de sol", emoji: "🕶️" },
   { id: "bufanda", nombre: "bufanda", emoji: "🧣" },
   { id: "guantes", nombre: "guantes", emoji: "🧤" },
+  { id: "parka", nombre: "parka", emoji: "🧥" },
   { id: "traje", nombre: "traje de baño", emoji: "🩱" },
+  { id: "pijama", nombre: "pijama", emoji: "🌙" },
 ];
-export const CLIMAS = [
-  { emoji: "🌧️", frase: "Está lloviendo. ¿Qué me pongo?", necesita: "paraguas", porque: "El paraguas nos protege de la lluvia." },
-  { emoji: "☀️", frase: "Hace mucho sol. ¿Qué me pongo?", necesita: "gorro", porque: "El gorro nos cuida la cabeza del sol." },
-  { emoji: "🌬️", frase: "Hace frío y hay viento. ¿Qué me pongo?", necesita: "bufanda", porque: "La bufanda nos abriga el cuello." },
-  { emoji: "❄️", frase: "Está nevando. ¿Qué me pongo en las manos?", necesita: "guantes", porque: "Los guantes nos abrigan las manos." },
-  { emoji: "🏖️", frase: "Vamos a la piscina. ¿Qué me pongo?", necesita: "traje", porque: "El traje de baño es para nadar." },
-] as const;
+export interface Clima { id: string; emoji: string; frase: string; sirven: string[]; porque: Record<string, string> }
+export const CLIMAS: Clima[] = [
+  { id: "lluvia", emoji: "🌧️", frase: "Está lloviendo. ¿Qué me sirve para la lluvia?", sirven: ["paraguas", "botas"],
+    porque: { paraguas: "El paraguas nos protege de la lluvia.", botas: "Con botas de agua no se mojan los pies." } },
+  { id: "sol", emoji: "☀️", frase: "Hace mucho sol y calor. ¿Qué me sirve para el sol?", sirven: ["gorro", "lentes"],
+    porque: { gorro: "El gorro de sol nos cuida la cabeza.", lentes: "Los lentes de sol nos cuidan los ojos." } },
+  { id: "nieve", emoji: "❄️", frase: "Está nevando y hace mucho frío. ¿Qué me abriga?", sirven: ["bufanda", "guantes", "parka"],
+    porque: { bufanda: "La bufanda nos abriga el cuello.", guantes: "Los guantes nos abrigan las manos.", parka: "La parka nos abriga todo el cuerpo." } },
+  { id: "playa", emoji: "🏖️", frase: "Vamos a la playa a bañarnos. ¿Qué me pongo para nadar?", sirven: ["traje"],
+    porque: { traje: "El traje de baño es para nadar." } },
+  { id: "noche", emoji: "🌙", frase: "Es de noche y vamos a dormir. ¿Qué me pongo?", sirven: ["pijama"],
+    porque: { pijama: "El pijama es para dormir calentito." } },
+];
 
-export function rondaRopa(nivel: Nivel, azar: Aleatorio = Math.random): Ronda<Prenda> & { clima: (typeof CLIMAS)[number] } {
+export function rondaRopa(nivel: Nivel, azar: Aleatorio = Math.random): Ronda<Prenda> & { clima: Clima } {
   const clima = elegir(CLIMAS, azar);
-  const correcta = PRENDAS.find((p) => p.id === clima.necesita)!;
-  return { enunciado: clima.frase, clima, opciones: opcionesCon(correcta, PRENDAS, OPCIONES_POR_NIVEL[nivel] + 1, azar), correcta };
+  const elegida = elegir(clima.sirven, azar);
+  const correcta = PRENDAS.find((p) => p.id === elegida)!;
+  // Las otras opciones nunca sirven para este clima.
+  const otras = mezclar(PRENDAS.filter((p) => !clima.sirven.includes(p.id)), azar).slice(0, OPCIONES_POR_NIVEL[nivel]);
+  return { enunciado: clima.frase, clima, opciones: mezclar([correcta, ...otras], azar), correcta };
 }
 
 /** Mesa de la abuela: "¿Qué le hace mejor a tu cuerpo?" (alimento sano contra golosina). */

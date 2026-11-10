@@ -2,6 +2,7 @@ import { ESTADO_INICIAL, registrarRespuesta, type Nivel, type Ronda } from "@esc
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { usePantalla } from "../lib/pantalla";
+import { useIsFocused } from "@react-navigation/native";
 import { COLORES, TOQUE_MINIMO } from "../lib/tema";
 import { nivelPorEdad, useEdad, useJuego } from "../lib/juego";
 import { hablar, hablarYEsperar, type Idioma } from "../lib/voz";
@@ -104,12 +105,15 @@ export function Pregunta<R extends RondaCualquiera>({ generar, estimulo, opcion,
   const [logradas, setLogradas] = useState(0);
   const { ganar } = useJuego();
 
+  // Solo habla la pantalla que se está viendo: una que quedó abierta detrás no debe hacer su propia pregunta.
+  const enfocada = useIsFocused();
   useEffect(() => {
+    if (!enfocada) return;
     void hablar(ronda.enunciado, idioma);
     // Si el niño se queda pensando, se le repite la pregunta (todavía no lee).
     const repetir = setInterval(() => void hablar(ronda.enunciado, idioma), 14000);
     return () => clearInterval(repetir);
-  }, [ronda, idioma]);
+  }, [ronda, idioma, enfocada]);
 
   function responder(valor: Opcion<R>, i: number) {
     if (celebrando) return;
