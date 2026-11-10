@@ -1,5 +1,6 @@
 import type { TemaIngles } from "@escuelita/core";
 import { Redirect, router, useLocalSearchParams, type Href } from "expo-router";
+import { useIr } from "../../../lib/ventana";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../../../components/Pantalla";
@@ -13,6 +14,7 @@ const explicados = new Set<string>();
 
 /** La casa de un amigo de otro país, con sus 6 juegos en su idioma. */
 export default function CasaDeAmigo() {
+  const ir = useIr();
   const { id } = useLocalSearchParams<{ id: string }>();
   const amigo = amigoPorId(id);
   const [entrando, setEntrando] = useState<TemaIngles | null>(null);
@@ -32,7 +34,7 @@ export default function CasaDeAmigo() {
       await hablarYEsperar(amigo.juegos[tema].frase, 100, amigo.idioma);
     }
     setEntrando(null);
-    router.push(`/amigo/${amigo.id}/${tema}` as Href);
+    ir(`/amigo/${amigo.id}/${tema}`);
   };
 
   const { Dibujo } = amigo;

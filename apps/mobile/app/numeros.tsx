@@ -1,5 +1,6 @@
 import { NUMEROS, rondaContar } from "@escuelita/core";
 import { router } from "expo-router";
+import { useIr } from "../lib/ventana";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../components/Pantalla";
@@ -17,6 +18,7 @@ const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * Pensado para niños que todavía no conocen los números.
  */
 export default function Numeros() {
+  const ir = useIr();
   const [jugando, setJugando] = useState(false);
   const [contando, setContando] = useState<{ numero: number; hasta: number } | null>(null);
 
@@ -65,7 +67,7 @@ export default function Numeros() {
                   ))}
                 </View>
                 {n.valor < 10 && (
-                  <Pressable style={estilos.lapiz} onPress={() => router.push(`/trazar?serie=numeros&c=${n.valor}`)} accessibilityLabel={`Escribir el ${n.palabra}`}>
+                  <Pressable style={estilos.lapiz} onPress={() => ir(`/trazar?serie=numeros&c=${n.valor}`)} accessibilityLabel={`Escribir el ${n.palabra}`}>
                     <TextoIconos estilo={estilos.lapizTexto} texto={`✏️`} />
                   </Pressable>
                 )}

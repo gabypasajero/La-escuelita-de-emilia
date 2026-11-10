@@ -1,4 +1,5 @@
 import { router, type Href } from "expo-router";
+import { useIr } from "../../lib/ventana";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../../components/Pantalla";
 import { COLORES } from "../../lib/tema";
@@ -11,6 +12,7 @@ const JUEGOS: Array<{ ruta: Href; nombre: string; emoji: string }> = [
 ];
 
 export default function MenuJuegos() {
+  const ir = useIr();
   return (
     <Pantalla color={COLORES.juegos}>
       <View style={estilos.lista}>
@@ -21,7 +23,7 @@ export default function MenuJuegos() {
             accessibilityLabel={j.nombre}
             onPress={() => {
               hablar(j.nombre);
-              router.push(j.ruta);
+              ir(j.ruta as string);
             }}
           >
             <Icono e={j.emoji} tam={110} />

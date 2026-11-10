@@ -1,5 +1,6 @@
 import { LETRAS, presentarLetra, rondaSonidoInicial, type Letra } from "@escuelita/core";
 import { router } from "expo-router";
+import { useIr } from "../lib/ventana";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Pantalla } from "../components/Pantalla";
@@ -14,6 +15,7 @@ import { Icono, TextoIconos } from "../components/Iconos";
  * Jugar: "¿Cuál empieza con mmm?" y se elige entre dibujos, sin leer.
  */
 export default function Letras() {
+  const ir = useIr();
   const [jugando, setJugando] = useState(false);
   const [elegida, setElegida] = useState<Letra | null>(null);
   const [soloVocales, setSoloVocales] = useState(false);
@@ -55,7 +57,7 @@ export default function Letras() {
               <Pressable
                 style={estilos.escribir}
                 accessibilityLabel="Escribir esta letra"
-                onPress={() => router.push(`/trazar?serie=${elegida.esVocal ? "vocales" : "abecedario"}&c=${elegida.letra}`)}
+                onPress={() => ir(`/trazar?serie=${elegida.esVocal ? "vocales" : "abecedario"}&c=${elegida.letra}`)}
               >
                 <TextoIconos estilo={[estilos.escribirTexto, { color: "#fff" }]} texto={`✏️ Escribir`} />
               </Pressable>
