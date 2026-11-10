@@ -44,9 +44,9 @@ export async function rellenar(svg: SVGSVGElement, w: number, h: number, x: numb
     }
   }
 
-  // Se agranda un par de pixeles para que no quede un borde claro junto a las líneas.
+  // Se agranda un pixel para que no quede un borde claro junto a las líneas.
   let borde = zona;
-  for (let v = 0; v < 2; v++) {
+  for (let v = 0; v < 1; v++) {
     const mas = new Uint8Array(borde);
     for (let p = 0; p < W * H; p++) {
       if (borde[p]) continue;

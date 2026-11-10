@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { Children, cloneElement, isValidElement, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
 import Svg, { Circle, Ellipse, G, Image as ImagenSvg, Path, Rect } from "react-native-svg";
 import { dibujoEnSvg, Icono } from "../components/Iconos";
@@ -38,10 +38,20 @@ const LAPICES: Array<{ id: Lapiz; nombre: string; dice: string }> = [
   { id: "balde", nombre: "Balde", dice: "Balde de pintura. Toca una parte del dibujo y se llena de color" },
   { id: "borrador", nombre: "Borrador", dice: "Borrador" },
 ].filter((l) => l.id !== "balde" || Platform.OS === "web") as Array<{ id: Lapiz; nombre: string; dice: string }>;
+function estrella(x: number, y: number, r: number): string {
+  return "M" + Array.from({ length: 10 }, (_, i) => {
+    const a = (i / 10) * Math.PI * 2 - Math.PI / 2, q = i % 2 ? r * 0.45 : r;
+    return `${(x + Math.cos(a) * q).toFixed(1)} ${(y + Math.sin(a) * q).toFixed(1)}`;
+  }).join(" L") + " Z";
+}
+
 // Timbres propios del taller, dibujados en una caja de 100 × 100.
 const N = { stroke: "#3B2F5C", strokeWidth: 3, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
 const carita = (cy: number) => <><Circle cx="42" cy={cy} r="2.6" fill="#3B2F5C" /><Circle cx="58" cy={cy} r="2.6" fill="#3B2F5C" /><Path d={`M43 ${cy + 8} Q50 ${cy + 14} 57 ${cy + 8}`} fill="none" {...N} strokeWidth={2.4} /><Circle cx="36" cy={cy + 6} r="3.4" fill="#F48FB1" opacity="0.7" /><Circle cx="64" cy={cy + 6} r="3.4" fill="#F48FB1" opacity="0.7" /></>;
 const TIMBRES: Record<string, ReactNode> = {
+  sol: <>{Array.from({ length: 10 }, (_, i) => { const a = (i / 10) * Math.PI * 2; return <Path key={i} d={`M${50 + Math.cos(a) * 30} ${50 + Math.sin(a) * 30} L${50 + Math.cos(a) * 44} ${50 + Math.sin(a) * 44}`} fill="none" stroke="#FFB300" strokeWidth="6" strokeLinecap="round" />; })}<Circle cx="50" cy="50" r="23" fill="#FDD835" {...N} />{carita(48)}</>,
+  estrella: <Path d={estrella(50, 52, 42)} fill="#FDD835" {...N} />,
+  flor: <><Path d="M50 62 V96 M50 82 Q34 72 30 84 Q42 92 50 82" fill="#66BB6A" {...N} />{[0, 1, 2, 3, 4, 5].map((i) => <Circle key={i} cx={50 + Math.cos(i * 1.047) * 18} cy={38 + Math.sin(i * 1.047) * 18} r="11" fill="#F48FB1" {...N} />)}<Circle cx="50" cy="38" r="9" fill="#FDD835" {...N} /></>,
   nube: <><Path d="M22 68 Q8 66 12 52 Q14 42 26 44 Q28 26 46 30 Q58 20 68 34 Q86 32 86 50 Q94 62 78 68 Z" fill="#FFFFFF" {...N} /><Path d="M30 58 Q40 62 50 58" fill="none" stroke="#B3E5FC" strokeWidth="3" strokeLinecap="round" /></>,
   arcoiris: <>{["#E53935", "#FB8C00", "#FDD835", "#43A047", "#1E88E5", "#8E24AA"].map((c, i) => <Path key={c} d={`M${12 + i * 6} 74 A${38 - i * 6} ${38 - i * 6} 0 0 1 ${88 - i * 6} 74`} fill="none" stroke={c} strokeWidth="6.4" />)}<Circle cx="16" cy="76" r="10" fill="#fff" {...N} strokeWidth={2} /><Circle cx="84" cy="76" r="10" fill="#fff" {...N} strokeWidth={2} /></>,
   luna: <Path d="M62 12 A40 40 0 1 0 88 62 A30 30 0 0 1 62 12 Z" fill="#FFF59D" {...N} />,
@@ -62,25 +72,37 @@ const TIMBRES: Record<string, ReactNode> = {
   regalo: <><Rect x="16" y="42" width="68" height="46" rx="4" fill="#AB47BC" {...N} /><Rect x="10" y="30" width="80" height="16" rx="4" fill="#CE93D8" {...N} /><Rect x="44" y="30" width="12" height="58" fill="#FDD835" {...N} strokeWidth={2} /><Path d="M50 30 Q32 6 26 22 Q28 30 50 30 Q72 30 74 22 Q68 6 50 30 Z" fill="#FDD835" {...N} /></>,
   corona: <><Path d="M14 76 L10 34 L32 54 L50 22 L68 54 L90 34 L86 76 Z" fill="#FDD835" {...N} />{[[32, 66, "#EF5350"], [50, 66, "#1E88E5"], [68, 66, "#43A047"]].map(([x, y, c]) => <Circle key={`${x}`} cx={x} cy={y} r="5" fill={c as string} />)}</>,
 };
-const timbre = (e: string, x: number, y: number, tam: number) =>
-  TIMBRES[e] ? <G transform={`translate(${x - tam / 2} ${y - tam / 2}) scale(${tam / 100})`}>{TIMBRES[e]}</G> : dibujoEnSvg(e, x, y, tam);
+/** El mismo timbre pero solo con su contorno, para estamparlo y después colorearlo. */
+function soloLinea(nodo: ReactNode): ReactNode {
+  return Children.map(nodo, (h) => {
+    if (!isValidElement(h)) return h;
+    const el = h as ReactElement<Record<string, unknown>>;
+    const pr = el.props;
+    const hijos = pr.children ? soloLinea(pr.children as ReactNode) : undefined;
+    if (pr.fill === undefined && pr.stroke === undefined) return cloneElement(el, {}, hijos);
+    // Ojos y boca se quedan; lo demás pasa a ser una línea cerrada sobre blanco.
+    if (typeof pr.opacity === "string" || typeof pr.opacity === "number") return null; // mejillas y brillos: fuera
+    if (pr.fill === "#3B2F5C") return el;
+    const relleno = pr.fill === "none" || pr.fill === undefined ? "none" : "#FFFFFF";
+    return cloneElement(el, { fill: relleno, stroke: "#3B2F5C", strokeWidth: pr.stroke === "#3B2F5C" ? pr.strokeWidth : 2.2, opacity: 1, strokeLinejoin: "round", strokeLinecap: "round" }, hijos);
+  });
+}
+const LINEAS: Record<string, ReactNode> = {};
+const timbre = (e: string, x: number, y: number, tam: number, linea = false) =>
+  TIMBRES[e] ? <G transform={`translate(${x - tam / 2} ${y - tam / 2}) scale(${tam / 100})`}>{linea ? (LINEAS[e] ??= soloLinea(TIMBRES[e])) : TIMBRES[e]}</G> : linea ? null : dibujoEnSvg(e, x, y, tam);
 
-const SELLOS_DIBUJO = ["⭐", "🌸", "☀️", "🍓", "🎃", "🥕", "🧺", "💧", "🏠", "🍦", "🧀", "🍇", "🌽", "🍅"].filter((e) => dibujoEnSvg(e, 0, 0, 1) !== null);
+const SELLOS_DIBUJO = ["🍓", "🎃", "🥕", "🧺", "💧", "🏠", "🍦", "🧀", "🍇", "🌽", "🍅"].filter((e) => dibujoEnSvg(e, 0, 0, 1) !== null);
 // Primero el cielo, las personas y los animales; después los objetos y la comida.
-const SELLOS = ["☀️", "nube", "arcoiris", "luna", "⭐", "nino", "nina", "tito", "gato", "perro", "conejo", "pajaro", "pez", "mariposa", "🌸", "arbol", "corazon", "globo", "pelota", "auto", "regalo", "corona", ...SELLOS_DIBUJO.filter((e) => !["☀️", "⭐", "🌸"].includes(e))].filter((e) => TIMBRES[e] || SELLOS_DIBUJO.includes(e));
+const SELLOS = ["sol", "nube", "arcoiris", "luna", "estrella", "nino", "nina", "tito", "gato", "perro", "conejo", "pajaro", "pez", "mariposa", "flor", "arbol", "corazon", "globo", "pelota", "auto", "regalo", "corona", ...SELLOS_DIBUJO].filter((e) => TIMBRES[e] || SELLOS_DIBUJO.includes(e));
 
 type Cosa =
   | { tipo: "trazo"; lapiz: Lapiz; d: string; color: string; grosor: number }
   | { tipo: "arcoiris"; tramos: Array<{ d: string; color: string }>; grosor: number; n: number; ultimo: string }
   | { tipo: "brillos"; puntos: Array<[number, number, number]>; color: string; ux: number; uy: number }
-  | { tipo: "sello"; e: string; x: number; y: number; tam: number }
+  | { tipo: "sello"; e: string; x: number; y: number; tam: number; linea?: boolean }
   | { tipo: "relleno"; href: string; w: number; h: number };
 
-const estrella = (x: number, y: number, r: number) =>
-  "M" + Array.from({ length: 10 }, (_, i) => {
-    const a = (i / 10) * Math.PI * 2 - Math.PI / 2, q = i % 2 ? r * 0.45 : r;
-    return `${(x + Math.cos(a) * q).toFixed(1)} ${(y + Math.sin(a) * q).toFixed(1)}`;
-  }).join(" L") + " Z";
+
 
 /** Cómo se ve cada lápiz. */
 function estiloDe(lapiz: Lapiz, color: string, g: number) {
@@ -120,14 +142,16 @@ export default function Pintar() {
   const [color, setColor] = useState(PALETA[0]!);
   const [grosor, setGrosor] = useState(GROSORES[1]!);
   const [lapiz, setLapiz] = useState<Lapiz>("plumon");
-  const [sello, setSello] = useState(SELLOS[0] ?? "⭐");
+  const [sello, setSello] = useState(SELLOS[0] ?? "sol");
+  // Timbres sin color: quedan como dibujo rápido para pintar después.
+  const [sinColor, setSinColor] = useState(false);
   const [dibujo, setDibujo] = useState<string | null>(null);
   const [calcar, setCalcar] = useState(false);
   const [eligiendo, setEligiendo] = useState(false);
   const [tam, setTam] = useState({ w: 0, h: 0 });
   const actual = useRef<Cosa | null>(null);
-  const mano = useRef({ color, grosor, lapiz, sello });
-  mano.current = { color, grosor, lapiz, sello };
+  const mano = useRef({ color, grosor, lapiz, sello, sinColor });
+  mano.current = { color, grosor, lapiz, sello, sinColor };
 
   const cambiar = (c: Cosa) => {
     actual.current = c;
@@ -141,7 +165,7 @@ export default function Pintar() {
       if (mano.current.lapiz === "balde") return void volcarBalde(x, y);
       const m = mano.current, p = `${Math.round(x)},${Math.round(y)}`, g = conPresion(presion, esLapiz);
       let nueva: Cosa;
-      if (m.lapiz === "sello") { nueva = { tipo: "sello", e: m.sello, x, y, tam: 40 + m.grosor * 3.2 }; sonido.toque(); }
+      if (m.lapiz === "sello") { nueva = { tipo: "sello", e: m.sello, x, y, tam: (m.sinColor ? 70 : 40) + m.grosor * (m.sinColor ? 5 : 3.2), linea: m.sinColor && !!TIMBRES[m.sello] }; sonido.toque(); }
       else if (m.lapiz === "arcoiris") nueva = { tipo: "arcoiris", tramos: [{ d: `M${p} L${p}`, color: ARCOIRIS[0]! }], grosor: g, n: 0, ultimo: p };
       else if (m.lapiz === "brillos") nueva = { tipo: "brillos", puntos: [[x, y, 6 + m.grosor * 0.5]], color: m.color, ux: x, uy: y };
       else nueva = { tipo: "trazo", lapiz: m.lapiz, d: `M${p} L${p}`, color: m.color, grosor: g };
@@ -232,7 +256,7 @@ export default function Pintar() {
                 if (c.tipo === "arcoiris") return <G key={i}>{c.tramos.map((t, k) => <Path key={k} d={t.d} stroke={t.color} strokeWidth={c.grosor} strokeLinecap="round" strokeLinejoin="round" fill="none" />)}</G>;
                 if (c.tipo === "brillos") return <G key={i}>{c.puntos.map(([x, y, r], k) => <Path key={k} d={estrella(x, y, r)} fill={k % 3 === 2 ? "#FFF59D" : c.color} stroke="#FFFFFF" strokeWidth="1" />)}</G>;
                 if (c.tipo === "relleno") return <ImagenSvg key={i} href={c.href} x={0} y={0} width={c.w} height={c.h} />;
-                return <G key={i}>{timbre(c.e, c.x, c.y, c.tam)}</G>;
+                return <G key={i}>{timbre(c.e, c.x, c.y, c.tam, c.linea)}</G>;
               })}
               {/* Para pintar, las líneas van encima: el color nunca las tapa. */}
               {!calcar && lineas}
@@ -260,9 +284,16 @@ export default function Pintar() {
       {/* Colores (o sellos) */}
       <ScrollView horizontal style={estilos.paleta} contentContainerStyle={estilos.paletaDentro} showsHorizontalScrollIndicator={false}>
         {lapiz === "sello"
-          ? SELLOS.map((e) => (
-            <Rebote key={e} accessibilityLabel={`Sello ${e}`} onPress={() => setSello(e)} style={[estilos.color, estilos.selloBoton, e === sello && estilos.elegido]}><Svg width={38} height={38} viewBox="0 0 38 38">{timbre(e, 19, 19, 34)}</Svg></Rebote>
-          ))
+          ? [
+            <Rebote key="modo" accessibilityLabel={sinColor ? "Timbres con color" : "Timbres para pintar"} style={estilos.modoSello}
+              onPress={() => { setSinColor(!sinColor); if (!sinColor && !TIMBRES[sello]) setSello("sol"); void hablar(sinColor ? "Timbres con color." : "Timbres sin color: estampa el dibujo y después píntalo tú."); }}>
+              <Svg width={34} height={34} viewBox="0 0 38 38">{timbre("estrella", 19, 19, 34, !sinColor)}</Svg>
+              <Text style={estilos.lapizNombre}>{sinColor ? "Con color" : "Para pintar"}</Text>
+            </Rebote>,
+            ...SELLOS.filter((e) => !sinColor || TIMBRES[e]).map((e) => (
+              <Rebote key={e} accessibilityLabel={`Sello ${e}`} onPress={() => setSello(e)} style={[estilos.color, estilos.selloBoton, e === sello && estilos.elegido]}><Svg width={38} height={38} viewBox="0 0 38 38">{timbre(e, 19, 19, 34, sinColor)}</Svg></Rebote>
+            )),
+          ]
           : lapiz === "arcoiris"
             ? <View style={estilos.arcoiris}>{ARCOIRIS.map((c) => <View key={c} style={{ flex: 1, backgroundColor: c }} />)}</View>
             : PALETA.map((c) => (
@@ -328,6 +359,7 @@ const estilos = StyleSheet.create({
   paleta: { flexGrow: 0, width: "100%", marginTop: 8 },
   paletaDentro: { gap: 8, paddingHorizontal: 6, paddingVertical: 6, alignItems: "center" },
   color: { width: 50, height: 50, borderRadius: 25, borderWidth: 3, borderColor: "rgba(59,47,92,0.18)" },
+  modoSello: { height: 54, paddingHorizontal: 10, borderRadius: 18, backgroundColor: "#FFF59D", alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: "#FBC02D" },
   selloBoton: { backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
   arcoiris: { flexDirection: "row", width: 360, height: 44, borderRadius: 22, overflow: "hidden", borderWidth: 3, borderColor: "#fff" },
   velo: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(28,20,56,0.45)", alignItems: "center", justifyContent: "center", zIndex: 40, padding: 16 },
