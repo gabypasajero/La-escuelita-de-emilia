@@ -3,6 +3,7 @@ import { aparte, caja, cilindro, disco, esfera, fusionar, grupo, lienzo, matText
 import { imagenIcono } from "./iconos3d";
 import type { Constructor, Ctx, Escena, Interactivo } from "./motor";
 import { crearPersona, ELENCO, type Persona } from "./personaje";
+import { arbol, arbusto, cerca, cerro, flor } from "./utileria";
 
 /**
  * Piezas para armar los interiores como una casa de juguetes abierta:
@@ -275,7 +276,130 @@ export function salaConMural(def: DefSala): Constructor {
           a.saludando = true;
           c.luego(2.2, () => { a.saludando = false; });
           c.decir(def.anfitrion.saludo, a);
+        } else c.decir(`¡Llegamos! Toca una tarjeta para jugar.`);
+      },
+      alEvento(ev) {
+        if (ev === "ventana-cerrada") c.enfocar(null);
+      },
+    };
+  };
+}
+
+// ---------- Patio con carteles (lugares al aire libre) ----------
+
+export interface DefPatio {
+  id: string;
+  titulo: string;
+  ancho: number;
+  fondo: number;
+  suelo: string;
+  /** Color de la zona de juego (tierra, arena, pasto claro). */
+  claro?: string;
+  carteles: Array<Tarjeta & { x: number; z: number }>;
+  tam?: [number, number];
+  anfitrion?: { quien: string; x: number; z: number; saludo: string };
+  salida?: string;
+  sinCerca?: boolean;
+  decorar?: DefSala["decorar"];
+}
+
+/** Lugar al aire libre: pasto, cerros y árboles al fondo, y carteles de madera con las tarjetas de sus juegos. */
+export function patioConCarteles(def: DefPatio): Constructor {
+  return (c) => {
+    const raiz = new THREE.Group();
+    const { ancho: W, fondo: D } = def;
+    const suelo = disco(def.suelo, 80, [0, 0, D / 2]);
+    suelo.receiveShadow = true;
+    raiz.add(suelo);
+    if (def.claro) {
+      const z = disco(def.claro, W * 0.5, [0, 0.012, D / 2 + 0.3], [1, (D / W) * 0.95]);
+      z.receiveShadow = true;
+      raiz.add(z);
+    }
+    const fijo = grupo();
+    // El fondo: cerros lejanos, árboles y arbustos
+    for (const [x, alto, ancho] of [[-20, 9, 17], [-6, 12, 21], [9, 10, 18], [23, 8, 15]] as const) {
+      const m = cerro(alto, ancho, alto > 9, c.noche ? "#5C6F8A" : "#8FA6B5");
+      m.position.set(x, -0.2, -19);
+      raiz.add(m);
+    }
+    for (let i = 0; i < 9; i++) {
+      const a = arbol(i, 1.15 + (i % 3) * 0.18);
+      a.position.set(-W / 2 - 3 + i * ((W + 6) / 8), 0, -2.6 - (i % 2) * 2.2);
+      raiz.add(a);
+    }
+    for (const l of [-1, 1]) for (let i = 0; i < 3; i++) {
+      const a = i === 1 ? arbusto(1.3, "#F48FB1") : arbol(i + (l > 0 ? 1 : 0), 1.1);
+      a.position.set(l * (W / 2 + 2.2 + (i % 2)), 0, 1.5 + i * (D / 3));
+      raiz.add(a);
+    }
+    if (!def.sinCerca) {
+      const v = cerca(W + 2, "#FFFFFF", 0.95);
+      v.position.set(0, 0, -0.4);
+      raiz.add(v);
+    }
+    for (let i = 0; i < 14; i++) {
+      const f = flor(["#F06292", "#FFEE58", "#FFFFFF", "#BA68C8", "#FF8A65"][i % 5]!, 1.2);
+      f.position.set(-W / 2 - 1.5 + ((i * 7.3) % (W + 3)), 0, i % 2 ? 0.3 + (i % 3) * 0.2 : D + 0.4 + (i % 3) * 0.5);
+      fijo.add(f);
+    }
+
+    const [tw, th] = def.tam ?? [2.6, 2.25];
+    const interactivos: Interactivo[] = [];
+    let anfitrion: Persona | null = null;
+    const solidos: Escena["solidos"] = [];
+    const tarjetas: Array<{ g: THREE.Group; fase: number }> = [];
+    def.carteles.forEach((t, i) => {
+      const yc = 0.75 + th / 2;
+      for (const l of [-1, 1]) fijo.add(cilindro("#8D6E63", 0.09, 0.1, yc + th / 2 + 0.2, [t.x + l * (tw / 2 - 0.2), (yc + th / 2 + 0.2) / 2, t.z - 0.08], 8));
+      const g = tarjeta(t, tw, th);
+      g.position.set(t.x, yc, t.z);
+      raiz.add(g);
+      tarjetas.push({ g, fase: i * 1.9 });
+      solidos.push({ x0: t.x - tw / 2, x1: t.x + tw / 2, z0: t.z - 0.4, z1: t.z + 0.3 });
+      interactivos.push({
+        objeto: g,
+        llegada: { x: t.x, z: t.z + 1.5 },
+        mira: { x: t.x, z: t.z },
+        alLlegar: () => {
+          c.enfocar([t.x, yc, t.z], 7);
+          void c.decirYEsperar(t.frase, anfitrion ?? undefined).then(() => {
+            if (c.vigente(def.id)) c.ventana(t.ruta, t.nombre);
+          });
+        },
+      });
+    });
+    if (def.anfitrion && ELENCO[def.anfitrion.quien]) {
+      anfitrion = crearPersona(ELENCO[def.anfitrion.quien]!);
+      anfitrion.raiz.position.set(def.anfitrion.x, 0, def.anfitrion.z);
+      raiz.add(anfitrion.raiz);
+      solidos.push({ x0: def.anfitrion.x - 0.6, x1: def.anfitrion.x + 0.6, z0: def.anfitrion.z - 0.5, z1: def.anfitrion.z + 0.5 });
+    }
+    const extra = def.decorar?.(fijo, raiz, c) || {};
+    raiz.add(fusionar(fijo, { ao: 0.1 }));
+    const a = anfitrion;
+    return {
+      id: def.id, titulo: def.titulo, exterior: true, raiz,
+      inicio: { x: 0, z: D - 1.2 },
+      limites: { x0: -W / 2 + 0.6, x1: W / 2 - 0.6, z0: 0.6, z1: D },
+      solidos: [...solidos, ...(extra.solidos ?? [])],
+      interactivos: [...interactivos, ...(extra.interactivos ?? [])],
+      camara: { modo: "sala", ancho: W, alto: 6.4, fondo: D, inclina: 22 },
+      salida: def.salida ?? "barrio",
+      actualizar(dt, t) {
+        for (const x of tarjetas) x.g.rotation.z = Math.sin(t * 1.2 + x.fase) * 0.012;
+        if (a) {
+          a.mirarA(c.nino.raiz.position.x, c.nino.raiz.position.z);
+          a.actualizar(dt, t);
         }
+        extra.actualizar?.(dt, t);
+      },
+      alEntrar() {
+        if (a && def.anfitrion) {
+          a.saludando = true;
+          c.luego(2.2, () => { a.saludando = false; });
+          c.decir(def.anfitrion.saludo, a);
+        } else c.decir(`¡Llegamos! Toca una tarjeta para jugar.`);
       },
       alEvento(ev) {
         if (ev === "ventana-cerrada") c.enfocar(null);
